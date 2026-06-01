@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --iron-tan: #d8c7a1;
+  --iron-cream: #efe3c2;
+  --iron-paper: #f5ead0;
+  --iron-red: #b22222;
 }
 
 @theme inline {
@@ -23,4 +27,223 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splash-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes splash-logo {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes xp-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 12px) scale(0.85);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.08);
+  }
+  30% {
+    transform: translate(-50%, -4px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -48px) scale(0.95);
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(20px);
+  }
+  70% {
+    transform: scale(1.03) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes xp-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes level-up-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes level-up-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes achievement-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(178, 34, 34, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 24px 4px rgba(178, 34, 34, 0.35);
+  }
+}
+
+@keyframes achievement-slide {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nav-indicator {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-screen-enter {
+  animation: screen-enter 0.28s ease-out both;
+}
+
+.animate-splash-fade-in {
+  animation: splash-fade-in 1s ease-out both;
+}
+
+.animate-splash-fade-out {
+  animation: splash-fade-out 0.4s ease-in both;
+}
+
+.animate-splash-logo {
+  animation: splash-logo 1s ease-out both;
+}
+
+.animate-xp-float {
+  animation: xp-float 1.2s ease-out both;
+}
+
+.animate-overlay-fade-in {
+  animation: overlay-fade-in 0.25s ease-out both;
+}
+
+.animate-modal-pop-in {
+  animation: modal-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-xp-pulse {
+  animation: xp-pulse 0.6s ease-in-out 0.3s 2;
+}
+
+.animate-level-up-burst {
+  animation: level-up-burst 0.8s ease-out both;
+}
+
+.animate-level-up-shake {
+  animation: level-up-shake 0.5s ease-in-out 0.2s 1;
+}
+
+.animate-achievement-glow {
+  animation: achievement-glow 1.2s ease-in-out infinite;
+}
+
+.animate-achievement-slide {
+  animation: achievement-slide 0.4s ease-out both;
+}
+
+.animate-nav-indicator {
+  animation: nav-indicator 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-screen-enter,
+  .animate-splash-fade-in,
+  .animate-splash-fade-out,
+  .animate-splash-logo,
+  .animate-xp-float,
+  .animate-overlay-fade-in,
+  .animate-modal-pop-in,
+  .animate-xp-pulse,
+  .animate-level-up-burst,
+  .animate-level-up-shake,
+  .animate-achievement-glow,
+  .animate-achievement-slide,
+  .animate-nav-indicator {
+    animation: none;
+  }
 }

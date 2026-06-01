@@ -2,7 +2,7 @@
 
 import OnboardingScreen from "./components/OnboardingScreen";
 import DevPanel from "./components/DevPanel";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { user } from "./data/user";
 import { useProfile } from "./hooks/useProfile";
 import { generateProgram } from "./data/programGenerator";
@@ -24,6 +24,21 @@ import { useSeasons } from "./hooks/useSeasons";
 import LegacyScreen from "./components/LegacyScreen";
 import HeroScreen from "./components/HeroScreen";
 import AppPopups from "./components/AppPopups";
+import SplashScreen from "./components/SplashScreen";
+import ScreenTransition from "./components/ScreenTransition";
+import XpFloatAnimation from "./components/XpFloatAnimation";
+import {
+  hapticWorkout,
+  hapticMission,
+  hapticLevelUp,
+  hapticAchievement,
+} from "./utils/haptics";
+
+const MORE_SUB_SCREENS = ["progress", "achievements", "strength", "legacy"];
+
+function getNavActiveScreen(screen: string) {
+  return MORE_SUB_SCREENS.includes(screen) ? "more" : screen;
+}
 
 export default function Home() {
   const { profile } = useProfile();
@@ -31,6 +46,11 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const [lastXpReward, setLastXpReward] = useState(0);
   const [showWeekPopup, setShowWeekPopup] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [xpFloat, setXpFloat] = useState<number | null>(null);
+
+  const handleSplashComplete = useCallback(() => setShowSplash(false), []);
+  const clearXpFloat = useCallback(() => setXpFloat(null), []);
 
   const {
     xp,
@@ -84,6 +104,14 @@ export default function Home() {
     checkForSeasonComplete(Number(week));
   }, [week, checkForNewTrial]);
 
+  useEffect(() => {
+    if (leveledUp) hapticLevelUp();
+  }, [leveledUp]);
+
+  useEffect(() => {
+    if (pendingAchievement) hapticAchievement();
+  }, [pendingAchievement]);
+
   const handleCompleteBossTrial = () => {
     if (pendingTrial) {
       const trial = getBossTrialByWeek(Number(week));
@@ -124,146 +152,164 @@ export default function Home() {
     recordWorkout();
     completeMission("workout");
     setShowPopup(true);
+    hapticWorkout();
   };
 
   const completeDeepWork = () => {
     addXp(60);
     addWork(1);
     completeMission("deepwork");
+    setXpFloat(60);
+    hapticMission();
   };
 
   const completeProtein = () => {
     addXp(40);
     addBody(1);
     completeMission("protein");
+    setXpFloat(40);
+    hapticMission();
   };
 
   const completeSleep = () => {
     addXp(35);
     addMind(1);
     completeMission("sleep");
+    setXpFloat(35);
+    hapticMission();
   };
 
   const weekNumber = Number(week);
+  const navScreen = getNavActiveScreen(screen);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#d8c7a1] to-[#efe3c2] text-black flex flex-col items-center p-6">
-      <div className="w-full max-w-md">
-        <div className="text-center mt-6">
-          <h1 className="text-5xl font-black tracking-wide">IRON PATH</h1>
+    <>
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
-          <p className="text-sm mt-2 uppercase tracking-[0.2em]">Est. 1950</p>
+      {xpFloat !== null && (
+        <XpFloatAnimation amount={xpFloat} onDone={clearXpFloat} />
+      )}
+
+      <main className="min-h-screen bg-gradient-to-b from-[#d8c7a1] to-[#efe3c2] text-black flex flex-col items-center p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+        <div className="w-full max-w-md">
+          <div className="text-center mt-6">
+            <h1 className="text-5xl font-black tracking-wide">IRON PATH</h1>
+
+            <p className="text-sm mt-2 uppercase tracking-[0.2em]">Est. 1950</p>
+          </div>
+
+          {!profile && (
+            <OnboardingScreen onFinish={() => window.location.reload()} />
+          )}
+
+          <ScreenTransition screen={screen}>
+            {profile && screen === "hero" && (
+              <HeroScreen
+                profile={profile}
+                level={level}
+                xp={xp}
+                body={body}
+                mind={mind}
+                work={work}
+                week={weekNumber}
+                program={program}
+                missions={missions}
+                completedCount={completedCount}
+                totalCount={totalCount}
+                progress={progress}
+              />
+            )}
+
+            {profile && screen === "today" && (
+              <TodayScreen
+                program={program}
+                onCompleteDeepWork={completeDeepWork}
+                onCompleteProtein={completeProtein}
+                onCompleteSleep={completeSleep}
+              />
+            )}
+
+            {screen === "training" && (
+              <TrainingScreen
+                program={program}
+                onCompleteWorkout={completeWorkout}
+                onCompleteWeek={() => {
+                  nextWeek();
+                  setShowWeekPopup(true);
+                }}
+              />
+            )}
+
+            {screen === "nutrition" && <NutritionScreen />}
+
+            {screen === "progress" && (
+              <ProgressScreen
+                level={level}
+                rank={getRank(level)}
+                week={weekNumber}
+                phase={program.phase}
+                xp={xp}
+                maxXp={user.maxXp}
+                weight={profile?.weight ?? "0"}
+                goal={profile?.goal ?? "unknown"}
+              />
+            )}
+
+            {screen === "achievements" && (
+              <AchievementsScreen achievementsUnlocked={achievementsUnlocked} />
+            )}
+
+            {screen === "more" && (
+              <MoreScreen
+                onSelectProgress={() => setScreen("progress")}
+                onSelectAchievements={() => setScreen("achievements")}
+                onSelectStrength={() => setScreen("strength")}
+                onSelectLegacy={() => setScreen("legacy")}
+              />
+            )}
+
+            {screen === "strength" && (
+              <StrengthTrackerScreen onClose={() => setScreen("more")} />
+            )}
+
+            {screen === "legacy" && (
+              <LegacyScreen seasons={completedSeasons} />
+            )}
+          </ScreenTransition>
+
+          <AppPopups
+            placement="inline"
+            pendingSeasonComplete={pendingSeasonComplete}
+            completedSeasons={completedSeasons}
+            onClaimSeason={handleClaimSeason}
+            onCloseSeason={clearPending}
+          />
         </div>
 
-        {!profile && (
-          <OnboardingScreen onFinish={() => window.location.reload()} />
-        )}
-
-        {profile && screen === "hero" && (
-          <HeroScreen
-            profile={profile}
-            level={level}
-            xp={xp}
-            body={body}
-            mind={mind}
-            work={work}
-            week={weekNumber}
-            program={program}
-            missions={missions}
-            completedCount={completedCount}
-            totalCount={totalCount}
-            progress={progress}
-          />
-        )}
-
-        {profile && screen === "today" && (
-          <TodayScreen
-            program={program}
-            onCompleteDeepWork={completeDeepWork}
-            onCompleteProtein={completeProtein}
-            onCompleteSleep={completeSleep}
-          />
-        )}
-
-        {screen === "training" && (
-          <TrainingScreen
-            program={program}
-            onCompleteWorkout={completeWorkout}
-            onCompleteWeek={() => {
-              nextWeek();
-              setShowWeekPopup(true);
-            }}
-          />
-        )}
-
-        {screen === "nutrition" && <NutritionScreen />}
-
-        {screen === "progress" && (
-          <ProgressScreen
-            level={level}
-            rank={getRank(level)}
-            week={weekNumber}
-            phase={program.phase}
-            xp={xp}
-            maxXp={user.maxXp}
-            weight={profile?.weight ?? "0"}
-            goal={profile?.goal ?? "unknown"}
-          />
-        )}
-
-        {screen === "achievements" && (
-          <AchievementsScreen achievementsUnlocked={achievementsUnlocked} />
-        )}
-
-        {screen === "more" && (
-          <MoreScreen
-            onSelectProgress={() => setScreen("progress")}
-            onSelectAchievements={() => setScreen("achievements")}
-            onSelectStrength={() => setScreen("strength")}
-            onSelectLegacy={() => setScreen("legacy")}
-          />
-        )}
-
-        {screen === "strength" && (
-          <StrengthTrackerScreen onClose={() => setScreen("more")} />
-        )}
-
-        {screen === "legacy" && (
-          <LegacyScreen seasons={completedSeasons} />
-        )}
-
         <AppPopups
-          placement="inline"
-          pendingSeasonComplete={pendingSeasonComplete}
-          completedSeasons={completedSeasons}
-          onClaimSeason={handleClaimSeason}
-          onCloseSeason={clearPending}
+          placement="floating"
+          showWeekPopup={showWeekPopup}
+          week={weekNumber}
+          phase={program.phase}
+          onCloseWeekPopup={() => setShowWeekPopup(false)}
+          showPopup={showPopup}
+          lastXpReward={lastXpReward}
+          onCloseWorkoutPopup={() => setShowPopup(false)}
+          leveledUp={leveledUp}
+          level={level}
+          rank={getRank(level)}
+          onCloseLevelUp={clearLevelUp}
+          pendingAchievement={pendingAchievement}
+          onCloseAchievement={clearPendingAchievement}
+          pendingTrial={pendingTrial}
+          onCompleteBossTrial={handleCompleteBossTrial}
+          onSkipBossTrial={clearPendingTrial}
         />
-      </div>
 
-      <AppPopups
-        placement="floating"
-        showWeekPopup={showWeekPopup}
-        week={weekNumber}
-        phase={program.phase}
-        onCloseWeekPopup={() => setShowWeekPopup(false)}
-        showPopup={showPopup}
-        lastXpReward={lastXpReward}
-        onCloseWorkoutPopup={() => setShowPopup(false)}
-        leveledUp={leveledUp}
-        level={level}
-        rank={getRank(level)}
-        onCloseLevelUp={clearLevelUp}
-        pendingAchievement={pendingAchievement}
-        onCloseAchievement={clearPendingAchievement}
-        pendingTrial={pendingTrial}
-        onCompleteBossTrial={handleCompleteBossTrial}
-        onSkipBossTrial={clearPendingTrial}
-      />
+        <DevPanel onReset={resetPlayer} />
 
-      <DevPanel onReset={resetPlayer} />
-
-      <BottomNav screen={screen} setScreen={setScreen} />
-    </main>
+        <BottomNav screen={navScreen} setScreen={setScreen} />
+      </main>
+    </>
   );
 }

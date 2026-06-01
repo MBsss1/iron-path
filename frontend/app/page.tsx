@@ -21,12 +21,14 @@ import { useDailyMissions } from "./hooks/useDailyMissions";
 import { useBossTrials } from "./hooks/useBossTrials";
 import { getBossTrialByWeek } from "./data/bossTrials";
 import { useSeasons } from "./hooks/useSeasons";
+import { useDailyRewards } from "./hooks/useDailyRewards";
 import LegacyScreen from "./components/LegacyScreen";
 import HeroScreen from "./components/HeroScreen";
 import AppPopups from "./components/AppPopups";
 import SplashScreen from "./components/SplashScreen";
 import ScreenTransition from "./components/ScreenTransition";
 import XpFloatAnimation from "./components/XpFloatAnimation";
+import DailyRewardPopup from "./components/DailyRewardPopup";
 import {
   hapticWorkout,
   hapticMission,
@@ -48,6 +50,7 @@ export default function Home() {
   const [showWeekPopup, setShowWeekPopup] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [xpFloat, setXpFloat] = useState<number | null>(null);
+  const [showDailyReward, setShowDailyReward] = useState(false);
 
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
@@ -99,10 +102,18 @@ export default function Home() {
     clearPending,
   } = useSeasons();
 
+  const { canClaim, rewardDay, xpReward, claimReward } = useDailyRewards();
+
   useEffect(() => {
     checkForNewTrial(Number(week));
     checkForSeasonComplete(Number(week));
   }, [week, checkForNewTrial]);
+
+  useEffect(() => {
+    if (canClaim && profile && !showSplash) {
+      setShowDailyReward(true);
+    }
+  }, [canClaim, profile, showSplash]);
 
   useEffect(() => {
     if (leveledUp) hapticLevelUp();
@@ -177,6 +188,15 @@ export default function Home() {
     completeMission("sleep");
     setXpFloat(35);
     hapticMission();
+  };
+
+  const handleClaimDailyReward = () => {
+    const reward = claimReward();
+    if (reward > 0) {
+      addXp(reward);
+      hapticMission();
+    }
+    setShowDailyReward(false);
   };
 
   const weekNumber = Number(week);
@@ -304,6 +324,13 @@ export default function Home() {
           pendingTrial={pendingTrial}
           onCompleteBossTrial={handleCompleteBossTrial}
           onSkipBossTrial={clearPendingTrial}
+        />
+
+        <DailyRewardPopup
+          isOpen={showDailyReward && canClaim}
+          day={rewardDay}
+          xpReward={xpReward}
+          onClaim={handleClaimDailyReward}
         />
 
         <DevPanel onReset={resetPlayer} />

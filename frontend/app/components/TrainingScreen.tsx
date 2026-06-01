@@ -18,7 +18,7 @@ export default function TrainingScreen({
 const workoutXp = getWorkoutXp(program.phase);
 
   return (
-    <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-xl mb-24">
+    <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
       <div className="text-center">
         <p className="uppercase tracking-[0.2em] text-sm font-bold">
           Current Phase
@@ -94,19 +94,16 @@ const workoutXp = getWorkoutXp(program.phase);
 
       <button
         onClick={onCompleteWorkout}
-        className="w-full mt-6 bg-[#b22222] text-[#efe3c2] border-4 border-black py-4 uppercase font-black tracking-widest"
+        className="w-full mt-6 bg-[#b22222] text-[#efe3c2] border-4 border-black py-4 uppercase font-black tracking-widest min-h-[52px] transition-transform active:scale-[0.98]"
       >
         Complete Workout
       </button>
-<button
-  onClick={() => {
-    console.log("COMPLETE WEEK CLICKED");
-    onCompleteWeek();
-  }}
-  className="w-full mt-4 bg-black text-[#efe3c2] border-4 border-[#b22222] py-4 uppercase font-black tracking-widest"
->
-  Complete Week
-</button>
+      <button
+        onClick={onCompleteWeek}
+        className="w-full mt-4 bg-black text-[#efe3c2] border-4 border-[#b22222] py-4 uppercase font-black tracking-widest min-h-[52px] transition-transform active:scale-[0.98]"
+      >
+        Complete Week
+      </button>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { safeGet, safeSet } from "../utils/storage";
+import { STORAGE_KEYS } from "../utils/storageKeys";
 
 export type DailyMission = {
   id: "workout" | "deepwork" | "protein" | "sleep";
@@ -19,27 +20,27 @@ export function useDailyMissions() {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const saved = safeGet("iron-path-daily-missions", null as any);
+    const saved = safeGet<{ date: string; missions: DailyMission[] } | null>(
+      STORAGE_KEYS.dailyMissions,
+      null
+    );
 
     const today = new Date().toDateString();
 
-    if (saved) {
-      // Reset if it's a new day
+    if (saved?.date && saved.missions) {
       if (saved.date !== today) {
-        safeSet("iron-path-daily-missions", { date: today, missions });
+        safeSet(STORAGE_KEYS.dailyMissions, { date: today, missions });
       } else {
         setMissions(saved.missions);
       }
     } else {
-      // First time - initialize with today's date
-      safeSet("iron-path-daily-missions", { date: today, missions });
+      safeSet(STORAGE_KEYS.dailyMissions, { date: today, missions });
     }
   }, []);
 
-  // Save to localStorage whenever missions change
   useEffect(() => {
     const today = new Date().toDateString();
-    safeSet("iron-path-daily-missions", { date: today, missions });
+    safeSet(STORAGE_KEYS.dailyMissions, { date: today, missions });
   }, [missions]);
 
   const completeMission = (id: "workout" | "deepwork" | "protein" | "sleep") => {

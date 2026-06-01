@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { safeGet, safeSet } from "../utils/storage";
+import { STORAGE_KEYS } from "../utils/storageKeys";
+
+const STORAGE_KEY = STORAGE_KEYS.dailyRewards;
 
 export const DAILY_REWARD_XP = [50, 75, 100, 125, 150, 200, 300] as const;
 
@@ -9,8 +12,6 @@ export type DailyRewardsData = {
   lastClaimDate: string | null;
   currentStreak: number;
 };
-
-const STORAGE_KEY = "iron-path-daily-rewards";
 
 function getTodayString() {
   return new Date().toDateString();

@@ -6,6 +6,8 @@ type Props = {
   onSelectStrength?: () => void;
   onSelectLegacy?: () => void;
   onSelectSettings?: () => void;
+  onSelectProfile?: () => void;
+  onSelectStats?: () => void;
   level: number;
   rank: string;
   week: number;
@@ -22,6 +24,8 @@ export default function MoreScreen({
   onSelectStrength,
   onSelectLegacy,
   onSelectSettings,
+  onSelectProfile,
+  onSelectStats,
   level,
   rank,
   week,
@@ -62,14 +66,36 @@ export default function MoreScreen({
 
       <div className="mt-8 space-y-4">
         <button
+          onClick={onSelectProfile}
+          className="w-full border-4 border-black p-5 sm:p-6 bg-[#e8d8b0] hover:bg-[#d4c89a] transition-colors min-h-[48px]"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">Identity</p>
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">👤 Profile</h3>
+          <p className="mt-3 text-sm uppercase text-black">
+            Edit avatar, stats, and training goal
+          </p>
+        </button>
+
+        <button
+          onClick={onSelectStats}
+          className="w-full border-4 border-black p-5 sm:p-6 bg-[#efe3c2] hover:bg-[#e6dcc0] transition-colors min-h-[48px]"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">Records</p>
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">📈 Stats</h3>
+          <p className="mt-3 text-sm uppercase text-black">
+            View XP, streaks, workouts, and milestones
+          </p>
+        </button>
+
+        <button
           onClick={onSelectProgress}
-          className="w-full border-4 border-black p-6 bg-black text-[#efe3c2] hover:bg-[#333] transition-colors"
+          className="w-full border-4 border-black p-5 sm:p-6 bg-black text-[#efe3c2] hover:bg-[#333] transition-colors min-h-[48px]"
         >
           <p className="uppercase tracking-[0.2em] text-sm font-bold">
             View Progress
           </p>
 
-          <h3 className="text-3xl font-black uppercase mt-3">
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">
             📊 Progress
           </h3>
 
@@ -84,7 +110,7 @@ export default function MoreScreen({
         >
           <p className="uppercase tracking-[0.2em] text-sm font-bold">Legacy</p>
 
-          <h3 className="text-3xl font-black uppercase mt-3">🏺 Legacy</h3>
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">🏺 Legacy</h3>
 
           <p className="mt-3 text-sm uppercase text-black">View completed seasons and records</p>
         </button>
@@ -97,7 +123,7 @@ export default function MoreScreen({
             View Achievements
           </p>
 
-          <h3 className="text-3xl font-black uppercase mt-3">
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">
             ⭐ Achievements
           </h3>
 
@@ -112,7 +138,7 @@ export default function MoreScreen({
         >
           <p className="uppercase tracking-[0.2em] text-sm font-bold">Strength Tracker</p>
 
-          <h3 className="text-3xl font-black uppercase mt-3">💪 Strength</h3>
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">💪 Strength</h3>
 
           <p className="mt-3 text-sm uppercase text-black">Track push-ups, pull-ups, dips, runs and weight</p>
         </button>
@@ -123,7 +149,7 @@ export default function MoreScreen({
         >
           <p className="uppercase tracking-[0.2em] text-sm font-bold">App Settings</p>
 
-          <h3 className="text-3xl font-black uppercase mt-3">⚙ Settings</h3>
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">⚙ Settings</h3>
 
           <p className="mt-3 text-sm uppercase">Reset progress and manage your data</p>
         </button>

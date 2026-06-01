@@ -25,14 +25,14 @@ export default function TodayScreen({
   };
 
   const taskClass = (task: string) =>
-    `w-full border-2 border-black p-4 flex justify-between uppercase font-bold cursor-pointer ${
+    `w-full border-2 border-black p-4 sm:p-5 flex justify-between uppercase font-bold cursor-pointer min-h-[52px] ${
       completed.includes(task)
         ? "bg-[#e8d8b0] text-black opacity-60"
         : "bg-black text-[#efe3c2]"
     }`;
 
   return (
-    <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-xl mb-24">
+    <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
       <h2 className="text-4xl font-black uppercase text-center">
         TODAY'S WORK
       </h2>

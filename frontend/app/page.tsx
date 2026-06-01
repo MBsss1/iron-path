@@ -1,7 +1,7 @@
 "use client";
 
 import OnboardingScreen from "./components/OnboardingScreen";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { user } from "./data/user";
 import { useProfile } from "./hooks/useProfile";
 import { generateProgram } from "./data/programGenerator";
@@ -15,6 +15,8 @@ import ProgressScreen from "./components/ProgressScreen";
 import AchievementsScreen from "./components/AchievementsScreen";
 import MoreScreen from "./components/MoreScreen";
 import SettingsScreen from "./components/SettingsScreen";
+import ProfileScreen from "./components/ProfileScreen";
+import StatsScreen from "./components/StatsScreen";
 import StrengthTrackerScreen from "./components/StrengthTrackerScreen";
 import { getWorkoutXp } from "./data/xpRewards";
 import { useDailyMissions } from "./hooks/useDailyMissions";
@@ -22,6 +24,7 @@ import { useBossTrials } from "./hooks/useBossTrials";
 import { getBossTrialByWeek } from "./data/bossTrials";
 import { useSeasons } from "./hooks/useSeasons";
 import { useDailyRewards } from "./hooks/useDailyRewards";
+import { useStats } from "./hooks/useStats";
 import LegacyScreen from "./components/LegacyScreen";
 import HeroScreen from "./components/HeroScreen";
 import AppPopups from "./components/AppPopups";
@@ -29,6 +32,8 @@ import SplashScreen from "./components/SplashScreen";
 import ScreenTransition from "./components/ScreenTransition";
 import XpFloatAnimation from "./components/XpFloatAnimation";
 import DailyRewardPopup from "./components/DailyRewardPopup";
+import { ACHIEVEMENTS } from "./data/achievements";
+import { clearAllGameData } from "./utils/storageKeys";
 import {
   hapticWorkout,
   hapticMission,
@@ -36,14 +41,22 @@ import {
   hapticAchievement,
 } from "./utils/haptics";
 
-const MORE_SUB_SCREENS = ["progress", "achievements", "strength", "legacy", "settings"];
+const MORE_SUB_SCREENS = [
+  "progress",
+  "achievements",
+  "strength",
+  "legacy",
+  "settings",
+  "profile",
+  "stats",
+];
 
 function getNavActiveScreen(screen: string) {
   return MORE_SUB_SCREENS.includes(screen) ? "more" : screen;
 }
 
 export default function Home() {
-  const { profile, clearProfile } = useProfile();
+  const { profile, saveProfile, clearProfile } = useProfile();
   const [screen, setScreen] = useState("hero");
   const [showPopup, setShowPopup] = useState(false);
   const [lastXpReward, setLastXpReward] = useState(0);
@@ -62,6 +75,9 @@ export default function Home() {
     body,
     mind,
     work,
+    totalXp,
+    workoutCount,
+    highestLevel,
     addXp,
     addBody,
     addMind,
@@ -75,6 +91,7 @@ export default function Home() {
     clearPendingAchievement,
     achievementsUnlocked,
     unlockAchievement,
+    checkAchievements,
   } = usePlayer();
 
   const {
@@ -92,7 +109,10 @@ export default function Home() {
     checkForNewTrial,
   } = useBossTrials();
 
-  const program = generateProgram(profile, Number(week));
+  const program = useMemo(
+    () => generateProgram(profile, Number(week)),
+    [profile, week]
+  );
 
   const {
     completedSeasons,
@@ -104,10 +124,44 @@ export default function Home() {
 
   const { canClaim, rewardDay, xpReward, claimReward } = useDailyRewards();
 
+  const { stats, daysSinceStart, recordMissionComplete, recordDailyClaim } =
+    useStats(level, Boolean(profile));
+
+  const achievementProgressInput = useMemo(
+    () => ({
+      level,
+      week: Number(week),
+      totalXp,
+      workoutCount,
+      loginStreak: stats.currentLoginStreak,
+      seasonsCompleted: completedSeasons.length,
+    }),
+    [
+      level,
+      week,
+      totalXp,
+      workoutCount,
+      stats.currentLoginStreak,
+      completedSeasons.length,
+    ]
+  );
+
   useEffect(() => {
     checkForNewTrial(Number(week));
     checkForSeasonComplete(Number(week));
   }, [week, checkForNewTrial]);
+
+  useEffect(() => {
+    checkAchievements(stats.currentLoginStreak, completedSeasons.length);
+  }, [
+    level,
+    week,
+    totalXp,
+    workoutCount,
+    stats.currentLoginStreak,
+    completedSeasons.length,
+    checkAchievements,
+  ]);
 
   useEffect(() => {
     if (canClaim && profile && !showSplash) {
@@ -123,7 +177,7 @@ export default function Home() {
     if (pendingAchievement) hapticAchievement();
   }, [pendingAchievement]);
 
-  const handleCompleteBossTrial = () => {
+  const handleCompleteBossTrial = useCallback(() => {
     if (pendingTrial) {
       const trial = getBossTrialByWeek(Number(week));
 
@@ -132,9 +186,9 @@ export default function Home() {
         completeTrial(pendingTrial);
       }
     }
-  };
+  }, [pendingTrial, week, addXp, completeTrial]);
 
-  const handleClaimSeason = () => {
+  const handleClaimSeason = useCallback(() => {
     const already = completedSeasons.some((s) => s.week === 24);
     if (already) return;
 
@@ -142,18 +196,27 @@ export default function Home() {
     addBody(5);
     addMind(5);
     addWork(5);
-    if (typeof unlockAchievement === "function") {
-      try {
-        unlockAchievement("iron_legend");
-      } catch (e) {
-        // ignore if achievement id not present
-      }
+    try {
+      unlockAchievement("iron_legend");
+      unlockAchievement("first_season");
+    } catch {
+      // ignore if achievement id not present
     }
 
     completeSeason(xp, level);
-  };
+  }, [
+    completedSeasons,
+    addXp,
+    addBody,
+    addMind,
+    addWork,
+    unlockAchievement,
+    completeSeason,
+    xp,
+    level,
+  ]);
 
-  const completeWorkout = () => {
+  const completeWorkout = useCallback(() => {
     const reward = getWorkoutXp(program.phase);
 
     setLastXpReward(reward);
@@ -162,51 +225,59 @@ export default function Home() {
     addMind(1);
     recordWorkout();
     completeMission("workout");
+    recordMissionComplete();
     setShowPopup(true);
     hapticWorkout();
-  };
+  }, [program.phase, addXp, addBody, addMind, recordWorkout, completeMission, recordMissionComplete]);
 
-  const completeDeepWork = () => {
+  const completeDeepWork = useCallback(() => {
     addXp(60);
     addWork(1);
     completeMission("deepwork");
+    recordMissionComplete();
     setXpFloat(60);
     hapticMission();
-  };
+  }, [addXp, addWork, completeMission, recordMissionComplete]);
 
-  const completeProtein = () => {
+  const completeProtein = useCallback(() => {
     addXp(40);
     addBody(1);
     completeMission("protein");
+    recordMissionComplete();
     setXpFloat(40);
     hapticMission();
-  };
+  }, [addXp, addBody, completeMission, recordMissionComplete]);
 
-  const completeSleep = () => {
+  const completeSleep = useCallback(() => {
     addXp(35);
     addMind(1);
     completeMission("sleep");
+    recordMissionComplete();
     setXpFloat(35);
     hapticMission();
-  };
+  }, [addXp, addMind, completeMission, recordMissionComplete]);
 
-  const handleClaimDailyReward = () => {
+  const handleClaimDailyReward = useCallback(() => {
     const reward = claimReward();
     if (reward > 0) {
       addXp(reward);
+      recordDailyClaim();
       hapticMission();
     }
     setShowDailyReward(false);
-  };
+  }, [claimReward, addXp, recordDailyClaim]);
 
-  const handleResetProgress = () => {
+  const handleResetProgress = useCallback(() => {
     resetPlayer();
     clearProfile();
+    clearAllGameData();
     window.location.reload();
-  };
+  }, [resetPlayer, clearProfile]);
 
   const weekNumber = Number(week);
   const navScreen = getNavActiveScreen(screen);
+  const rank = useMemo(() => getRank(level), [level]);
+  const loginStreak = stats.currentLoginStreak;
 
   return (
     <>
@@ -216,12 +287,16 @@ export default function Home() {
         <XpFloatAnimation amount={xpFloat} onDone={clearXpFloat} />
       )}
 
-      <main className="min-h-screen bg-gradient-to-b from-[#d8c7a1] to-[#efe3c2] text-black flex flex-col items-center p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+      <main className="min-h-screen bg-gradient-to-b from-[#d8c7a1] to-[#efe3c2] text-black flex flex-col items-center px-4 sm:px-6 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <div className="w-full max-w-md">
-          <div className="text-center mt-6">
-            <h1 className="text-5xl font-black tracking-wide">IRON PATH</h1>
+          <div className="text-center mt-4 sm:mt-6">
+            <h1 className="text-4xl sm:text-5xl font-black tracking-wide">
+              IRON PATH
+            </h1>
 
-            <p className="text-sm mt-2 uppercase tracking-[0.2em]">Est. 1950</p>
+            <p className="text-xs sm:text-sm mt-2 uppercase tracking-[0.2em]">
+              Est. 1950
+            </p>
           </div>
 
           {!profile && (
@@ -243,6 +318,7 @@ export default function Home() {
                 completedCount={completedCount}
                 totalCount={totalCount}
                 progress={progress}
+                streak={loginStreak}
               />
             )}
 
@@ -271,7 +347,7 @@ export default function Home() {
             {screen === "progress" && (
               <ProgressScreen
                 level={level}
-                rank={getRank(level)}
+                rank={rank}
                 week={weekNumber}
                 phase={program.phase}
                 xp={xp}
@@ -282,7 +358,10 @@ export default function Home() {
             )}
 
             {screen === "achievements" && (
-              <AchievementsScreen achievementsUnlocked={achievementsUnlocked} />
+              <AchievementsScreen
+                achievementsUnlocked={achievementsUnlocked}
+                progressInput={achievementProgressInput}
+              />
             )}
 
             {screen === "more" && (
@@ -292,14 +371,42 @@ export default function Home() {
                 onSelectStrength={() => setScreen("strength")}
                 onSelectLegacy={() => setScreen("legacy")}
                 onSelectSettings={() => setScreen("settings")}
+                onSelectProfile={() => setScreen("profile")}
+                onSelectStats={() => setScreen("stats")}
                 level={level}
-                rank={getRank(level)}
+                rank={rank}
                 week={weekNumber}
                 phase={program.phase}
-                streak={user.streak}
+                streak={loginStreak}
                 body={body}
                 mind={mind}
                 work={work}
+              />
+            )}
+
+            {screen === "profile" && profile && (
+              <ProfileScreen
+                profile={profile}
+                level={level}
+                onSave={saveProfile}
+                onClose={() => setScreen("more")}
+              />
+            )}
+
+            {screen === "stats" && (
+              <StatsScreen
+                totalXp={totalXp}
+                level={level}
+                highestLevel={Math.max(highestLevel, stats.highestLevel)}
+                workoutCount={workoutCount}
+                missionsCompleted={stats.totalMissionsCompleted}
+                achievementsUnlocked={achievementsUnlocked.length}
+                achievementsTotal={ACHIEVEMENTS.length}
+                seasonsCompleted={completedSeasons.length}
+                currentStreak={stats.currentLoginStreak}
+                longestStreak={stats.longestLoginStreak}
+                daysSinceStart={daysSinceStart}
+                onClose={() => setScreen("more")}
               />
             )}
 
@@ -339,7 +446,7 @@ export default function Home() {
           onCloseWorkoutPopup={() => setShowPopup(false)}
           leveledUp={leveledUp}
           level={level}
-          rank={getRank(level)}
+          rank={rank}
           onCloseLevelUp={clearLevelUp}
           pendingAchievement={pendingAchievement}
           onCloseAchievement={clearPendingAchievement}

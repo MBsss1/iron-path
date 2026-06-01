@@ -23,6 +23,7 @@ type Props = {
   completedCount: number;
   totalCount: number;
   progress: number;
+  streak: number;
 };
 
 export default function HeroScreen({
@@ -38,14 +39,16 @@ export default function HeroScreen({
   completedCount,
   totalCount,
   progress,
+  streak,
 }: Props) {
   return (
     <>
-      <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-2xl">
+      <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl">
         <div className="flex flex-col items-center">
           <img
-            src={getAvatar(level)}
-            className="w-64 h-80 object-cover border-4 border-black"
+            src={getAvatar(level, profile.avatarId)}
+            alt="Avatar"
+            className="w-56 sm:w-64 h-72 sm:h-80 object-cover border-4 border-black"
           />
 
           <h2 className="text-4xl font-black mt-6">LEVEL {level}</h2>
@@ -110,7 +113,7 @@ export default function HeroScreen({
 
             <div className="flex justify-between uppercase text-sm mt-2">
               <span>Streak</span>
-              <span>{user.streak} Days</span>
+              <span>{streak} Days</span>
             </div>
           </div>
 

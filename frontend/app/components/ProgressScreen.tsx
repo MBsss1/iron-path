@@ -23,7 +23,7 @@ export default function ProgressScreen({
   const xpProgress = (xp / maxXp) * 100;
 
   return (
-    <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-xl mb-24">
+    <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
       <div className="text-center">
         <p className="uppercase tracking-[0.2em] text-sm font-bold">
           Iron Record

@@ -13,7 +13,7 @@ type Props = {
   currentStreak: number;
   longestStreak: number;
   daysSinceStart: number;
-  onClose: () => void;
+  onBack: () => void;
 };
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
@@ -37,14 +37,14 @@ export default function StatsScreen({
   currentStreak,
   longestStreak,
   daysSinceStart,
-  onClose,
+  onBack,
 }: Props) {
   return (
     <ScreenShell
       eyebrow="Records"
       title="Stats"
       subtitle="Your complete Iron Path history"
-      onBack={onClose}
+      onBack={onBack}
     >
       <IronCard variant="dark">
         <div className="space-y-3">

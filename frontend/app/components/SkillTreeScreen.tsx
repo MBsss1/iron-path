@@ -13,10 +13,10 @@ import IronCard from "./IronCard";
 type Props = {
   classId: ClassId | string;
   level: number;
-  onClose: () => void;
+  onBack: () => void;
 };
 
-export default function SkillTreeScreen({ classId, level, onClose }: Props) {
+export default function SkillTreeScreen({ classId, level, onBack }: Props) {
   const classDef = getClass(classId);
 
   if (!classDef) {
@@ -25,7 +25,7 @@ export default function SkillTreeScreen({ classId, level, onClose }: Props) {
         eyebrow="Abilities"
         title="Skill Tree"
         subtitle="Select a class first"
-        onBack={onClose}
+        onBack={onBack}
       >
         <IronCard variant="paper">
           <p className="uppercase text-sm font-bold text-center">
@@ -44,7 +44,7 @@ export default function SkillTreeScreen({ classId, level, onClose }: Props) {
       eyebrow="Abilities"
       title="Skill Tree"
       subtitle={`${classDef.name} — ${unlockedCount} / ${totalSkills} unlocked · Level ${level}`}
-      onBack={onClose}
+      onBack={onBack}
     >
       <IronCard variant="dark">
         <div className="flex items-center gap-3">

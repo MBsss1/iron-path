@@ -77,6 +77,7 @@ export default function Home() {
 
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
+  const goBackToMore = useCallback(() => setScreen("more"), []);
 
   const {
     xp,
@@ -413,6 +414,7 @@ export default function Home() {
                 maxXp={user.maxXp}
                 weight={profile?.weight ?? "0"}
                 goal={profile?.goal ?? "unknown"}
+                onBack={goBackToMore}
               />
             )}
 
@@ -420,6 +422,7 @@ export default function Home() {
               <AchievementsScreen
                 achievementsUnlocked={achievementsUnlocked}
                 progressInput={achievementProgressInput}
+                onBack={goBackToMore}
               />
             )}
 
@@ -449,7 +452,7 @@ export default function Home() {
                 profile={profile}
                 level={level}
                 onSave={saveProfile}
-                onClose={() => setScreen("more")}
+                onBack={goBackToMore}
               />
             )}
 
@@ -466,29 +469,32 @@ export default function Home() {
                 currentStreak={stats.currentLoginStreak}
                 longestStreak={stats.longestLoginStreak}
                 daysSinceStart={daysSinceStart}
-                onClose={() => setScreen("more")}
+                onBack={goBackToMore}
               />
             )}
 
             {screen === "strength" && (
-              <StrengthTrackerScreen onClose={() => setScreen("more")} />
+              <StrengthTrackerScreen onBack={goBackToMore} />
             )}
 
             {screen === "legacy" && (
-              <LegacyScreen seasons={completedSeasons} />
+              <LegacyScreen
+                seasons={completedSeasons}
+                onBack={goBackToMore}
+              />
             )}
 
             {screen === "skilltree" && profile?.classId && (
               <SkillTreeScreen
                 classId={profile.classId}
                 level={level}
-                onClose={() => setScreen("more")}
+                onBack={goBackToMore}
               />
             )}
 
             {screen === "settings" && (
               <SettingsScreen
-                onClose={() => setScreen("more")}
+                onBack={goBackToMore}
                 onReset={handleResetProgress}
               />
             )}

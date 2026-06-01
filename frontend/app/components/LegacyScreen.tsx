@@ -2,15 +2,26 @@ import { SeasonRecord } from "../hooks/useSeasons";
 
 type Props = {
   seasons: SeasonRecord[];
+  onBack: () => void;
 };
 
-export default function LegacyScreen({ seasons }: Props) {
+export default function LegacyScreen({ seasons, onBack }: Props) {
   return (
     <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
-      <div className="text-center">
-        <p className="uppercase tracking-[0.2em] text-sm font-bold">Legacy</p>
-        <h2 className="text-4xl font-black uppercase mt-2">Completed Seasons</h2>
-        <p className="mt-2 uppercase text-sm">Your recorded seasons and milestones.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="text-center flex-1">
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">Legacy</p>
+          <h2 className="text-4xl font-black uppercase mt-2">Completed Seasons</h2>
+          <p className="mt-2 uppercase text-sm">Your recorded seasons and milestones.</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onBack}
+          className="border-4 border-black px-4 py-2 bg-black text-[#efe3c2] uppercase text-xs font-black shrink-0 transition-transform active:scale-95"
+        >
+          Back
+        </button>
       </div>
 
       <div className="mt-8 space-y-3">

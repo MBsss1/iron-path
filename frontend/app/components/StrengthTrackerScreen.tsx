@@ -24,7 +24,7 @@ function diffText(cur?: number, prev?: number, unit = "") {
   return `${sign}${formatted}${unit ? " " + unit : ""}`;
 }
 
-export default function StrengthTrackerScreen({ onClose }: { onClose?: () => void }) {
+export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }) {
   const { data, updateMetric, reset } = useStrengthTracker();
 
   const [pushInput, setPushInput] = useState(String(data.pushUps ?? 0));
@@ -75,16 +75,14 @@ export default function StrengthTrackerScreen({ onClose }: { onClose?: () => voi
         <p className="text-sm mt-2 uppercase tracking-[0.2em]">Log your lifts and runs — track progress</p>
       </div>
 
-      {onClose && (
-        <div className="flex justify-end mt-4">
-          <button
-            className="bg-black text-[#efe3c2] border-2 border-black py-2 px-4 uppercase font-bold"
-            onClick={onClose}
-          >
-            Back
-          </button>
-        </div>
-      )}
+      <div className="flex justify-end mt-4">
+        <button
+          className="bg-black text-[#efe3c2] border-2 border-black py-2 px-4 uppercase font-bold"
+          onClick={onBack}
+        >
+          Back
+        </button>
+      </div>
 
       <div className="mt-6 space-y-4">
         {/* Push-ups */}

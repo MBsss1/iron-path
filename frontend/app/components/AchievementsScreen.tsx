@@ -16,11 +16,13 @@ import IronCard from "./IronCard";
 type Props = {
   achievementsUnlocked: AchievementId[];
   progressInput: AchievementProgressInput;
+  onBack: () => void;
 };
 
 export default function AchievementsScreen({
   achievementsUnlocked,
   progressInput,
+  onBack,
 }: Props) {
   const unlockedCount = achievementsUnlocked.length;
   const totalCount = ACHIEVEMENTS.length;
@@ -31,6 +33,7 @@ export default function AchievementsScreen({
       eyebrow="Path Milestones"
       title="Achievements"
       subtitle={`${unlockedCount} / ${totalCount} unlocked · ${completionPercent}% complete`}
+      onBack={onBack}
     >
       <IronCard variant="dark">
         <p className="uppercase text-xs font-bold text-center">Completion</p>

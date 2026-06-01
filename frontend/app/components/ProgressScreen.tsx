@@ -7,6 +7,7 @@ type Props = {
   maxXp: number;
   weight: string;
   goal: string;
+  onBack: () => void;
 };
 
 export default function ProgressScreen({
@@ -18,24 +19,35 @@ export default function ProgressScreen({
   maxXp,
   weight,
   goal,
+  onBack,
 }: Props) {
   const pathProgress = (week / 24) * 100;
   const xpProgress = (xp / maxXp) * 100;
 
   return (
     <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
-      <div className="text-center">
-        <p className="uppercase tracking-[0.2em] text-sm font-bold">
-          Iron Record
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="text-center flex-1">
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">
+            Iron Record
+          </p>
 
-        <h2 className="text-4xl font-black uppercase mt-2">
-          Progress
-        </h2>
+          <h2 className="text-4xl font-black uppercase mt-2">
+            Progress
+          </h2>
 
-        <p className="mt-2 uppercase text-sm">
-          Proof of work. Proof of growth.
-        </p>
+          <p className="mt-2 uppercase text-sm">
+            Proof of work. Proof of growth.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onBack}
+          className="border-4 border-black px-4 py-2 bg-black text-[#efe3c2] uppercase text-xs font-black shrink-0 transition-transform active:scale-95"
+        >
+          Back
+        </button>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-4">

@@ -14,14 +14,14 @@ type Props = {
   profile: Profile;
   level: number;
   onSave: (profile: Profile) => void;
-  onClose: () => void;
+  onBack: () => void;
 };
 
 export default function ProfileScreen({
   profile,
   level,
   onSave,
-  onClose,
+  onBack,
 }: Props) {
   const [age, setAge] = useState(profile.age);
   const [height, setHeight] = useState(profile.height);
@@ -59,7 +59,7 @@ export default function ProfileScreen({
     }
 
     onSave(nextProfile);
-    onClose();
+    onBack();
   };
 
   const inputClass =
@@ -70,7 +70,7 @@ export default function ProfileScreen({
       eyebrow="Identity"
       title="Profile"
       subtitle="Update your path and avatar"
-      onBack={onClose}
+      onBack={onBack}
     >
       <IronCard>
         <p className="uppercase text-xs font-bold tracking-widest mb-3">

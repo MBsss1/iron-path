@@ -3,11 +3,11 @@
 import { useState } from "react";
 
 type Props = {
-  onClose: () => void;
+  onBack: () => void;
   onReset: () => void;
 };
 
-export default function SettingsScreen({ onClose, onReset }: Props) {
+export default function SettingsScreen({ onBack, onReset }: Props) {
   const [confirming, setConfirming] = useState(false);
 
   const handleConfirmReset = () => {
@@ -26,7 +26,7 @@ export default function SettingsScreen({ onClose, onReset }: Props) {
 
         <button
           type="button"
-          onClick={onClose}
+          onClick={onBack}
           className="border-4 border-black px-4 py-2 bg-black text-[#efe3c2] uppercase text-xs font-black shrink-0 transition-transform active:scale-95"
         >
           Back

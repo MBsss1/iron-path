@@ -230,6 +230,57 @@ body {
   animation: nav-indicator 0.25s ease-out both;
 }
 
+@keyframes boss-defeat-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(20px);
+  }
+  60% {
+    transform: scale(1.05) translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes boss-defeat-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(178, 34, 34, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 24px 4px rgba(178, 34, 34, 0.6);
+  }
+}
+
+@keyframes boss-defeat-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-boss-defeat-pop {
+  animation: boss-defeat-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-boss-defeat-glow {
+  animation: boss-defeat-glow 1.4s ease-in-out infinite;
+}
+
+.animate-boss-defeat-shake {
+  animation: boss-defeat-shake 0.5s ease-in-out 0.3s 2;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-screen-enter,
   .animate-splash-fade-in,
@@ -243,7 +294,10 @@ body {
   .animate-level-up-shake,
   .animate-achievement-glow,
   .animate-achievement-slide,
-  .animate-nav-indicator {
+  .animate-nav-indicator,
+  .animate-boss-defeat-pop,
+  .animate-boss-defeat-glow,
+  .animate-boss-defeat-shake {
     animation: none;
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getTitleLabel } from "../data/bosses";
 
 type Props = {
   level: number;
@@ -11,6 +12,7 @@ type Props = {
   body: number;
   mind: number;
   work: number;
+  equippedTitle?: string | null;
 };
 
 function buildShareText({
@@ -22,21 +24,31 @@ function buildShareText({
   body,
   mind,
   work,
+  equippedTitle,
 }: Props) {
+  const titleLine = equippedTitle
+    ? getTitleLabel(equippedTitle) ?? equippedTitle
+    : null;
+
   return [
     "IRON PATH",
+    titleLine ? `"${titleLine}"` : null,
     `Level ${level} — ${rank}`,
     `Week ${week}/24 · ${phase}`,
     `Streak: ${streak} days`,
     `Body ${body} · Mind ${mind} · Work ${work}`,
     "",
     "Stay on the path.",
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export default function ShareProgressCard(props: Props) {
-  const { level, rank, week, phase, streak, body, mind, work } = props;
+  const { level, rank, week, phase, streak, body, mind, work, equippedTitle } =
+    props;
   const [copied, setCopied] = useState(false);
+  const titleLabel = getTitleLabel(equippedTitle);
 
   const handleShare = async () => {
     const text = buildShareText(props);
@@ -81,6 +93,13 @@ export default function ShareProgressCard(props: Props) {
           <span>Rank</span>
           <span className="font-black">{rank}</span>
         </div>
+
+        {titleLabel && (
+          <div className="border-2 border-black px-4 py-3 bg-[#b22222] text-[#efe3c2] text-center">
+            <p className="text-xs tracking-widest">Title</p>
+            <p className="font-black mt-1">{titleLabel}</p>
+          </div>
+        )}
 
         <div className="flex justify-between border-2 border-black px-4 py-3 bg-[#f5ead0]">
           <span>Week</span>

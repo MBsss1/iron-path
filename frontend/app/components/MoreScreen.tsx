@@ -3,6 +3,7 @@ import ShareProgressCard from "./ShareProgressCard";
 type Props = {
   onSelectProgress: () => void;
   onSelectAchievements: () => void;
+  onSelectBosses?: () => void;
   onSelectStrength?: () => void;
   onSelectLegacy?: () => void;
   onSelectSettings?: () => void;
@@ -17,11 +18,13 @@ type Props = {
   body: number;
   mind: number;
   work: number;
+  equippedTitle?: string | null;
 };
 
 export default function MoreScreen({
   onSelectProgress,
   onSelectAchievements,
+  onSelectBosses,
   onSelectStrength,
   onSelectLegacy,
   onSelectSettings,
@@ -36,6 +39,7 @@ export default function MoreScreen({
   body,
   mind,
   work,
+  equippedTitle,
 }: Props) {
   return (
     <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-2xl mb-24">
@@ -63,6 +67,7 @@ export default function MoreScreen({
           body={body}
           mind={mind}
           work={work}
+          equippedTitle={equippedTitle}
         />
       </div>
 
@@ -86,6 +91,21 @@ export default function MoreScreen({
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">📈 Stats</h3>
           <p className="mt-3 text-sm uppercase text-black">
             View XP, streaks, workouts, and milestones
+          </p>
+        </button>
+
+        <button
+          onClick={onSelectBosses}
+          className="w-full border-4 border-black p-5 sm:p-6 bg-black text-[#efe3c2] hover:bg-[#1a1a1a] transition-colors min-h-[48px]"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-[#b22222]">
+            Inner War
+          </p>
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">
+            ⚔ Boss Trials
+          </h3>
+          <p className="mt-3 text-sm uppercase">
+            Face inner foes. Earn titles, badges, and glory
           </p>
         </button>
 

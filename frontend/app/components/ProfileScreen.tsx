@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AVATAR_OPTIONS } from "../data/avatar";
 import { CLASSES, type ClassId } from "../data/classes";
+import { getBadgeLabel, getTitleLabel } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
 import { canChangeClass, daysUntilClassChange } from "../utils/classBonuses";
 import ClassCard from "./ClassCard";
@@ -15,6 +16,10 @@ type Props = {
   level: number;
   onSave: (profile: Profile) => void;
   onBack: () => void;
+  equippedTitle: string | null;
+  unlockedTitleIds: string[];
+  defeatedBadges: string[];
+  onEquipTitle: (titleId: string | null) => void;
 };
 
 export default function ProfileScreen({
@@ -22,6 +27,10 @@ export default function ProfileScreen({
   level,
   onSave,
   onBack,
+  equippedTitle,
+  unlockedTitleIds,
+  defeatedBadges,
+  onEquipTitle,
 }: Props) {
   const [age, setAge] = useState(profile.age);
   const [height, setHeight] = useState(profile.height);
@@ -132,6 +141,61 @@ export default function ProfileScreen({
             />
           ))}
         </div>
+      </IronCard>
+
+      <IronCard variant="dark">
+        <p className="uppercase text-xs font-bold tracking-widest mb-3">
+          Title
+        </p>
+        {equippedTitle && (
+          <p className="text-center text-lg font-black uppercase text-[#b22222] mb-3">
+            {getTitleLabel(equippedTitle)}
+          </p>
+        )}
+        {unlockedTitleIds.length === 0 ? (
+          <p className="text-xs uppercase text-center opacity-80">
+            Defeat bosses to unlock titles
+          </p>
+        ) : (
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => onEquipTitle(null)}
+              className={`w-full border-2 border-[#efe3c2] p-2 uppercase text-xs font-bold ${
+                !equippedTitle ? "bg-[#b22222]" : "bg-transparent"
+              }`}
+            >
+              No Title
+            </button>
+            {unlockedTitleIds.map((titleId) => (
+              <button
+                key={titleId}
+                type="button"
+                onClick={() => onEquipTitle(titleId)}
+                className={`w-full border-2 border-[#efe3c2] p-2 uppercase text-xs font-bold ${
+                  equippedTitle === titleId ? "bg-[#b22222]" : "bg-transparent"
+                }`}
+              >
+                {getTitleLabel(titleId)}
+              </button>
+            ))}
+          </div>
+        )}
+        {defeatedBadges.length > 0 && (
+          <div className="mt-4 border-t-2 border-[#efe3c2]/30 pt-3">
+            <p className="uppercase text-xs font-bold mb-2">Boss Badges</p>
+            <div className="flex flex-wrap gap-2">
+              {defeatedBadges.map((badge) => (
+                <span
+                  key={badge}
+                  className="border-2 border-[#efe3c2] px-2 py-1 text-[10px] font-black uppercase"
+                >
+                  {getBadgeLabel(badge)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </IronCard>
 
       <IronCard variant="paper">

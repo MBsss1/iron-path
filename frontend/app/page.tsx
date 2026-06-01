@@ -20,7 +20,10 @@ import StatsScreen from "./components/StatsScreen";
 import ClassSelectionScreen from "./components/ClassSelectionScreen";
 import SkillTreeScreen from "./components/SkillTreeScreen";
 import StrengthTrackerScreen from "./components/StrengthTrackerScreen";
+import BossScreen from "./components/BossScreen";
 import type { ClassId } from "./data/classes";
+import type { BossId } from "./data/bosses";
+import { BOSSES, getBoss } from "./data/bosses";
 import {
   applyClassXpBonus,
   applyClassLevelUpBonus,
@@ -28,6 +31,7 @@ import {
 import { getWorkoutXp, MISSION_XP } from "./data/xpRewards";
 import { useDailyMissions } from "./hooks/useDailyMissions";
 import { useBossTrials } from "./hooks/useBossTrials";
+import { useBosses } from "./hooks/useBosses";
 import { getBossTrialByWeek } from "./data/bossTrials";
 import { useSeasons } from "./hooks/useSeasons";
 import { useDailyRewards } from "./hooks/useDailyRewards";
@@ -46,6 +50,7 @@ import {
   hapticMission,
   hapticLevelUp,
   hapticAchievement,
+  hapticBossDefeat,
 } from "./utils/haptics";
 
 const MORE_SUB_SCREENS = [
@@ -57,6 +62,7 @@ const MORE_SUB_SCREENS = [
   "profile",
   "stats",
   "skilltree",
+  "bosses",
 ];
 
 function getNavActiveScreen(screen: string) {
@@ -73,6 +79,7 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [xpFloat, setXpFloat] = useState<number | null>(null);
   const [showDailyReward, setShowDailyReward] = useState(false);
+  const [bossDefeatXp, setBossDefeatXp] = useState(0);
   const levelUpBonusApplied = useRef(false);
 
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
@@ -119,6 +126,22 @@ export default function Home() {
     clearPendingTrial,
     checkForNewTrial,
   } = useBossTrials();
+
+  const {
+    defeatedBosses,
+    equippedTitle,
+    unlockedTitleIds,
+    completionPercent: bossCompletionPercent,
+    recordDeepWork,
+    buildContext,
+    defeatBoss,
+    clearPendingDefeat,
+    equipTitle,
+    getBossStatus,
+    getCurrentBoss,
+    isRequirementMet,
+    getPendingDefeatBoss,
+  } = useBosses();
 
   const program = useMemo(
     () => generateProgram(profile, Number(week)),
@@ -261,11 +284,12 @@ export default function Home() {
     const reward = applyClassXpBonus(MISSION_XP.deepWork, classId, "deepWork", level);
     addXp(reward);
     addWork(1);
+    recordDeepWork();
     completeMission("deepwork");
     recordMissionComplete();
     setXpFloat(reward);
     hapticMission();
-  }, [classId, level, addXp, addWork, completeMission, recordMissionComplete]);
+  }, [classId, level, addXp, addWork, recordDeepWork, completeMission, recordMissionComplete]);
 
   const completeProtein = useCallback(() => {
     const reward = applyClassXpBonus(MISSION_XP.protein, classId, "mission", level);
@@ -308,6 +332,74 @@ export default function Home() {
   const navScreen = getNavActiveScreen(screen);
   const rank = useMemo(() => getRank(level), [level]);
   const loginStreak = stats.currentLoginStreak;
+
+  const bossProgressContext = useMemo(
+    () =>
+      buildContext({
+        level,
+        workoutCount,
+        missionsCompleted: stats.totalMissionsCompleted,
+        currentStreak: loginStreak,
+        totalXp,
+      }),
+    [
+      buildContext,
+      level,
+      workoutCount,
+      stats.totalMissionsCompleted,
+      loginStreak,
+      totalXp,
+    ]
+  );
+
+  const currentBoss = useMemo(
+    () => getCurrentBoss(bossProgressContext),
+    [getCurrentBoss, bossProgressContext]
+  );
+
+  const pendingBossDefeat = getPendingDefeatBoss();
+
+  const defeatedBadges = useMemo(
+    () =>
+      defeatedBosses
+        .map((id) => getBoss(id)?.rewards.badge)
+        .filter((badge): badge is string => Boolean(badge)),
+    [defeatedBosses]
+  );
+
+  const handleClaimBoss = useCallback(
+    (bossId: BossId) => {
+      const boss = getBoss(bossId);
+      if (!boss) return;
+      if (defeatedBosses.includes(bossId)) return;
+      if (!isRequirementMet(boss, bossProgressContext)) return;
+
+      const xpReward = applyClassXpBonus(
+        boss.rewards.xp,
+        classId,
+        "all",
+        level
+      );
+      setBossDefeatXp(xpReward);
+      addXp(xpReward);
+      defeatBoss(bossId);
+      hapticBossDefeat();
+    },
+    [
+      defeatedBosses,
+      isRequirementMet,
+      bossProgressContext,
+      classId,
+      level,
+      addXp,
+      defeatBoss,
+    ]
+  );
+
+  const handleCloseBossDefeat = useCallback(() => {
+    clearPendingDefeat();
+    setBossDefeatXp(0);
+  }, [clearPendingDefeat]);
 
   const handleConfirmClass = useCallback(
     (selectedClassId: ClassId) => {
@@ -375,6 +467,7 @@ export default function Home() {
                 totalCount={totalCount}
                 progress={progress}
                 streak={loginStreak}
+                equippedTitle={equippedTitle}
               />
             )}
 
@@ -428,6 +521,7 @@ export default function Home() {
 
             {screen === "more" && (
               <MoreScreen
+                onSelectBosses={() => setScreen("bosses")}
                 onSelectProgress={() => setScreen("progress")}
                 onSelectAchievements={() => setScreen("achievements")}
                 onSelectStrength={() => setScreen("strength")}
@@ -444,6 +538,7 @@ export default function Home() {
                 body={body}
                 mind={mind}
                 work={work}
+                equippedTitle={equippedTitle}
               />
             )}
 
@@ -453,6 +548,10 @@ export default function Home() {
                 level={level}
                 onSave={saveProfile}
                 onBack={goBackToMore}
+                equippedTitle={equippedTitle}
+                unlockedTitleIds={unlockedTitleIds}
+                defeatedBadges={defeatedBadges}
+                onEquipTitle={equipTitle}
               />
             )}
 
@@ -469,6 +568,10 @@ export default function Home() {
                 currentStreak={stats.currentLoginStreak}
                 longestStreak={stats.longestLoginStreak}
                 daysSinceStart={daysSinceStart}
+                equippedTitle={equippedTitle}
+                bossesDefeated={defeatedBosses.length}
+                bossesTotal={BOSSES.length}
+                bossCompletionPercent={bossCompletionPercent}
                 onBack={goBackToMore}
               />
             )}
@@ -496,6 +599,18 @@ export default function Home() {
               <SettingsScreen
                 onBack={goBackToMore}
                 onReset={handleResetProgress}
+              />
+            )}
+
+            {screen === "bosses" && (
+              <BossScreen
+                ctx={bossProgressContext}
+                currentBoss={currentBoss}
+                getStatus={(boss) => getBossStatus(boss, bossProgressContext)}
+                onClaimBoss={handleClaimBoss}
+                onBack={goBackToMore}
+                defeatedCount={defeatedBosses.length}
+                completionPercent={bossCompletionPercent}
               />
             )}
           </ScreenTransition>
@@ -527,6 +642,9 @@ export default function Home() {
           pendingTrial={pendingTrial}
           onCompleteBossTrial={handleCompleteBossTrial}
           onSkipBossTrial={clearPendingTrial}
+          pendingBossDefeat={pendingBossDefeat}
+          bossDefeatXp={bossDefeatXp}
+          onCloseBossDefeat={handleCloseBossDefeat}
         />
 
         <DailyRewardPopup

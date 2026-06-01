@@ -27,6 +27,10 @@ export function hapticAchievement() {
   vibrate([25, 30, 25, 30, 40]);
 }
 
+export function hapticBossDefeat() {
+  vibrate([40, 60, 30, 60, 30, 80, 100]);
+}
+
 export function hapticTab() {
   vibrate(8);
 }

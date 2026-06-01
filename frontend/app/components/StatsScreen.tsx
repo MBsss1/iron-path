@@ -1,5 +1,6 @@
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
+import { getTitleLabel } from "../data/bosses";
 
 type Props = {
   totalXp: number;
@@ -13,6 +14,10 @@ type Props = {
   currentStreak: number;
   longestStreak: number;
   daysSinceStart: number;
+  equippedTitle: string | null;
+  bossesDefeated: number;
+  bossesTotal: number;
+  bossCompletionPercent: number;
   onBack: () => void;
 };
 
@@ -37,8 +42,14 @@ export default function StatsScreen({
   currentStreak,
   longestStreak,
   daysSinceStart,
+  equippedTitle,
+  bossesDefeated,
+  bossesTotal,
+  bossCompletionPercent,
   onBack,
 }: Props) {
+  const titleLabel = getTitleLabel(equippedTitle);
+
   return (
     <ScreenShell
       eyebrow="Records"
@@ -46,6 +57,20 @@ export default function StatsScreen({
       subtitle="Your complete Iron Path history"
       onBack={onBack}
     >
+      <IronCard variant="dark">
+        <div className="space-y-3">
+          <StatRow
+            label="Current Title"
+            value={titleLabel ?? "None"}
+          />
+          <StatRow
+            label="Bosses Defeated"
+            value={`${bossesDefeated} / ${bossesTotal}`}
+          />
+          <StatRow label="Boss Completion" value={`${bossCompletionPercent}%`} />
+        </div>
+      </IronCard>
+
       <IronCard variant="dark">
         <div className="space-y-3">
           <StatRow label="Total XP Earned" value={totalXp.toLocaleString()} />

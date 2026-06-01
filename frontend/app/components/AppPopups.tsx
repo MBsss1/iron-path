@@ -5,7 +5,9 @@ import WorkoutPopup from "./WorkoutPopup";
 import LevelUpPopup from "./LevelUpPopup";
 import AchievementPopup from "./AchievementPopup";
 import BossTrialPopup from "./BossTrialPopup";
+import BossDefeatPopup from "./BossDefeatPopup";
 import SeasonCompletePopup from "./SeasonCompletePopup";
+import type { BossDefinition } from "../data/bosses";
 import { getBossTrialByWeek } from "../data/bossTrials";
 import type { AchievementDefinition } from "../data/achievements";
 import type { BossTrialId } from "../data/bossTrials";
@@ -37,6 +39,9 @@ type FloatingProps = {
   pendingTrial: BossTrialId | null;
   onCompleteBossTrial: () => void;
   onSkipBossTrial: () => void;
+  pendingBossDefeat: BossDefinition | null;
+  bossDefeatXp: number;
+  onCloseBossDefeat: () => void;
 };
 
 type Props = InlineProps | FloatingProps;
@@ -92,6 +97,13 @@ export default function AppPopups(props: Props) {
         trial={trial}
         onComplete={props.onCompleteBossTrial}
         onSkip={props.onSkipBossTrial}
+      />
+
+      <BossDefeatPopup
+        isOpen={Boolean(props.pendingBossDefeat)}
+        boss={props.pendingBossDefeat}
+        xpReward={props.bossDefeatXp}
+        onClose={props.onCloseBossDefeat}
       />
     </>
   );

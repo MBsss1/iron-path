@@ -8,6 +8,7 @@ import DailyMissionTracker from "./DailyMissionTracker";
 import StreakCalendar from "./StreakCalendar";
 import SeasonProgress from "./SeasonProgress";
 import { getClass } from "../data/classes";
+import { getTitleLabel } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
 import type { DailyMission } from "../hooks/useDailyMissions";
 
@@ -25,6 +26,7 @@ type Props = {
   totalCount: number;
   progress: number;
   streak: number;
+  equippedTitle?: string | null;
 };
 
 export default function HeroScreen({
@@ -41,8 +43,10 @@ export default function HeroScreen({
   totalCount,
   progress,
   streak,
+  equippedTitle,
 }: Props) {
   const classDef = getClass(profile.classId);
+  const titleLabel = getTitleLabel(equippedTitle);
 
   return (
     <>
@@ -57,6 +61,12 @@ export default function HeroScreen({
           <h2 className="text-4xl font-black mt-6">LEVEL {level}</h2>
 
           <p className="uppercase tracking-widest mt-2">{getRank(level)}</p>
+
+          {titleLabel && (
+            <p className="mt-2 uppercase text-sm font-black text-[#b22222] tracking-wider">
+              {titleLabel}
+            </p>
+          )}
 
           {classDef && (
             <div className="mt-4 w-full border-2 border-black p-4 bg-[#e8d8b0] text-center">

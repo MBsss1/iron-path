@@ -1,7 +1,6 @@
 "use client";
 
 import OnboardingScreen from "./components/OnboardingScreen";
-import DevPanel from "./components/DevPanel";
 import { useState, useEffect, useCallback } from "react";
 import { user } from "./data/user";
 import { useProfile } from "./hooks/useProfile";
@@ -15,6 +14,7 @@ import NutritionScreen from "./components/NutritionScreen";
 import ProgressScreen from "./components/ProgressScreen";
 import AchievementsScreen from "./components/AchievementsScreen";
 import MoreScreen from "./components/MoreScreen";
+import SettingsScreen from "./components/SettingsScreen";
 import StrengthTrackerScreen from "./components/StrengthTrackerScreen";
 import { getWorkoutXp } from "./data/xpRewards";
 import { useDailyMissions } from "./hooks/useDailyMissions";
@@ -36,14 +36,14 @@ import {
   hapticAchievement,
 } from "./utils/haptics";
 
-const MORE_SUB_SCREENS = ["progress", "achievements", "strength", "legacy"];
+const MORE_SUB_SCREENS = ["progress", "achievements", "strength", "legacy", "settings"];
 
 function getNavActiveScreen(screen: string) {
   return MORE_SUB_SCREENS.includes(screen) ? "more" : screen;
 }
 
 export default function Home() {
-  const { profile } = useProfile();
+  const { profile, clearProfile } = useProfile();
   const [screen, setScreen] = useState("hero");
   const [showPopup, setShowPopup] = useState(false);
   const [lastXpReward, setLastXpReward] = useState(0);
@@ -199,6 +199,12 @@ export default function Home() {
     setShowDailyReward(false);
   };
 
+  const handleResetProgress = () => {
+    resetPlayer();
+    clearProfile();
+    window.location.reload();
+  };
+
   const weekNumber = Number(week);
   const navScreen = getNavActiveScreen(screen);
 
@@ -285,6 +291,7 @@ export default function Home() {
                 onSelectAchievements={() => setScreen("achievements")}
                 onSelectStrength={() => setScreen("strength")}
                 onSelectLegacy={() => setScreen("legacy")}
+                onSelectSettings={() => setScreen("settings")}
                 level={level}
                 rank={getRank(level)}
                 week={weekNumber}
@@ -302,6 +309,13 @@ export default function Home() {
 
             {screen === "legacy" && (
               <LegacyScreen seasons={completedSeasons} />
+            )}
+
+            {screen === "settings" && (
+              <SettingsScreen
+                onClose={() => setScreen("more")}
+                onReset={handleResetProgress}
+              />
             )}
           </ScreenTransition>
 
@@ -340,8 +354,6 @@ export default function Home() {
           xpReward={xpReward}
           onClaim={handleClaimDailyReward}
         />
-
-        <DevPanel onReset={resetPlayer} />
 
         <BottomNav screen={navScreen} setScreen={setScreen} />
       </main>

@@ -5,6 +5,7 @@ type Props = {
   onSelectAchievements: () => void;
   onSelectStrength?: () => void;
   onSelectLegacy?: () => void;
+  onSelectSettings?: () => void;
   level: number;
   rank: string;
   week: number;
@@ -20,6 +21,7 @@ export default function MoreScreen({
   onSelectAchievements,
   onSelectStrength,
   onSelectLegacy,
+  onSelectSettings,
   level,
   rank,
   week,
@@ -113,6 +115,17 @@ export default function MoreScreen({
           <h3 className="text-3xl font-black uppercase mt-3">💪 Strength</h3>
 
           <p className="mt-3 text-sm uppercase text-black">Track push-ups, pull-ups, dips, runs and weight</p>
+        </button>
+
+        <button
+          onClick={onSelectSettings}
+          className="w-full border-4 border-black p-6 bg-black text-[#efe3c2] hover:bg-[#333] transition-colors"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">App Settings</p>
+
+          <h3 className="text-3xl font-black uppercase mt-3">⚙ Settings</h3>
+
+          <p className="mt-3 text-sm uppercase">Reset progress and manage your data</p>
         </button>
       </div>
     </div>

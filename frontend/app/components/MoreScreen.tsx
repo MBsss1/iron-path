@@ -1,8 +1,18 @@
+import ShareProgressCard from "./ShareProgressCard";
+
 type Props = {
   onSelectProgress: () => void;
   onSelectAchievements: () => void;
   onSelectStrength?: () => void;
   onSelectLegacy?: () => void;
+  level: number;
+  rank: string;
+  week: number;
+  phase: string;
+  streak: number;
+  body: number;
+  mind: number;
+  work: number;
 };
 
 export default function MoreScreen({
@@ -10,6 +20,14 @@ export default function MoreScreen({
   onSelectAchievements,
   onSelectStrength,
   onSelectLegacy,
+  level,
+  rank,
+  week,
+  phase,
+  streak,
+  body,
+  mind,
+  work,
 }: Props) {
   return (
     <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-2xl mb-24">
@@ -25,6 +43,19 @@ export default function MoreScreen({
         <p className="mt-2 uppercase text-sm">
           Additional options and records
         </p>
+      </div>
+
+      <div className="mt-8">
+        <ShareProgressCard
+          level={level}
+          rank={rank}
+          week={week}
+          phase={phase}
+          streak={streak}
+          body={body}
+          mind={mind}
+          work={work}
+        />
       </div>
 
       <div className="mt-8 space-y-4">

@@ -285,6 +285,14 @@ export default function Home() {
                 onSelectAchievements={() => setScreen("achievements")}
                 onSelectStrength={() => setScreen("strength")}
                 onSelectLegacy={() => setScreen("legacy")}
+                level={level}
+                rank={getRank(level)}
+                week={weekNumber}
+                phase={program.phase}
+                streak={user.streak}
+                body={body}
+                mind={mind}
+                work={work}
               />
             )}
 

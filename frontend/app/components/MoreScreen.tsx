@@ -1,0 +1,89 @@
+type Props = {
+  onSelectProgress: () => void;
+  onSelectAchievements: () => void;
+  onSelectStrength?: () => void;
+  onSelectLegacy?: () => void;
+};
+
+export default function MoreScreen({
+  onSelectProgress,
+  onSelectAchievements,
+  onSelectStrength,
+  onSelectLegacy,
+}: Props) {
+  return (
+    <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-2xl mb-24">
+      <div className="text-center">
+        <p className="uppercase tracking-[0.2em] text-sm font-bold">
+          Menu
+        </p>
+
+        <h2 className="text-4xl font-black uppercase mt-2">
+          More
+        </h2>
+
+        <p className="mt-2 uppercase text-sm">
+          Additional options and records
+        </p>
+      </div>
+
+      <div className="mt-8 space-y-4">
+        <button
+          onClick={onSelectProgress}
+          className="w-full border-4 border-black p-6 bg-black text-[#efe3c2] hover:bg-[#333] transition-colors"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">
+            View Progress
+          </p>
+
+          <h3 className="text-3xl font-black uppercase mt-3">
+            📊 Progress
+          </h3>
+
+          <p className="mt-3 text-sm uppercase">
+            Track your journey, weeks, and XP milestones
+          </p>
+        </button>
+
+        <button
+          onClick={onSelectLegacy}
+          className="w-full border-4 border-black p-6 bg-[#efe3c2] hover:bg-[#e6dcc0] transition-colors"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">Legacy</p>
+
+          <h3 className="text-3xl font-black uppercase mt-3">🏺 Legacy</h3>
+
+          <p className="mt-3 text-sm uppercase text-black">View completed seasons and records</p>
+        </button>
+
+        <button
+          onClick={onSelectAchievements}
+          className="w-full border-4 border-black p-6 bg-[#e8d8b0] hover:bg-[#d4c89a] transition-colors"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">
+            View Achievements
+          </p>
+
+          <h3 className="text-3xl font-black uppercase mt-3">
+            ⭐ Achievements
+          </h3>
+
+          <p className="mt-3 text-sm uppercase text-black">
+            Unlock milestones and unlock your potential
+          </p>
+        </button>
+
+        <button
+          onClick={onSelectStrength}
+          className="w-full border-4 border-black p-6 bg-[#efe3c2] hover:bg-[#e6dcc0] transition-colors"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">Strength Tracker</p>
+
+          <h3 className="text-3xl font-black uppercase mt-3">💪 Strength</h3>
+
+          <p className="mt-3 text-sm uppercase text-black">Track push-ups, pull-ups, dips, runs and weight</p>
+        </button>
+      </div>
+    </div>
+  );
+}

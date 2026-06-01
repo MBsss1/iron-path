@@ -8,6 +8,7 @@ type Props = {
   onSelectSettings?: () => void;
   onSelectProfile?: () => void;
   onSelectStats?: () => void;
+  onSelectSkillTree?: () => void;
   level: number;
   rank: string;
   week: number;
@@ -26,6 +27,7 @@ export default function MoreScreen({
   onSelectSettings,
   onSelectProfile,
   onSelectStats,
+  onSelectSkillTree,
   level,
   rank,
   week,
@@ -141,6 +143,17 @@ export default function MoreScreen({
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">💪 Strength</h3>
 
           <p className="mt-3 text-sm uppercase text-black">Track push-ups, pull-ups, dips, runs and weight</p>
+        </button>
+
+        <button
+          onClick={onSelectSkillTree}
+          className="w-full border-4 border-black p-5 sm:p-6 bg-[#e8d8b0] hover:bg-[#d4c89a] transition-colors min-h-[48px]"
+        >
+          <p className="uppercase tracking-[0.2em] text-sm font-bold">Abilities</p>
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">🌳 Skill Tree</h3>
+          <p className="mt-3 text-sm uppercase text-black">
+            View class skills and unlock progress
+          </p>
         </button>
 
         <button

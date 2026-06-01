@@ -1,3 +1,9 @@
+export const MISSION_XP = {
+  deepWork: 60,
+  protein: 40,
+  sleep: 35,
+} as const;
+
 export function getWorkoutXp(phase: string) {
   if (phase === "Foundation") return 100;
 

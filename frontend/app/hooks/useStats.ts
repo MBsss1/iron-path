@@ -34,18 +34,14 @@ function wasYesterday(dateStr: string) {
   return new Date(dateStr).toDateString() === yesterday.toDateString();
 }
 
-function evaluateLoginStreak(data: StatsData): StatsData {
+function advanceLoginStreakOnClaim(data: StatsData): StatsData {
   const today = getTodayString();
-
-  if (!data.startDate) {
-    return { ...data, startDate: today };
-  }
 
   if (data.lastLoginDate === today) {
     return data;
   }
 
-  let currentLoginStreak = data.currentLoginStreak;
+  let currentLoginStreak: number;
 
   if (!data.lastLoginDate) {
     currentLoginStreak = 1;
@@ -55,39 +51,29 @@ function evaluateLoginStreak(data: StatsData): StatsData {
     currentLoginStreak = 1;
   }
 
-  const longestLoginStreak = Math.max(data.longestLoginStreak, currentLoginStreak);
+  const longestLoginStreak = Math.max(
+    data.longestLoginStreak,
+    currentLoginStreak
+  );
 
   return {
     ...data,
+    startDate: data.startDate ?? today,
     currentLoginStreak,
     longestLoginStreak,
     lastLoginDate: today,
   };
 }
 
-export function useStats(level: number, profileLoaded: boolean) {
+export function useStats(level: number) {
   const [stats, setStats] = useState<StatsData>(DEFAULT_STATS);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const saved = safeGet<StatsData | null>(STORAGE_KEYS.stats, null);
-    const initial = saved ?? DEFAULT_STATS;
-    setStats(initial);
+    setStats(saved ?? DEFAULT_STATS);
     setLoaded(true);
   }, []);
-
-  useEffect(() => {
-    if (!loaded || !profileLoaded) return;
-
-    setStats((current) => {
-      const evaluated = evaluateLoginStreak(current);
-      const withLevel = {
-        ...evaluated,
-        highestLevel: Math.max(evaluated.highestLevel, level),
-      };
-      return withLevel;
-    });
-  }, [loaded, profileLoaded, level]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -110,11 +96,7 @@ export function useStats(level: number, profileLoaded: boolean) {
   }, []);
 
   const recordDailyClaim = useCallback(() => {
-    setStats((current) => {
-      const today = getTodayString();
-      if (current.lastLoginDate === today) return current;
-      return evaluateLoginStreak(current);
-    });
+    setStats((current) => advanceLoginStreakOnClaim(current));
   }, []);
 
   const daysSinceStart = stats.startDate

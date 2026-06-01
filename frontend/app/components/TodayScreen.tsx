@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ClassId } from "../data/classes";
+import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
+import { applyClassXpBonus } from "../utils/classBonuses";
 
 type Props = {
   program: any;
+  classId?: ClassId | string | null;
+  level: number;
   onCompleteDeepWork: () => void;
   onCompleteProtein: () => void;
   onCompleteSleep: () => void;
@@ -11,11 +16,31 @@ type Props = {
 
 export default function TodayScreen({
   program,
+  classId,
+  level,
   onCompleteDeepWork,
   onCompleteProtein,
   onCompleteSleep,
 }: Props) {
   const [completed, setCompleted] = useState<string[]>([]);
+
+  const deepWorkXp = useMemo(
+    () => applyClassXpBonus(MISSION_XP.deepWork, classId, "deepWork", level),
+    [classId, level]
+  );
+  const proteinXp = useMemo(
+    () => applyClassXpBonus(MISSION_XP.protein, classId, "mission", level),
+    [classId, level]
+  );
+  const sleepXp = useMemo(
+    () => applyClassXpBonus(MISSION_XP.sleep, classId, "mission", level),
+    [classId, level]
+  );
+  const workoutXp = useMemo(
+    () =>
+      applyClassXpBonus(getWorkoutXp(program.phase), classId, "workout", level),
+    [program.phase, classId, level]
+  );
 
   const completeTask = (task: string, action: () => void) => {
     if (completed.includes(task)) return;
@@ -53,7 +78,7 @@ export default function TodayScreen({
               ? "✓ Deep Work 2 Hours"
               : "Deep Work 2 Hours"}
           </span>
-          <span>+60 XP</span>
+          <span>+{deepWorkXp} XP</span>
         </button>
 
         {program.workouts?.map((workout: string, index: number) => (
@@ -62,7 +87,7 @@ export default function TodayScreen({
             className="border-2 border-black p-4 bg-[#e8d8b0] flex justify-between uppercase font-bold"
           >
             <span>{workout}</span>
-            <span>+120 XP</span>
+            <span>+{workoutXp} XP</span>
           </div>
         ))}
 
@@ -76,7 +101,7 @@ export default function TodayScreen({
               ? "✓ Protein Target"
               : "Protein Target"}
           </span>
-          <span>+40 XP</span>
+          <span>+{proteinXp} XP</span>
         </button>
 
         <button
@@ -89,7 +114,7 @@ export default function TodayScreen({
               ? "✓ Sleep Before 00:30"
               : "Sleep Before 00:30"}
           </span>
-          <span>+35 XP</span>
+          <span>+{sleepXp} XP</span>
         </button>
       </div>
     </div>

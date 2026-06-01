@@ -1,21 +1,30 @@
 import { getNextMission } from "../data/workoutPlans";
 import { getWorkoutXp } from "../data/xpRewards";
+import type { ClassId } from "../data/classes";
+import { applyClassXpBonus } from "../utils/classBonuses";
+
 type Props = {
   onCompleteWorkout: () => void;
   onCompleteWeek: () => void;
   program: any;
+  classId?: ClassId | string | null;
+  level: number;
 };
 
 export default function TrainingScreen({
   onCompleteWorkout,
   onCompleteWeek,
   program,
+  classId,
+  level,
 }: Props) {
-  const mission = getNextMission(
-  program.goal,
-  program.phase
-);
-const workoutXp = getWorkoutXp(program.phase);
+  const mission = getNextMission(program.goal, program.phase);
+  const workoutXp = applyClassXpBonus(
+    getWorkoutXp(program.phase),
+    classId,
+    "workout",
+    level
+  );
 
   return (
     <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
@@ -31,7 +40,6 @@ const workoutXp = getWorkoutXp(program.phase);
         <p className="mt-2 uppercase text-sm">
           Week {program.week} / 24
         </p>
-        
 
         <p className="mt-4 uppercase text-sm font-bold">
           {program.focus}
@@ -42,28 +50,28 @@ const workoutXp = getWorkoutXp(program.phase);
         <h3 className="text-2xl font-black uppercase">
           This Week
         </h3>
-<div className="mt-4 space-y-3 text-sm uppercase font-bold">
-  {program.workouts?.map((workout: string, index: number) => (
-    <div
-      key={index}
-      className="flex justify-between border-b border-black pb-2"
-    >
-      <span>{workout}</span>
-      <span>+120 XP</span>
-    </div>
-  ))}
+        <div className="mt-4 space-y-3 text-sm uppercase font-bold">
+          {program.workouts?.map((workout: string, index: number) => (
+            <div
+              key={index}
+              className="flex justify-between border-b border-black pb-2"
+            >
+              <span>{workout}</span>
+              <span>+{workoutXp} XP</span>
+            </div>
+          ))}
 
-  <div className="flex justify-between pt-2">
-    <span>Strength Days</span>
-    <span>{program.strengthDays}</span>
-  </div>
+          <div className="flex justify-between pt-2">
+            <span>Strength Days</span>
+            <span>{program.strengthDays}</span>
+          </div>
 
-  <div className="flex justify-between">
-    <span>Run Days</span>
-    <span>{program.runDays}</span>
-  </div>
-</div>
-</div>
+          <div className="flex justify-between">
+            <span>Run Days</span>
+            <span>{program.runDays}</span>
+          </div>
+        </div>
+      </div>
 
       <div className="mt-6 border-2 border-black p-4 bg-black text-[#efe3c2]">
         <p className="uppercase text-sm tracking-[0.2em]">
@@ -74,13 +82,13 @@ const workoutXp = getWorkoutXp(program.phase);
           {mission.title}
         </h3>
         <div className="mt-3 border-2 border-[#efe3c2] px-3 py-2 inline-block">
-  <p className="uppercase text-xs tracking-widest">
-    Mission Reward
-  </p>
-  <p className="text-xl font-black text-[#b22222]">
-    +{workoutXp} XP
-  </p>
-</div>
+          <p className="uppercase text-xs tracking-widest">
+            Mission Reward
+          </p>
+          <p className="text-xl font-black text-[#b22222]">
+            +{workoutXp} XP
+          </p>
+        </div>
 
         <div className="mt-4 space-y-3 text-sm uppercase">
           {mission.exercises.map(([name, value]) => (

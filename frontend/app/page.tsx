@@ -1,7 +1,7 @@
 "use client";
 
 import OnboardingScreen from "./components/OnboardingScreen";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { user } from "./data/user";
 import { useProfile } from "./hooks/useProfile";
 import { generateProgram } from "./data/programGenerator";
@@ -17,8 +17,15 @@ import MoreScreen from "./components/MoreScreen";
 import SettingsScreen from "./components/SettingsScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import StatsScreen from "./components/StatsScreen";
+import ClassSelectionScreen from "./components/ClassSelectionScreen";
+import SkillTreeScreen from "./components/SkillTreeScreen";
 import StrengthTrackerScreen from "./components/StrengthTrackerScreen";
-import { getWorkoutXp } from "./data/xpRewards";
+import type { ClassId } from "./data/classes";
+import {
+  applyClassXpBonus,
+  applyClassLevelUpBonus,
+} from "./utils/classBonuses";
+import { getWorkoutXp, MISSION_XP } from "./data/xpRewards";
 import { useDailyMissions } from "./hooks/useDailyMissions";
 import { useBossTrials } from "./hooks/useBossTrials";
 import { getBossTrialByWeek } from "./data/bossTrials";
@@ -49,6 +56,7 @@ const MORE_SUB_SCREENS = [
   "settings",
   "profile",
   "stats",
+  "skilltree",
 ];
 
 function getNavActiveScreen(screen: string) {
@@ -57,6 +65,7 @@ function getNavActiveScreen(screen: string) {
 
 export default function Home() {
   const { profile, saveProfile, clearProfile } = useProfile();
+  const classId = profile?.classId;
   const [screen, setScreen] = useState("hero");
   const [showPopup, setShowPopup] = useState(false);
   const [lastXpReward, setLastXpReward] = useState(0);
@@ -64,6 +73,7 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [xpFloat, setXpFloat] = useState<number | null>(null);
   const [showDailyReward, setShowDailyReward] = useState(false);
+  const levelUpBonusApplied = useRef(false);
 
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
@@ -125,7 +135,7 @@ export default function Home() {
   const { canClaim, rewardDay, xpReward, claimReward } = useDailyRewards();
 
   const { stats, daysSinceStart, recordMissionComplete, recordDailyClaim } =
-    useStats(level, Boolean(profile));
+    useStats(level);
 
   const achievementProgressInput = useMemo(
     () => ({
@@ -182,17 +192,17 @@ export default function Home() {
       const trial = getBossTrialByWeek(Number(week));
 
       if (trial) {
-        addXp(trial.xpReward);
+        addXp(applyClassXpBonus(trial.xpReward, classId, "all", level));
         completeTrial(pendingTrial);
       }
     }
-  }, [pendingTrial, week, addXp, completeTrial]);
+  }, [pendingTrial, week, addXp, completeTrial, classId, level]);
 
   const handleClaimSeason = useCallback(() => {
     const already = completedSeasons.some((s) => s.week === 24);
     if (already) return;
 
-    addXp(1000);
+    addXp(applyClassXpBonus(1000, classId, "all", level));
     addBody(5);
     addMind(5);
     addWork(5);
@@ -214,10 +224,16 @@ export default function Home() {
     completeSeason,
     xp,
     level,
+    classId,
   ]);
 
   const completeWorkout = useCallback(() => {
-    const reward = getWorkoutXp(program.phase);
+    const reward = applyClassXpBonus(
+      getWorkoutXp(program.phase),
+      classId,
+      "workout",
+      level
+    );
 
     setLastXpReward(reward);
     addXp(reward);
@@ -228,44 +244,57 @@ export default function Home() {
     recordMissionComplete();
     setShowPopup(true);
     hapticWorkout();
-  }, [program.phase, addXp, addBody, addMind, recordWorkout, completeMission, recordMissionComplete]);
+  }, [
+    program.phase,
+    classId,
+    level,
+    addXp,
+    addBody,
+    addMind,
+    recordWorkout,
+    completeMission,
+    recordMissionComplete,
+  ]);
 
   const completeDeepWork = useCallback(() => {
-    addXp(60);
+    const reward = applyClassXpBonus(MISSION_XP.deepWork, classId, "deepWork", level);
+    addXp(reward);
     addWork(1);
     completeMission("deepwork");
     recordMissionComplete();
-    setXpFloat(60);
+    setXpFloat(reward);
     hapticMission();
-  }, [addXp, addWork, completeMission, recordMissionComplete]);
+  }, [classId, level, addXp, addWork, completeMission, recordMissionComplete]);
 
   const completeProtein = useCallback(() => {
-    addXp(40);
+    const reward = applyClassXpBonus(MISSION_XP.protein, classId, "mission", level);
+    addXp(reward);
     addBody(1);
     completeMission("protein");
     recordMissionComplete();
-    setXpFloat(40);
+    setXpFloat(reward);
     hapticMission();
-  }, [addXp, addBody, completeMission, recordMissionComplete]);
+  }, [classId, level, addXp, addBody, completeMission, recordMissionComplete]);
 
   const completeSleep = useCallback(() => {
-    addXp(35);
+    const reward = applyClassXpBonus(MISSION_XP.sleep, classId, "mission", level);
+    addXp(reward);
     addMind(1);
     completeMission("sleep");
     recordMissionComplete();
-    setXpFloat(35);
+    setXpFloat(reward);
     hapticMission();
-  }, [addXp, addMind, completeMission, recordMissionComplete]);
+  }, [classId, level, addXp, addMind, completeMission, recordMissionComplete]);
 
   const handleClaimDailyReward = useCallback(() => {
     const reward = claimReward();
     if (reward > 0) {
-      addXp(reward);
+      addXp(applyClassXpBonus(reward, classId, "all", level));
       recordDailyClaim();
       hapticMission();
     }
     setShowDailyReward(false);
-  }, [claimReward, addXp, recordDailyClaim]);
+  }, [claimReward, addXp, classId, level, recordDailyClaim]);
 
   const handleResetProgress = useCallback(() => {
     resetPlayer();
@@ -278,6 +307,28 @@ export default function Home() {
   const navScreen = getNavActiveScreen(screen);
   const rank = useMemo(() => getRank(level), [level]);
   const loginStreak = stats.currentLoginStreak;
+
+  const handleConfirmClass = useCallback(
+    (selectedClassId: ClassId) => {
+      if (!profile) return;
+      saveProfile({
+        ...profile,
+        classId: selectedClassId,
+        classChangedAt: null,
+      });
+    },
+    [profile, saveProfile]
+  );
+
+  useEffect(() => {
+    if (leveledUp && classId && !levelUpBonusApplied.current) {
+      applyClassLevelUpBonus(classId, addBody, addMind, addWork);
+      levelUpBonusApplied.current = true;
+    }
+    if (!leveledUp) {
+      levelUpBonusApplied.current = false;
+    }
+  }, [leveledUp, classId, addBody, addMind, addWork]);
 
   return (
     <>
@@ -303,8 +354,12 @@ export default function Home() {
             <OnboardingScreen onFinish={() => window.location.reload()} />
           )}
 
+          {profile && !profile.classId && (
+            <ClassSelectionScreen onConfirm={handleConfirmClass} />
+          )}
+
           <ScreenTransition screen={screen}>
-            {profile && screen === "hero" && (
+            {profile && profile.classId && screen === "hero" && (
               <HeroScreen
                 profile={profile}
                 level={level}
@@ -322,9 +377,11 @@ export default function Home() {
               />
             )}
 
-            {profile && screen === "today" && (
+            {profile && profile.classId && screen === "today" && (
               <TodayScreen
                 program={program}
+                classId={classId}
+                level={level}
                 onCompleteDeepWork={completeDeepWork}
                 onCompleteProtein={completeProtein}
                 onCompleteSleep={completeSleep}
@@ -334,6 +391,8 @@ export default function Home() {
             {screen === "training" && (
               <TrainingScreen
                 program={program}
+                classId={classId}
+                level={level}
                 onCompleteWorkout={completeWorkout}
                 onCompleteWeek={() => {
                   nextWeek();
@@ -373,6 +432,7 @@ export default function Home() {
                 onSelectSettings={() => setScreen("settings")}
                 onSelectProfile={() => setScreen("profile")}
                 onSelectStats={() => setScreen("stats")}
+                onSelectSkillTree={() => setScreen("skilltree")}
                 level={level}
                 rank={rank}
                 week={weekNumber}
@@ -416,6 +476,14 @@ export default function Home() {
 
             {screen === "legacy" && (
               <LegacyScreen seasons={completedSeasons} />
+            )}
+
+            {screen === "skilltree" && profile?.classId && (
+              <SkillTreeScreen
+                classId={profile.classId}
+                level={level}
+                onClose={() => setScreen("more")}
+              />
             )}
 
             {screen === "settings" && (

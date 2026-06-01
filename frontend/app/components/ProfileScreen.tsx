@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { AVATAR_OPTIONS } from "../data/avatar";
+import { CLASSES, type ClassId } from "../data/classes";
 import type { Profile } from "../hooks/useProfile";
+import { canChangeClass, daysUntilClassChange } from "../utils/classBonuses";
+import ClassCard from "./ClassCard";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
 import IronButton from "./IronButton";
@@ -27,9 +30,19 @@ export default function ProfileScreen({
   const [experience, setExperience] = useState(profile.experience);
   const [watchType, setWatchType] = useState(profile.watchType);
   const [avatarId, setAvatarId] = useState(profile.avatarId ?? "rookie");
+  const [classId, setClassId] = useState<ClassId>(
+    profile.classId ?? "warrior"
+  );
+
+  const classChangeAllowed = canChangeClass(profile.classChangedAt);
+  const daysRemaining = daysUntilClassChange(profile.classChangedAt);
 
   const handleSave = () => {
-    onSave({
+    const finalClassId = classChangeAllowed
+      ? classId
+      : (profile.classId ?? classId);
+
+    const nextProfile: Profile = {
       age,
       height,
       weight,
@@ -37,7 +50,15 @@ export default function ProfileScreen({
       experience,
       watchType,
       avatarId,
-    });
+      classId: finalClassId,
+      classChangedAt: profile.classChangedAt,
+    };
+
+    if (finalClassId !== profile.classId && classChangeAllowed) {
+      nextProfile.classChangedAt = new Date().toISOString();
+    }
+
+    onSave(nextProfile);
     onClose();
   };
 
@@ -86,6 +107,30 @@ export default function ProfileScreen({
               </button>
             );
           })}
+        </div>
+      </IronCard>
+
+      <IronCard variant="paper">
+        <p className="uppercase text-xs font-bold tracking-widest mb-3">
+          Class
+        </p>
+        {!classChangeAllowed && (
+          <p className="text-xs uppercase font-bold mb-3 text-[#b22222]">
+            Class change available in {daysRemaining} day
+            {daysRemaining === 1 ? "" : "s"}
+          </p>
+        )}
+        <div className="space-y-3">
+          {CLASSES.map((classDef) => (
+            <ClassCard
+              key={classDef.id}
+              classDef={classDef}
+              selected={classId === classDef.id}
+              onSelect={() => {
+                if (classChangeAllowed) setClassId(classDef.id);
+              }}
+            />
+          ))}
         </div>
       </IronCard>
 

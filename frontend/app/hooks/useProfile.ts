@@ -5,6 +5,8 @@ import { safeSet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 import { migrateProfile, saveVersionedProfile } from "../utils/migrations";
 
+import type { ClassId } from "../data/classes";
+
 export type Profile = {
   age: string;
   height: string;
@@ -13,6 +15,8 @@ export type Profile = {
   experience: string;
   watchType: string;
   avatarId?: string;
+  classId?: ClassId;
+  classChangedAt?: string | null;
 };
 
 export function useProfile() {

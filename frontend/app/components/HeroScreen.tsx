@@ -7,6 +7,7 @@ import { user } from "../data/user";
 import DailyMissionTracker from "./DailyMissionTracker";
 import StreakCalendar from "./StreakCalendar";
 import SeasonProgress from "./SeasonProgress";
+import { getClass } from "../data/classes";
 import type { Profile } from "../hooks/useProfile";
 import type { DailyMission } from "../hooks/useDailyMissions";
 
@@ -41,6 +42,8 @@ export default function HeroScreen({
   progress,
   streak,
 }: Props) {
+  const classDef = getClass(profile.classId);
+
   return (
     <>
       <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl">
@@ -54,6 +57,31 @@ export default function HeroScreen({
           <h2 className="text-4xl font-black mt-6">LEVEL {level}</h2>
 
           <p className="uppercase tracking-widest mt-2">{getRank(level)}</p>
+
+          {classDef && (
+            <div className="mt-4 w-full border-2 border-black p-4 bg-[#e8d8b0] text-center">
+              <p className="text-xs uppercase tracking-widest font-bold">
+                Class
+              </p>
+              <p className="text-2xl font-black mt-1">
+                <span aria-hidden="true">{classDef.icon}</span> {classDef.name}
+              </p>
+              <p className="text-xs uppercase mt-2 leading-relaxed">
+                {classDef.description}
+              </p>
+              <div className="mt-3 border-t-2 border-black pt-3">
+                <p className="text-xs uppercase font-bold">Class Bonuses</p>
+                <ul className="mt-2 space-y-1">
+                  {classDef.bonusSummary.map((bonus) => (
+                    <li key={bonus} className="text-xs font-black uppercase">
+                      {bonus}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
           <div className="mt-3 w-full grid grid-cols-2 gap-3">
             <div className="border-2 border-black px-4 py-3 bg-[#e8d8b0] text-center">
               <p className="text-xs uppercase font-bold tracking-widest">

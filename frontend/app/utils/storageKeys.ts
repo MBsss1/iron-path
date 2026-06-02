@@ -12,12 +12,12 @@ export const STORAGE_KEYS = {
   stats: "iron-path-stats",
 } as const;
 
-export function clearAllGameData() {
-  Object.values(STORAGE_KEYS).forEach((key) => {
+export function clearAllGameData(): void {
+  for (const key of Object.values(STORAGE_KEYS)) {
     try {
       localStorage.removeItem(key);
     } catch {
       // ignore
     }
-  });
+  }
 }

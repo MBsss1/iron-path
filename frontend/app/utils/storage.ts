@@ -1,18 +1,20 @@
 export function safeGet<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
-    if (raw === null) return fallback;
+    if (raw === null) {
+      return fallback;
+    }
     return JSON.parse(raw) as T;
-  } catch (e) {
-    console.warn(`storage.safeGet failed for ${key}`, e);
+  } catch (error) {
+    console.warn(`storage.safeGet failed for ${key}`, error);
     return fallback;
   }
 }
 
-export function safeSet<T>(key: string, value: T) {
+export function safeSet<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.warn(`storage.safeSet failed for ${key}`, e);
+  } catch (error) {
+    console.warn(`storage.safeSet failed for ${key}`, error);
   }
 }

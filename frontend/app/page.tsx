@@ -542,7 +542,9 @@ export default function Home() {
               />
             )}
 
-            {screen === "nutrition" && <NutritionScreen />}
+            {screen === "nutrition" && (
+              <NutritionScreen goal={profile?.goal} />
+            )}
 
             {screen === "progress" && (
               <ProgressScreen

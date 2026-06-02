@@ -1,10 +1,12 @@
 {
   "name": "Iron Path",
   "short_name": "IRON PATH",
+  "description": "Strength, discipline, and progress.",
   "theme_color": "#000000",
   "background_color": "#d8c7a1",
   "display": "standalone",
   "start_url": "/",
+  "scope": "/",
   "icons": [
     {
       "src": "/icons/icon-192.png",

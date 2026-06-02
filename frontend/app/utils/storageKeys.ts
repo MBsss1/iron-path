@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   achievements: "iron-path-achievements",
   dailyRewards: "iron-path-daily-rewards",
   dailyMissions: "iron-path-daily-missions",
+  nutritionMissions: "iron-path-nutrition-missions",
   bossTrials: "iron-path-boss-trials",
   bossV2: "iron-path-boss-v2",
   seasons: "iron-path-seasons",

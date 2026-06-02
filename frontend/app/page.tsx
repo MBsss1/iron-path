@@ -51,7 +51,14 @@ import {
   hapticAchievement,
   hapticBossDefeat,
 } from "./utils/haptics";
-import { telegramExpand, telegramReady } from "./utils/telegram";
+import {
+  applyTelegramTheme,
+  configureTelegramBackButton,
+  getTelegramBackButtonTarget,
+  subscribeTelegramThemeChange,
+  telegramExpand,
+  telegramReady,
+} from "./utils/telegram";
 
 const MORE_SUB_SCREENS = [
   "progress",
@@ -86,10 +93,35 @@ export default function Home() {
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
   const goBackToMore = useCallback(() => setScreen("more"), []);
 
+  const appReady = Boolean(profile?.classId);
+
   useEffect(() => {
     telegramReady();
     telegramExpand();
+    applyTelegramTheme();
+    const unsubscribeTheme = subscribeTelegramThemeChange();
+    return unsubscribeTheme;
   }, []);
+
+  const handleTelegramBack = useCallback(() => {
+    const target = getTelegramBackButtonTarget(screen, MORE_SUB_SCREENS);
+    if (target === "more") {
+      setScreen("more");
+      return;
+    }
+    if (target === "hero") {
+      setScreen("hero");
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    const visible =
+      appReady && getTelegramBackButtonTarget(screen, MORE_SUB_SCREENS) !== null;
+    return configureTelegramBackButton({
+      visible,
+      onClick: handleTelegramBack,
+    });
+  }, [appReady, screen, handleTelegramBack]);
 
   const {
     xp,

@@ -82,8 +82,7 @@ export default function HeroScreen({
   const bossRequirementMet = bossProgressPercent >= 100;
   const isMaxRank = nextRankEn === "MAX RANK";
   const isNewUser = workoutCount === 0;
-  const hasDayProgress = completedCount > 0;
-  const showNextReward = hasDayProgress || xp > 0 || level > 1;
+  const showNextReward = workoutCount > 0 || xp > 0;
   const showBossBlock = workoutCount > 0;
   const phaseLabel = translatePhase(program.phase, t);
   const bossProgressLabel = currentBoss

@@ -16,7 +16,7 @@ const ru = {
   nav: {
     ariaLabel: "Главная навигация",
     home: "Главная",
-    today: "Сегодня",
+    today: "День",
     train: "Тренинг",
     food: "Питание",
     more: "Ещё",
@@ -161,6 +161,11 @@ const ru = {
     proteinDone: "✓ Норма белка",
     sleep: "Сон до 00:30",
     sleepDone: "✓ Сон до 00:30",
+    workoutHint: "Тренировка записывается во вкладке Тренинг",
+    goToTraining: "Перейти к тренировке",
+    workoutPlanTitle: "План на неделю",
+    workoutPlanNote: "Отметка — во вкладке Тренинг",
+    workoutPlanDone: "Тренировка записана сегодня",
   },
   training: {
     currentPhase: "Текущая фаза",
@@ -171,6 +176,7 @@ const ru = {
     nextSession: "Следующая сессия",
     reward: "Награда",
     logWorkout: "Записать тренировку",
+    logWorkoutReward: "+{{xp}} опыта за запись",
     completeWeek: "Завершить неделю",
   },
   nutrition: {

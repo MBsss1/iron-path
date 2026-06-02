@@ -41,11 +41,24 @@ export default function TrainingScreen({
         <p className="mt-2 text-sm text-iron-muted">
           {t("training.week", { week: program.week })}
         </p>
-        <p className="mt-4 text-sm font-semibold text-iron-text">{program.focus}</p>
       </div>
 
-      <div className="mt-8 border border-iron-border p-4 bg-iron-raised">
+      <section className="mt-6 border border-iron-accent-dim/50 bg-iron-panel p-4 rounded-sm">
+        <p className="text-xs text-iron-muted text-center mb-3">
+          {t("training.logWorkoutReward", { xp: workoutXp })}
+        </p>
+        <button
+          type="button"
+          onClick={onCompleteWorkout}
+          className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[56px] rounded-sm"
+        >
+          {t("training.logWorkout")}
+        </button>
+      </section>
+
+      <div className="mt-6 border border-iron-border p-4 bg-iron-raised rounded-sm">
         <h3 className="iron-heading text-xl">{t("training.thisWeek")}</h3>
+        <p className="text-sm text-iron-muted mt-2">{program.focus}</p>
         <div className="mt-4 space-y-3 text-sm font-medium text-iron-text">
           {program.workouts?.map((workout: string, index: number) => (
             <div
@@ -53,31 +66,24 @@ export default function TrainingScreen({
               className="flex justify-between border-b border-iron-border pb-2"
             >
               <span>{workout}</span>
-              <span>+{workoutXp} {t("common.xp")}</span>
             </div>
           ))}
 
-          <div className="flex justify-between pt-2">
+          <div className="flex justify-between pt-2 text-iron-muted">
             <span>{t("training.strengthDays")}</span>
             <span>{program.strengthDays}</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between text-iron-muted">
             <span>{t("training.runDays")}</span>
             <span>{program.runDays}</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 border border-iron-border p-4 iron-card-panel">
+      <div className="mt-4 border border-iron-border p-4 iron-card-panel rounded-sm">
         <p className="iron-label">{t("training.nextSession")}</p>
-        <h3 className="iron-heading text-2xl mt-2">{mission.title}</h3>
-        <div className="mt-3 border border-iron-border px-3 py-2 inline-block">
-          <p className="text-xs text-iron-muted">{t("training.reward")}</p>
-          <p className="text-xl font-semibold iron-text-accent">
-            +{workoutXp} {t("common.xp")}
-          </p>
-        </div>
+        <h3 className="iron-heading text-xl mt-2">{mission.title}</h3>
 
         <div className="mt-4 space-y-3 text-sm">
           {mission.exercises.map(([name, value]) => (
@@ -91,15 +97,8 @@ export default function TrainingScreen({
 
       <button
         type="button"
-        onClick={onCompleteWorkout}
-        className="iron-interactive iron-btn-primary w-full mt-6 py-4 text-sm font-semibold min-h-[52px] rounded-sm"
-      >
-        {t("training.logWorkout")}
-      </button>
-      <button
-        type="button"
         onClick={onCompleteWeek}
-        className="iron-interactive iron-btn-secondary w-full mt-4 py-4 text-sm font-semibold min-h-[52px] rounded-sm"
+        className="iron-interactive iron-btn-secondary w-full mt-4 py-3 text-sm font-semibold rounded-sm"
       >
         {t("training.completeWeek")}
       </button>

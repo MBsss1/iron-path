@@ -642,6 +642,7 @@ function HomeContent() {
                 onCompleteDeepWork={completeDeepWork}
                 onCompleteProtein={completeProtein}
                 onCompleteSleep={completeSleep}
+                onGoToTraining={handleStartTraining}
               />
             )}
 

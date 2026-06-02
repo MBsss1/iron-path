@@ -161,6 +161,11 @@ const en = {
     proteinDone: "✓ Protein Target",
     sleep: "Sleep Before 00:30",
     sleepDone: "✓ Sleep Before 00:30",
+    workoutHint: "Log your workout on the Training tab",
+    goToTraining: "Go to training",
+    workoutPlanTitle: "This week's plan",
+    workoutPlanNote: "Mark complete on Training",
+    workoutPlanDone: "Workout logged today",
   },
   training: {
     currentPhase: "Current phase",
@@ -170,7 +175,8 @@ const en = {
     runDays: "Run days",
     nextSession: "Next session",
     reward: "Reward",
-    logWorkout: "Log workout complete",
+    logWorkout: "Log workout",
+    logWorkoutReward: "+{{xp}} XP when logged",
     completeWeek: "Complete week",
   },
   nutrition: {

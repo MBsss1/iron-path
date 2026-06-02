@@ -66,14 +66,11 @@ function advanceLoginStreakOnClaim(data: StatsData): StatsData {
 }
 
 export function useStats(level: number) {
-  const [stats, setStats] = useState<StatsData>(DEFAULT_STATS);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    const saved = safeGet<StatsData | null>(STORAGE_KEYS.stats, null);
-    setStats(saved ?? DEFAULT_STATS);
-    setLoaded(true);
-  }, []);
+  const [stats, setStats] = useState<StatsData>(() =>
+    safeGet<StatsData | null>(STORAGE_KEYS.stats, null) ?? DEFAULT_STATS
+  );
+  const loaded = true;
+  const [nowMs] = useState(() => Date.now());
 
   useEffect(() => {
     if (!loaded) return;
@@ -82,10 +79,12 @@ export function useStats(level: number) {
 
   useEffect(() => {
     if (!loaded) return;
-    setStats((current) => ({
-      ...current,
-      highestLevel: Math.max(current.highestLevel, level),
-    }));
+    queueMicrotask(() => {
+      setStats((current) => ({
+        ...current,
+        highestLevel: Math.max(current.highestLevel, level),
+      }));
+    });
   }, [level, loaded]);
 
   const recordMissionComplete = useCallback(() => {
@@ -103,7 +102,7 @@ export function useStats(level: number) {
     ? Math.max(
         0,
         Math.floor(
-          (Date.now() - new Date(stats.startDate).getTime()) /
+          (nowMs - new Date(stats.startDate).getTime()) /
             (1000 * 60 * 60 * 24)
         )
       )

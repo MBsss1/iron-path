@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { safeGet, safeSet } from "../utils/storage";
+import { STORAGE_KEYS } from "../utils/storageKeys";
 
 export type SeasonRecord = {
   id: number;
@@ -13,16 +14,13 @@ export type SeasonRecord = {
 };
 
 export function useSeasons() {
-  const [completedSeasons, setCompletedSeasons] = useState<SeasonRecord[]>([]);
+  const [completedSeasons, setCompletedSeasons] = useState<SeasonRecord[]>(() =>
+    safeGet(STORAGE_KEYS.seasons, [] as SeasonRecord[])
+  );
   const [pendingSeasonComplete, setPendingSeasonComplete] = useState<boolean>(false);
 
   useEffect(() => {
-    const saved = safeGet("iron-path-seasons", [] as SeasonRecord[]);
-    if (saved) setCompletedSeasons(saved);
-  }, []);
-
-  useEffect(() => {
-    safeSet("iron-path-seasons", completedSeasons);
+    safeSet(STORAGE_KEYS.seasons, completedSeasons);
   }, [completedSeasons]);
 
   const checkForSeasonComplete = (week: number) => {

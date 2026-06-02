@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { safeGet, safeSet } from "../utils/storage";
+import { STORAGE_KEYS } from "../utils/storageKeys";
 
 export type StrengthData = {
   pushUps: number;
@@ -26,10 +27,12 @@ const DEFAULT: StrengthData = {
 };
 
 export function useStrengthTracker() {
-  const [data, setData] = useState<StrengthData>(() => safeGet("iron-path-strength", DEFAULT));
+  const [data, setData] = useState<StrengthData>(() =>
+    safeGet(STORAGE_KEYS.strength, DEFAULT)
+  );
 
   useEffect(() => {
-    safeSet("iron-path-strength", data);
+    safeSet(STORAGE_KEYS.strength, data);
   }, [data]);
 
   const updateMetric = (metric: keyof StrengthData, value: number) => {
@@ -67,7 +70,7 @@ export function useStrengthTracker() {
 
   const reset = () => {
     setData(DEFAULT);
-    safeSet("iron-path-strength", DEFAULT);
+    safeSet(STORAGE_KEYS.strength, DEFAULT);
   };
 
   return { data, updateMetric, reset } as const;

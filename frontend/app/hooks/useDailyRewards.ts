@@ -48,26 +48,15 @@ export function getRewardXpForDay(day: number) {
 }
 
 export function useDailyRewards() {
-  const [data, setData] = useState<DailyRewardsData>({
-    lastClaimDate: null,
-    currentStreak: 1,
-  });
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
+  const [data, setData] = useState<DailyRewardsData>(() => {
     const saved = safeGet<DailyRewardsData | null>(STORAGE_KEY, null);
     const initial: DailyRewardsData = saved ?? {
       lastClaimDate: null,
       currentStreak: 1,
     };
-    const evaluated = evaluateStreak(initial);
-
-    setData(evaluated);
-    if (JSON.stringify(evaluated) !== JSON.stringify(saved)) {
-      safeSet(STORAGE_KEY, evaluated);
-    }
-    setLoaded(true);
-  }, []);
+    return evaluateStreak(initial);
+  });
+  const loaded = true;
 
   useEffect(() => {
     if (!loaded) return;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { STORAGE_KEYS } from "../utils/storageKeys";
 
 type Props = {
   onFinish: () => void;
@@ -17,7 +18,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
 
   const saveProfile = () => {
     localStorage.setItem(
-      "iron-path-profile",
+      STORAGE_KEYS.profile,
       JSON.stringify({
         age,
         height,

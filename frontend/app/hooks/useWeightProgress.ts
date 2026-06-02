@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { safeGet, safeSet } from "../utils/storage";
+import { STORAGE_KEYS } from "../utils/storageKeys";
 import { useProfile } from "./useProfile";
 
 export type WeightEntry = {
@@ -27,13 +28,13 @@ export function useWeightProgress() {
     if (Number.isNaN(profileWeight)) return;
 
     const saved = safeGet<WeightProgressData | null>(
-      "iron-path-weight-progress",
+      STORAGE_KEYS.weightProgress,
       null
     );
 
     if (saved && saved.startWeight && saved.history) {
       // Use saved data
-      setData(saved);
+      queueMicrotask(() => setData(saved));
     } else {
       // Initialize from profile weight
       const today = new Date().toISOString().split("T")[0];
@@ -48,8 +49,8 @@ export function useWeightProgress() {
           },
         ],
       };
-      safeSet("iron-path-weight-progress", initialized);
-      setData(initialized);
+      safeSet(STORAGE_KEYS.weightProgress, initialized);
+      queueMicrotask(() => setData(initialized));
     }
   }, [profile]);
 
@@ -69,7 +70,7 @@ export function useWeightProgress() {
           : [...data.history, { date: today, weight: newWeight }],
     };
 
-    safeSet("iron-path-weight-progress", updated);
+    safeSet(STORAGE_KEYS.weightProgress, updated);
     setData(updated);
   };
 
@@ -81,7 +82,7 @@ export function useWeightProgress() {
       targetWeight: target,
     };
 
-    safeSet("iron-path-weight-progress", updated);
+    safeSet(STORAGE_KEYS.weightProgress, updated);
     setData(updated);
   };
 
@@ -104,7 +105,7 @@ export function useWeightProgress() {
       ],
     };
 
-    safeSet("iron-path-weight-progress", initialized);
+    safeSet(STORAGE_KEYS.weightProgress, initialized);
     setData(initialized);
   };
 

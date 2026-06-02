@@ -24,7 +24,9 @@ export function useProfile() {
 
   useEffect(() => {
     const migrated = migrateProfile();
-    if (migrated) setProfile(migrated);
+    if (migrated) {
+      queueMicrotask(() => setProfile(migrated));
+    }
   }, []);
 
   const saveProfile = (profile: Profile) => {

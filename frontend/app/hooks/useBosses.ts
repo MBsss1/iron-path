@@ -33,14 +33,11 @@ const DEFAULT_SAVE: BossSaveData = {
 };
 
 export function useBosses() {
-  const [save, setSave] = useState<BossSaveData>(DEFAULT_SAVE);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
+  const [save, setSave] = useState<BossSaveData>(() => {
     const stored = safeGet<BossSaveData | null>(STORAGE_KEYS.bossV2, null);
-    setSave(stored ? { ...DEFAULT_SAVE, ...stored } : DEFAULT_SAVE);
-    setLoaded(true);
-  }, []);
+    return stored ? { ...DEFAULT_SAVE, ...stored } : DEFAULT_SAVE;
+  });
+  const loaded = true;
 
   useEffect(() => {
     if (!loaded) return;

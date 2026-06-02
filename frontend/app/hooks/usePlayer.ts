@@ -52,24 +52,28 @@ export function usePlayer() {
   useEffect(() => {
     const player = safeGet<Partial<PlayerData> | null>(STORAGE_KEYS.player, null);
     if (player) {
-      setXp(player.xp ?? DEFAULT_PLAYER.xp);
-      setLevel(player.level ?? DEFAULT_PLAYER.level);
-      setWeek(player.week ?? DEFAULT_PLAYER.week);
-      setBody(player.body ?? DEFAULT_PLAYER.body);
-      setMind(player.mind ?? DEFAULT_PLAYER.mind);
-      setWork(player.work ?? DEFAULT_PLAYER.work);
-      setTotalXp(player.totalXp ?? player.xp ?? DEFAULT_PLAYER.totalXp);
-      setWorkoutCount(player.workoutCount ?? DEFAULT_PLAYER.workoutCount);
-      setHighestLevel(
-        player.highestLevel ?? player.level ?? DEFAULT_PLAYER.highestLevel
-      );
+      queueMicrotask(() => {
+        setXp(player.xp ?? DEFAULT_PLAYER.xp);
+        setLevel(player.level ?? DEFAULT_PLAYER.level);
+        setWeek(player.week ?? DEFAULT_PLAYER.week);
+        setBody(player.body ?? DEFAULT_PLAYER.body);
+        setMind(player.mind ?? DEFAULT_PLAYER.mind);
+        setWork(player.work ?? DEFAULT_PLAYER.work);
+        setTotalXp(player.totalXp ?? player.xp ?? DEFAULT_PLAYER.totalXp);
+        setWorkoutCount(player.workoutCount ?? DEFAULT_PLAYER.workoutCount);
+        setHighestLevel(
+          player.highestLevel ?? player.level ?? DEFAULT_PLAYER.highestLevel
+        );
+      });
     }
 
     const savedAchievements = safeGet<AchievementId[] | null>(
       STORAGE_KEYS.achievements,
       null
     );
-    if (savedAchievements) setAchievementsUnlocked(savedAchievements);
+    if (savedAchievements) {
+      queueMicrotask(() => setAchievementsUnlocked(savedAchievements));
+    }
   }, []);
 
   const addMind = (amount: number) => {
@@ -127,7 +131,9 @@ export function usePlayer() {
   );
 
   useEffect(() => {
-    setHighestLevel((current) => Math.max(current, level));
+    queueMicrotask(() => {
+      setHighestLevel((current) => Math.max(current, level));
+    });
   }, [level]);
 
   useEffect(() => {

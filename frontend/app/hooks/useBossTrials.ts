@@ -3,22 +3,17 @@
 import { useEffect, useState } from "react";
 import { safeGet, safeSet } from "../utils/storage";
 import { BossTrialId, getAvailableTrial } from "../data/bossTrials";
+import { STORAGE_KEYS } from "../utils/storageKeys";
 
 export function useBossTrials() {
-  const [completedTrials, setCompletedTrials] = useState<BossTrialId[]>([]);
+  const [completedTrials, setCompletedTrials] = useState<BossTrialId[]>(() =>
+    safeGet(STORAGE_KEYS.bossTrials, [] as BossTrialId[])
+  );
   const [pendingTrial, setPendingTrial] = useState<BossTrialId | null>(null);
-
-  // Load completed trials from localStorage
-  useEffect(() => {
-    const saved = safeGet("iron-path-boss-trials", [] as BossTrialId[]);
-    if (saved) {
-      setCompletedTrials(saved);
-    }
-  }, []);
 
   // Save to localStorage whenever completed trials change
   useEffect(() => {
-    safeSet("iron-path-boss-trials", completedTrials);
+    safeSet(STORAGE_KEYS.bossTrials, completedTrials);
   }, [completedTrials]);
 
   const completeTrial = (trialId: BossTrialId) => {

@@ -11,32 +11,23 @@ export type DailyMission = {
 };
 
 export function useDailyMissions() {
-  const [missions, setMissions] = useState<DailyMission[]>([
-    { id: "workout", name: "Workout", completed: false },
-    { id: "deepwork", name: "Deep Work", completed: false },
-    { id: "protein", name: "Protein", completed: false },
-    { id: "sleep", name: "Sleep", completed: false },
-  ]);
-
-  // Load from localStorage on mount
-  useEffect(() => {
+  const [missions, setMissions] = useState<DailyMission[]>(() => {
+    const defaults: DailyMission[] = [
+      { id: "workout", name: "Workout", completed: false },
+      { id: "deepwork", name: "Deep Work", completed: false },
+      { id: "protein", name: "Protein", completed: false },
+      { id: "sleep", name: "Sleep", completed: false },
+    ];
     const saved = safeGet<{ date: string; missions: DailyMission[] } | null>(
       STORAGE_KEYS.dailyMissions,
       null
     );
-
     const today = new Date().toDateString();
-
-    if (saved?.date && saved.missions) {
-      if (saved.date !== today) {
-        safeSet(STORAGE_KEYS.dailyMissions, { date: today, missions });
-      } else {
-        setMissions(saved.missions);
-      }
-    } else {
-      safeSet(STORAGE_KEYS.dailyMissions, { date: today, missions });
+    if (saved?.date === today && saved.missions) {
+      return saved.missions;
     }
-  }, []);
+    return defaults;
+  });
 
   useEffect(() => {
     const today = new Date().toDateString();

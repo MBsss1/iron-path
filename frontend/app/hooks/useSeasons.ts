@@ -14,14 +14,16 @@ export type SeasonRecord = {
 };
 
 export function useSeasons() {
-  const [completedSeasons, setCompletedSeasons] = useState<SeasonRecord[]>(() =>
-    safeGet(STORAGE_KEYS.seasons, [] as SeasonRecord[])
-  );
+  const [completedSeasons, setCompletedSeasons] = useState<SeasonRecord[]>([]);
   const [pendingSeasonComplete, setPendingSeasonComplete] = useState<boolean>(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const stored = safeGet(STORAGE_KEYS.seasons, [] as SeasonRecord[]);
+    queueMicrotask(() => {
+      setCompletedSeasons(stored);
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {

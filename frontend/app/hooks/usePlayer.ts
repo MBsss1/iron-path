@@ -62,26 +62,35 @@ function loadStoredPlayerSnapshot(): StoredPlayerSnapshot {
 }
 
 export function usePlayer() {
-  const [snapshot] = useState(loadStoredPlayerSnapshot);
-
-  const [xp, setXp] = useState(snapshot.player.xp);
-  const [level, setLevel] = useState(snapshot.player.level);
-  const [week, setWeek] = useState(snapshot.player.week);
-  const [body, setBody] = useState(snapshot.player.body);
+  const [xp, setXp] = useState(DEFAULT_PLAYER.xp);
+  const [level, setLevel] = useState(DEFAULT_PLAYER.level);
+  const [week, setWeek] = useState(DEFAULT_PLAYER.week);
+  const [body, setBody] = useState(DEFAULT_PLAYER.body);
   const [leveledUp, setLeveledUp] = useState(false);
-  const [mind, setMind] = useState(snapshot.player.mind);
-  const [work, setWork] = useState(snapshot.player.work);
-  const [totalXp, setTotalXp] = useState(snapshot.player.totalXp);
-  const [workoutCount, setWorkoutCount] = useState(snapshot.player.workoutCount);
-  const [highestLevel, setHighestLevel] = useState(snapshot.player.highestLevel);
-  const [achievementsUnlocked, setAchievementsUnlocked] = useState<AchievementId[]>(
-    snapshot.achievements
-  );
+  const [mind, setMind] = useState(DEFAULT_PLAYER.mind);
+  const [work, setWork] = useState(DEFAULT_PLAYER.work);
+  const [totalXp, setTotalXp] = useState(DEFAULT_PLAYER.totalXp);
+  const [workoutCount, setWorkoutCount] = useState(DEFAULT_PLAYER.workoutCount);
+  const [highestLevel, setHighestLevel] = useState(DEFAULT_PLAYER.highestLevel);
+  const [achievementsUnlocked, setAchievementsUnlocked] = useState<AchievementId[]>([]);
   const [pendingAchievement, setPendingAchievement] = useState<AchievementDefinition | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const { player, achievements } = loadStoredPlayerSnapshot();
+    queueMicrotask(() => {
+      setXp(player.xp);
+      setLevel(player.level);
+      setWeek(player.week);
+      setBody(player.body);
+      setMind(player.mind);
+      setWork(player.work);
+      setTotalXp(player.totalXp);
+      setWorkoutCount(player.workoutCount);
+      setHighestLevel(player.highestLevel);
+      setAchievementsUnlocked(achievements);
+      setLoaded(true);
+    });
   }, []);
 
   const addMind = (amount: number) => {

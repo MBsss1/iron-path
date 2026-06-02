@@ -27,13 +27,15 @@ const DEFAULT: StrengthData = {
 };
 
 export function useStrengthTracker() {
-  const [data, setData] = useState<StrengthData>(() =>
-    safeGet(STORAGE_KEYS.strength, DEFAULT)
-  );
+  const [data, setData] = useState<StrengthData>(DEFAULT);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const stored = safeGet(STORAGE_KEYS.strength, DEFAULT);
+    queueMicrotask(() => {
+      setData(stored);
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {

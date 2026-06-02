@@ -32,11 +32,15 @@ function loadDailyMissions(): DailyMission[] {
 }
 
 export function useDailyMissions() {
-  const [missions, setMissions] = useState<DailyMission[]>(loadDailyMissions);
+  const [missions, setMissions] = useState<DailyMission[]>(DEFAULT_MISSIONS);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const stored = loadDailyMissions();
+    queueMicrotask(() => {
+      setMissions(stored);
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {

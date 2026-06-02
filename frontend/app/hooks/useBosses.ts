@@ -38,11 +38,15 @@ function loadBossSave(): BossSaveData {
 }
 
 export function useBosses() {
-  const [save, setSave] = useState<BossSaveData>(loadBossSave);
+  const [save, setSave] = useState<BossSaveData>(DEFAULT_SAVE);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const stored = loadBossSave();
+    queueMicrotask(() => {
+      setSave(stored);
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {

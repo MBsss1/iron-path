@@ -6,14 +6,16 @@ import { BossTrialId, getAvailableTrial } from "../data/bossTrials";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 
 export function useBossTrials() {
-  const [completedTrials, setCompletedTrials] = useState<BossTrialId[]>(() =>
-    safeGet(STORAGE_KEYS.bossTrials, [] as BossTrialId[])
-  );
+  const [completedTrials, setCompletedTrials] = useState<BossTrialId[]>([]);
   const [pendingTrial, setPendingTrial] = useState<BossTrialId | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const stored = safeGet(STORAGE_KEYS.bossTrials, [] as BossTrialId[]);
+    queueMicrotask(() => {
+      setCompletedTrials(stored);
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {

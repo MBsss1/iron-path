@@ -1,4 +1,8 @@
 export function safeGet<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
   try {
     const raw = localStorage.getItem(key);
     if (raw === null) {
@@ -12,6 +16,10 @@ export function safeGet<T>(key: string, fallback: T): T {
 }
 
 export function safeSet<T>(key: string, value: T): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {

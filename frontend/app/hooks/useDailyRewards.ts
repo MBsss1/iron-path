@@ -54,12 +54,21 @@ export function getRewardXpForDay(day: number) {
   return DAILY_REWARD_XP[index];
 }
 
+const INITIAL_DAILY_REWARDS: DailyRewardsData = {
+  lastClaimDate: null,
+  currentStreak: 1,
+};
+
 export function useDailyRewards() {
-  const [data, setData] = useState<DailyRewardsData>(loadDailyRewards);
+  const [data, setData] = useState<DailyRewardsData>(INITIAL_DAILY_REWARDS);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const stored = loadDailyRewards();
+    queueMicrotask(() => {
+      setData(stored);
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {

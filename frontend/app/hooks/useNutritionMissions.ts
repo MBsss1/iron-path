@@ -38,11 +38,15 @@ function loadNutritionMissions(): NutritionMission[] {
 }
 
 export function useNutritionMissions() {
-  const [missions, setMissions] = useState<NutritionMission[]>(loadNutritionMissions);
+  const [missions, setMissions] = useState<NutritionMission[]>(DEFAULT_MISSIONS);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    queueMicrotask(() => setLoaded(true));
+    const stored = loadNutritionMissions();
+    queueMicrotask(() => {
+      setMissions(stored);
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {

@@ -33,39 +33,13 @@ type Props = {
 };
 
 function formatGoal(goal?: string) {
-  if (!goal) return "—";
+  if (!goal) return "Not set";
   return goal.replace(/_/g, " ");
 }
 
-function getMissionIcon(id: DailyMission["id"]) {
-  switch (id) {
-    case "workout":
-      return "💪";
-    case "deepwork":
-      return "🧠";
-    case "protein":
-      return "🍖";
-    case "sleep":
-      return "😴";
-    default:
-      return "•";
-  }
-}
-
-function getXpMotivation(xp: number, maxXp: number, level: number) {
-  const remaining = maxXp - xp;
-  const pct = maxXp > 0 ? Math.round((xp / maxXp) * 100) : 0;
-
-  if (remaining <= 0) {
-    return "Level up is within reach — finish strong today.";
-  }
-  if (pct >= 75) {
-    return `Only ${remaining} XP to Level ${level + 1}. One more mission.`;
-  }
-  if (pct >= 40) {
-    return "Steady grind. Stack XP before the day ends.";
-  }
-  return "Start with Today — small wins compound.";
+function getMissionShortName(name: string) {
+  if (name === "Deep Work") return "Deep work";
+  return name.toLowerCase();
 }
 
 export default function HeroScreen({
@@ -96,181 +70,149 @@ export default function HeroScreen({
   const rank = getRank(level);
   const nextRank = getNextRank(level);
   const xpPercent = maxXp > 0 ? Math.min(100, Math.round((xp / maxXp) * 100)) : 0;
-  const seasonPercent = Math.min(100, Math.round((week / 24) * 100));
   const allMissionsDone = totalCount > 0 && completedCount >= totalCount;
+  const bossRequirementMet = bossProgressPercent >= 100;
 
   return (
-    <div className="mt-6 sm:mt-8 border-4 border-black p-4 sm:p-5 bg-[#f5ead0] shadow-2xl mb-6 space-y-4">
-      {/* 1. Compact Character Identity */}
-      <section className="flex gap-4 items-start">
+    <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 iron-stagger space-y-3">
+      {/* 1. Character identity */}
+      <section className="flex gap-3 items-center border-b border-iron-border pb-3">
         <img
           src={getAvatar(level, profile.avatarId)}
-          alt="Avatar"
-          className="w-24 h-32 sm:w-28 sm:h-36 object-cover border-4 border-black shrink-0"
+          alt=""
+          className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
         />
-
-        <div className="flex-1 min-w-0 pt-1">
-          <h2 className="text-2xl sm:text-3xl font-black leading-none">
-            LEVEL {level}
+        <div className="flex-1 min-w-0">
+          <p className="iron-label">Operator</p>
+          <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
+            Level {level} · {rank}
           </h2>
-          <p className="uppercase tracking-widest text-sm font-bold mt-1">
-            {rank}
-          </p>
           {titleLabel && (
-            <p className="mt-1 uppercase text-xs font-black text-[#b22222] tracking-wider truncate">
-              {titleLabel}
-            </p>
+            <p className="text-sm text-iron-accent mt-0.5 truncate">{titleLabel}</p>
           )}
           {classDef && (
-            <p className="mt-2 text-sm font-black uppercase truncate">
-              <span aria-hidden="true">{classDef.icon}</span> {classDef.name}
+            <p className="text-sm text-iron-muted mt-0.5">
+              {classDef.name} · Body {body} · Mind {mind} · Work {work}
             </p>
           )}
+          <p className="text-xs text-iron-muted mt-1">
+            {streak} day streak · Week {week} of 24
+          </p>
         </div>
       </section>
 
-      {/* 2. Next Reward Card */}
-      <section className="border-2 border-black p-4 bg-[#e8d8b0]">
-        <div className="flex justify-between items-center gap-2">
-          <h3 className="text-sm font-black uppercase">Next Reward</h3>
-          <span className="text-xs font-bold uppercase shrink-0">
-            {xp} / {maxXp} XP
-          </span>
-        </div>
-
-        <div className="w-full h-4 border-2 border-black mt-3 bg-[#f5ead0]">
-          <div
-            className="h-full bg-[#b22222] transition-all duration-500"
-            style={{ width: `${xpPercent}%` }}
-          />
-        </div>
-
-        <p className="mt-2 text-xs uppercase font-bold">
-          {nextRank === "MAX RANK"
-            ? `Level ${level} · Max rank achieved`
-            : `Next rank · ${nextRank} at Level ${level + 1}`}
-        </p>
-
-        <p className="mt-2 text-xs leading-relaxed normal-case font-bold text-black/80">
-          {getXpMotivation(xp, maxXp, level)}
-        </p>
-      </section>
-
-      {/* 3. Daily Progress Card */}
-      <section className="border-2 border-black p-4 bg-black text-[#efe3c2]">
-        <div className="flex justify-between items-center gap-2">
-          <h3 className="text-sm font-black uppercase">Daily Progress</h3>
-          <span className="text-xs font-bold uppercase">
+      {/* 2. Daily progress */}
+      <section className="iron-card-raised p-3">
+        <div className="flex justify-between items-baseline gap-2">
+          <h3 className="iron-heading text-sm">Today&apos;s discipline</h3>
+          <span className="text-xs text-iron-muted">
             {completedCount} / {totalCount}
           </span>
         </div>
 
-        <div className="w-full h-3 border-2 border-[#efe3c2] mt-3 bg-[#333]">
+        <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
           <div
-            className="h-full bg-[#b22222] transition-all duration-300"
+            className="h-full iron-progress-fill"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-iron-muted">
           {missions.map((mission) => (
-            <span
-              key={mission.id}
-              className={`inline-flex items-center gap-1 border-2 px-2 py-1 text-[10px] sm:text-xs font-black uppercase ${
-                mission.completed
-                  ? "border-[#b22222] bg-[#b22222] text-[#efe3c2]"
-                  : "border-[#efe3c2]/50 bg-transparent text-[#efe3c2]/80"
-              }`}
-            >
-              <span aria-hidden="true">{getMissionIcon(mission.id)}</span>
-              {mission.name}
-            </span>
+            <li key={mission.id} className="flex items-center gap-1.5 min-w-0">
+              <span className={mission.completed ? "text-iron-accent" : "text-iron-border-strong"}>
+                {mission.completed ? "✓" : "□"}
+              </span>
+              <span className="truncate">{getMissionShortName(mission.name)}</span>
+            </li>
           ))}
-        </div>
+        </ul>
 
         <button
           type="button"
           onClick={onContinueToday}
-          className="w-full mt-4 border-4 border-[#efe3c2] bg-[#b22222] text-[#efe3c2] py-3 uppercase font-black tracking-widest text-sm transition-transform active:scale-[0.98]"
+          className="iron-interactive iron-btn-primary w-full mt-3 py-2.5 text-sm font-semibold rounded-sm"
         >
-          {allMissionsDone ? "Review Today" : "Continue Today"}
+          {allMissionsDone ? "Review today's log" : "Open today's log"}
         </button>
       </section>
 
-      {/* 4. Current Boss Card */}
-      <section className="border-2 border-black p-4 bg-[#e8d8b0]">
-        <h3 className="text-sm font-black uppercase">Current Boss</h3>
+      {/* 3. Next reward */}
+      <section className="iron-card-surface p-3">
+        <div className="flex justify-between items-baseline gap-2">
+          <h3 className="iron-heading text-sm">Next reward</h3>
+          <span className="text-xs text-iron-muted">
+            {xp} / {maxXp} xp
+          </span>
+        </div>
+        <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
+          <div
+            className="h-full iron-progress-fill"
+            style={{ width: `${xpPercent}%` }}
+          />
+        </div>
+        <p className="text-xs text-iron-muted mt-2">
+          {nextRank === "MAX RANK"
+            ? `Maximum rank held at level ${level}.`
+            : `Next rank: ${nextRank} at level ${level + 1}.`}
+        </p>
+      </section>
+
+      {/* 4. Current boss — target dossier */}
+      <section className="iron-dossier p-3">
+        <p className="iron-label text-iron-danger">Target dossier</p>
 
         {allBossesDefeated ? (
-          <p className="mt-3 text-sm font-black uppercase text-[#b22222]">
-            All bosses defeated
+          <p className="text-sm text-iron-muted mt-2">
+            All targets cleared. Maintain the standard.
           </p>
         ) : currentBoss ? (
           <>
-            <p className="mt-2 text-xl font-black uppercase">{currentBoss.name}</p>
-            <p className="mt-1 text-xs leading-relaxed">{currentBoss.description}</p>
-
-            <div className="mt-3">
-              <div className="flex justify-between text-xs font-bold uppercase gap-2">
-                <span className="truncate">{bossProgressLabel}</span>
-                <span className="shrink-0">{bossProgressPercent}%</span>
-              </div>
-              <div className="w-full h-3 border-2 border-black mt-2 bg-[#f5ead0]">
+            <h3 className="iron-heading text-lg mt-1 text-iron-text">{currentBoss.name}</h3>
+            <p className="text-xs text-iron-muted mt-1 leading-relaxed">
+              {currentBoss.description}
+            </p>
+            <div className="mt-3 border-t border-iron-border pt-2">
+              <p className="iron-label mb-1.5">Requirements</p>
+              <p className="text-sm flex items-start gap-2">
+                <span className="text-iron-danger shrink-0">
+                  {bossRequirementMet ? "✓" : "□"}
+                </span>
+                <span>{currentBoss.requirement.label}</span>
+              </p>
+              <p className="text-xs text-iron-muted mt-1 pl-5">{bossProgressLabel}</p>
+              <div className="w-full h-1.5 iron-progress-track mt-2 overflow-hidden">
                 <div
-                  className="h-full bg-[#b22222] transition-all duration-500"
+                  className="h-full iron-progress-fill iron-progress-fill-danger"
                   style={{ width: `${bossProgressPercent}%` }}
                 />
               </div>
             </div>
           </>
         ) : (
-          <p className="mt-3 text-xs font-bold uppercase text-black/70">
-            Train and level up to unlock the next boss.
+          <p className="text-sm text-iron-muted mt-2">
+            No active target. Continue training to unlock the next dossier.
           </p>
         )}
 
         <button
           type="button"
           onClick={onViewBoss}
-          className="w-full mt-4 border-2 border-black bg-black text-[#efe3c2] py-2.5 uppercase font-black text-xs tracking-wider transition-transform active:scale-[0.98]"
+          className="iron-interactive iron-btn-secondary w-full mt-3 py-2 text-xs font-semibold rounded-sm"
         >
-          View Boss
+          Open dossier file
         </button>
       </section>
 
-      {/* 5. Current Goal compact */}
-      <section className="border-2 border-black px-4 py-3 bg-black text-[#efe3c2]">
-        <p className="text-xs uppercase font-bold tracking-widest">Current Goal</p>
-        <p className="mt-1 text-sm font-black uppercase">
-          {formatGoal(profile.goal)} · {program.phase}
-        </p>
-        <p className="mt-1 text-xs uppercase font-bold text-[#efe3c2]/80">
-          Week {week} / 24
-        </p>
-      </section>
-
-      {/* 6. Collapsed lower info */}
-      <section className="border-2 border-black px-4 py-3 bg-[#e8d8b0] text-center space-y-2">
-        <p className="text-xs font-black uppercase tracking-wide">
-          Body {body} · Mind {mind} · Work {work}
-        </p>
-        <p className="text-xs font-bold uppercase">
-          Streak · {streak} {streak === 1 ? "day" : "days"}
-        </p>
+      {/* 5. Current goal */}
+      <section className="iron-card-panel px-3 py-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
         <div>
-          <div className="flex justify-between text-[10px] font-black uppercase">
-            <span>Season path</span>
-            <span>
-              Week {week}/24 · {seasonPercent}%
-            </span>
-          </div>
-          <div className="w-full h-2 border border-black mt-1 bg-[#f5ead0]">
-            <div
-              className="h-full bg-[#b22222]"
-              style={{ width: `${seasonPercent}%` }}
-            />
-          </div>
+          <p className="iron-label">Current objective</p>
+          <p className="text-iron-text mt-0.5">
+            {formatGoal(profile.goal)} · {program.phase}
+          </p>
         </div>
+        <p className="text-xs text-iron-muted">Season week {week}/24</p>
       </section>
     </div>
   );

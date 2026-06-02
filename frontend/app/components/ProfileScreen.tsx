@@ -72,7 +72,7 @@ export default function ProfileScreen({
   };
 
   const inputClass =
-    "w-full border-2 border-black p-3 bg-white min-h-[48px] text-base";
+    "w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] text-base";
 
   return (
     <ScreenShell
@@ -96,18 +96,18 @@ export default function ProfileScreen({
                 type="button"
                 disabled={locked}
                 onClick={() => setAvatarId(option.id)}
-                className={`border-2 border-black p-2 text-center transition-transform active:scale-95 min-h-[44px] ${
+                className={`border border-iron-border p-2 text-center transition-transform active:scale-95 min-h-[44px] ${
                   selected
-                    ? "bg-[#b22222] text-[#efe3c2]"
+                    ? "bg-iron-accent-dim text-iron-bg border-iron-accent"
                     : locked
-                      ? "bg-gray-300 opacity-60"
-                      : "bg-[#f5ead0]"
+                      ? "bg-iron-charcoal opacity-60 text-iron-muted"
+                      : "iron-card-raised text-iron-text"
                 }`}
               >
                 <img
                   src={option.src}
                   alt={option.label}
-                  className="w-full h-20 object-cover border-2 border-black mb-2"
+                  className="w-full h-20 object-cover border border-iron-border mb-2"
                 />
                 <p className="text-xs font-black uppercase">{option.label}</p>
                 {locked && (
@@ -124,7 +124,7 @@ export default function ProfileScreen({
           Class
         </p>
         {!classChangeAllowed && (
-          <p className="text-xs uppercase font-bold mb-3 text-[#b22222]">
+          <p className="iron-label mb-3">
             Class change available in {daysRemaining} day
             {daysRemaining === 1 ? "" : "s"}
           </p>
@@ -148,7 +148,7 @@ export default function ProfileScreen({
           Title
         </p>
         {equippedTitle && (
-          <p className="text-center text-lg font-black uppercase text-[#b22222] mb-3">
+          <p className="text-center text-lg font-semibold iron-text-accent mb-3">
             {getTitleLabel(equippedTitle)}
           </p>
         )}
@@ -161,8 +161,8 @@ export default function ProfileScreen({
             <button
               type="button"
               onClick={() => onEquipTitle(null)}
-              className={`w-full border-2 border-[#efe3c2] p-2 uppercase text-xs font-bold ${
-                !equippedTitle ? "bg-[#b22222]" : "bg-transparent"
+              className={`w-full border border-iron-border p-2 uppercase text-xs font-bold ${
+                !equippedTitle ? "bg-iron-accent-dim text-iron-bg" : "bg-transparent text-iron-text"
               }`}
             >
               No Title
@@ -172,8 +172,8 @@ export default function ProfileScreen({
                 key={titleId}
                 type="button"
                 onClick={() => onEquipTitle(titleId)}
-                className={`w-full border-2 border-[#efe3c2] p-2 uppercase text-xs font-bold ${
-                  equippedTitle === titleId ? "bg-[#b22222]" : "bg-transparent"
+                className={`w-full border border-iron-border p-2 uppercase text-xs font-bold ${
+                  equippedTitle === titleId ? "bg-iron-accent-dim text-iron-bg" : "bg-transparent text-iron-text"
                 }`}
               >
                 {getTitleLabel(titleId)}
@@ -182,13 +182,13 @@ export default function ProfileScreen({
           </div>
         )}
         {defeatedBadges.length > 0 && (
-          <div className="mt-4 border-t-2 border-[#efe3c2]/30 pt-3">
+          <div className="mt-4 border-t border-iron-border pt-3">
             <p className="uppercase text-xs font-bold mb-2">Boss Badges</p>
             <div className="flex flex-wrap gap-2">
               {defeatedBadges.map((badge) => (
                 <span
                   key={badge}
-                  className="border-2 border-[#efe3c2] px-2 py-1 text-[10px] font-black uppercase"
+                  className="border border-iron-border px-2 py-1 text-[10px] font-black uppercase text-iron-cream"
                 >
                   {getBadgeLabel(badge)}
                 </span>

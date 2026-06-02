@@ -16,31 +16,29 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
   };
 
   return (
-    <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-2xl mb-24">
+    <div className="mt-10 iron-shell-card p-6 mb-24">
       <div className="flex items-start justify-between gap-4">
         <div className="text-center flex-1">
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">Options</p>
-          <h2 className="text-4xl font-black uppercase mt-2">Settings</h2>
-          <p className="mt-2 uppercase text-sm">App preferences and data</p>
+          <p className="iron-label">Options</p>
+          <h2 className="iron-heading text-3xl mt-2">Settings</h2>
+          <p className="mt-2 text-sm text-iron-muted">App preferences and data</p>
         </div>
 
         <button
           type="button"
           onClick={onBack}
-          className="border-4 border-black px-4 py-2 bg-black text-[#efe3c2] uppercase text-xs font-black shrink-0 transition-transform active:scale-95"
+          className="border border-iron-border-strong px-4 py-2 bg-iron-panel text-iron-cream uppercase text-xs font-black shrink-0 transition-transform active:scale-95"
         >
           Back
         </button>
       </div>
 
-      <div className="mt-8 border-4 border-black bg-[#e8d8b0] p-5">
-        <p className="uppercase tracking-[0.2em] text-sm font-bold text-[#b22222]">
-          Danger Zone
-        </p>
+      <div className="mt-8 border border-iron-border-strong iron-card-raised p-5">
+        <p className="iron-label text-iron-danger">Danger zone</p>
 
-        <h3 className="text-2xl font-black uppercase mt-3">Reset Progress</h3>
+        <h3 className="iron-heading text-xl mt-3">Reset progress</h3>
 
-        <p className="mt-3 uppercase text-sm leading-relaxed">
+        <p className="mt-3 text-sm leading-relaxed text-iron-muted">
           Clears your profile, XP, level, week, stats, and all saved progress.
           This cannot be undone.
         </p>
@@ -49,13 +47,13 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
           <button
             type="button"
             onClick={() => setConfirming(true)}
-            className="w-full mt-5 bg-black text-[#efe3c2] border-4 border-[#b22222] py-3 uppercase font-black transition-transform active:scale-[0.98]"
+            className="w-full mt-5 iron-interactive iron-btn-secondary py-3 text-sm font-semibold rounded-sm border-iron-danger"
           >
             Reset Progress
           </button>
         ) : (
-          <div className="mt-5 border-4 border-black bg-[#f5ead0] p-4">
-            <p className="uppercase text-sm font-bold text-center">
+          <div className="mt-5 border border-iron-border iron-card-panel p-4">
+            <p className="uppercase text-sm font-bold text-center text-iron-cream">
               Are you sure? All progress will be lost.
             </p>
 
@@ -63,7 +61,7 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
               <button
                 type="button"
                 onClick={() => setConfirming(false)}
-                className="border-4 border-black py-3 uppercase font-black bg-[#e8d8b0] transition-transform active:scale-[0.98]"
+                className="border border-iron-border py-3 uppercase font-black iron-card-raised text-iron-text transition-transform active:scale-[0.98]"
               >
                 Cancel
               </button>
@@ -71,7 +69,7 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
               <button
                 type="button"
                 onClick={handleConfirmReset}
-                className="border-4 border-black py-3 uppercase font-black bg-[#b22222] text-[#efe3c2] transition-transform active:scale-[0.98]"
+                className="iron-interactive iron-btn-danger py-3 text-sm font-semibold rounded-sm"
               >
                 Confirm Reset
               </button>

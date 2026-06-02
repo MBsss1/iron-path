@@ -553,13 +553,13 @@ export default function Home() {
 
       {!showSplash && !storageReady && (
         <div
-          className="fixed inset-0 z-[99] flex items-center justify-center bg-gradient-to-b from-[#d8c7a1] to-[#efe3c2]"
+          className="fixed inset-0 z-[99] flex items-center justify-center iron-page"
           aria-busy="true"
           aria-label="Loading saved progress"
         >
-          <div className="text-center border-4 border-black bg-[#f5ead0] py-8 px-10 shadow-2xl">
-            <p className="text-sm uppercase tracking-[0.3em] font-black">Loading</p>
-            <div className="mt-4 h-1 w-20 mx-auto bg-[#b22222]" />
+          <div className="text-center iron-shell-card py-8 px-10">
+            <p className="iron-label">Loading</p>
+            <div className="mt-4 h-0.5 w-20 mx-auto bg-iron-accent-dim" />
           </div>
         </div>
       )}
@@ -568,16 +568,14 @@ export default function Home() {
         <XpFloatAnimation amount={xpFloat} onDone={clearXpFloat} />
       )}
 
-      <main className="min-h-screen bg-gradient-to-b from-[#d8c7a1] to-[#efe3c2] text-black flex flex-col items-center px-4 sm:px-6 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+      <main className="min-h-screen iron-page flex flex-col items-center px-4 sm:px-6 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <div className="w-full max-w-md">
-          <div className="text-center mt-4 sm:mt-6">
-            <h1 className="text-4xl sm:text-5xl font-black tracking-wide">
-              IRON PATH
+          <div className="text-center mt-4 sm:mt-6 iron-page-header">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-wide text-iron-text">
+              Iron Path
             </h1>
 
-            <p className="text-xs sm:text-sm mt-2 uppercase tracking-[0.2em]">
-              Est. 1950
-            </p>
+            <p className="text-xs sm:text-sm mt-2 iron-page-header-sub">Est. 1950</p>
           </div>
 
           {profileLoaded && !profile && (

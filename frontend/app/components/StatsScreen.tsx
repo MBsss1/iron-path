@@ -23,9 +23,9 @@ type Props = {
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex justify-between items-center border-b border-black/20 pb-3 last:border-0 last:pb-0">
-      <span className="uppercase text-xs sm:text-sm font-bold">{label}</span>
-      <span className="font-black text-lg">{value}</span>
+    <div className="flex justify-between items-center border-b border-iron-border pb-3 last:border-0 last:pb-0">
+      <span className="uppercase text-xs sm:text-sm font-bold text-iron-muted">{label}</span>
+      <span className="font-black text-lg text-iron-cream">{value}</span>
     </div>
   );
 }

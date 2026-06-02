@@ -27,34 +27,26 @@ export default function TrainingScreen({
   );
 
   return (
-    <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
+    <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24">
       <div className="text-center">
-        <p className="uppercase tracking-[0.2em] text-sm font-bold">
-          Current Phase
-        </p>
+        <p className="iron-label">Current phase</p>
 
-        <h2 className="text-4xl font-black uppercase mt-2">
-          {program.phase}
-        </h2>
+        <h2 className="iron-heading text-3xl mt-2">{program.phase}</h2>
 
-        <p className="mt-2 uppercase text-sm">
+        <p className="mt-2 text-sm text-iron-muted">
           Week {program.week} / 24
         </p>
 
-        <p className="mt-4 uppercase text-sm font-bold">
-          {program.focus}
-        </p>
+        <p className="mt-4 text-sm font-semibold text-iron-text">{program.focus}</p>
       </div>
 
-      <div className="mt-8 border-2 border-black p-4 bg-[#e8d8b0]">
-        <h3 className="text-2xl font-black uppercase">
-          This Week
-        </h3>
-        <div className="mt-4 space-y-3 text-sm uppercase font-bold">
+      <div className="mt-8 border border-iron-border p-4 bg-iron-raised">
+        <h3 className="iron-heading text-xl">This week</h3>
+        <div className="mt-4 space-y-3 text-sm font-medium text-iron-text">
           {program.workouts?.map((workout: string, index: number) => (
             <div
               key={index}
-              className="flex justify-between border-b border-black pb-2"
+              className="flex justify-between border-b border-iron-border pb-2"
             >
               <span>{workout}</span>
               <span>+{workoutXp} XP</span>
@@ -73,24 +65,16 @@ export default function TrainingScreen({
         </div>
       </div>
 
-      <div className="mt-6 border-2 border-black p-4 bg-black text-[#efe3c2]">
-        <p className="uppercase text-sm tracking-[0.2em]">
-          Next Mission
-        </p>
+      <div className="mt-6 border border-iron-border p-4 iron-card-panel">
+        <p className="iron-label">Next session</p>
 
-        <h3 className="text-3xl font-black mt-2 uppercase">
-          {mission.title}
-        </h3>
-        <div className="mt-3 border-2 border-[#efe3c2] px-3 py-2 inline-block">
-          <p className="uppercase text-xs tracking-widest">
-            Mission Reward
-          </p>
-          <p className="text-xl font-black text-[#b22222]">
-            +{workoutXp} XP
-          </p>
+        <h3 className="iron-heading text-2xl mt-2">{mission.title}</h3>
+        <div className="mt-3 border border-iron-border px-3 py-2 inline-block">
+          <p className="text-xs text-iron-muted">Reward</p>
+          <p className="text-xl font-semibold iron-text-accent">+{workoutXp} XP</p>
         </div>
 
-        <div className="mt-4 space-y-3 text-sm uppercase">
+        <div className="mt-4 space-y-3 text-sm">
           {mission.exercises.map(([name, value]) => (
             <div key={name} className="flex justify-between">
               <span>{name}</span>
@@ -101,16 +85,18 @@ export default function TrainingScreen({
       </div>
 
       <button
+        type="button"
         onClick={onCompleteWorkout}
-        className="w-full mt-6 bg-[#b22222] text-[#efe3c2] border-4 border-black py-4 uppercase font-black tracking-widest min-h-[52px] transition-transform active:scale-[0.98]"
+        className="iron-interactive iron-btn-primary w-full mt-6 py-4 text-sm font-semibold min-h-[52px] rounded-sm"
       >
-        Complete Workout
+        Log workout complete
       </button>
       <button
+        type="button"
         onClick={onCompleteWeek}
-        className="w-full mt-4 bg-black text-[#efe3c2] border-4 border-[#b22222] py-4 uppercase font-black tracking-widest min-h-[52px] transition-transform active:scale-[0.98]"
+        className="iron-interactive iron-btn-secondary w-full mt-4 py-4 text-sm font-semibold min-h-[52px] rounded-sm"
       >
-        Complete Week
+        Complete week
       </button>
     </div>
   );

@@ -12,8 +12,8 @@ export default function WeightProgressScreen() {
 
   if (!data) {
     return (
-      <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-xl">
-        <p className="text-center uppercase font-bold">Loading weight data...</p>
+      <div className="mt-10 iron-shell-card p-6">
+        <p className="text-center uppercase font-bold text-iron-muted">Loading weight data...</p>
       </div>
     );
   }
@@ -51,50 +51,53 @@ export default function WeightProgressScreen() {
   const diffToTarget = data.targetWeight - data.currentWeight;
   const progressPercent = ((data.currentWeight - data.startWeight) / Math.max(Math.abs(data.targetWeight - data.startWeight), 1)) * 100;
 
+  const inputClass =
+    "w-full p-2 border border-iron-border bg-iron-panel text-iron-text";
+
   return (
     <div className="mt-6 space-y-4">
       {/* Main stats */}
-      <div className="border-4 border-black p-4 bg-black text-[#efe3c2]">
+      <div className="border border-iron-border-strong p-4 iron-card-panel">
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-xs uppercase tracking-widest">Current Weight</p>
-            <p className="text-4xl font-black">{data.currentWeight}</p>
-            <p className="text-sm uppercase mt-1">kg</p>
+            <p className="text-xs uppercase tracking-widest text-iron-gold">Current Weight</p>
+            <p className="text-4xl font-black text-iron-cream">{data.currentWeight}</p>
+            <p className="text-sm uppercase mt-1 text-iron-muted">kg</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-widest">Total Change</p>
+            <p className="text-xs uppercase tracking-widest text-iron-gold">Total Change</p>
             <p className={`text-2xl font-black ${totalChange >= 0 ? "text-green-400" : "text-red-400"}`}>
               {totalChange > 0 ? "+" : ""}{totalChange.toFixed(1)}
             </p>
-            <p className="text-sm uppercase mt-1">kg</p>
+            <p className="text-sm uppercase mt-1 text-iron-muted">kg</p>
           </div>
         </div>
       </div>
 
       {/* Start & Target */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="border-2 border-black p-3 bg-[#e8d8b0]">
-          <p className="text-xs uppercase font-bold">Start Weight</p>
-          <p className="text-2xl font-black">{data.startWeight}</p>
-          <p className="text-xs uppercase">kg</p>
+        <div className="border border-iron-border p-3 iron-card-raised">
+          <p className="text-xs uppercase font-bold text-iron-gold">Start Weight</p>
+          <p className="text-2xl font-black text-iron-text">{data.startWeight}</p>
+          <p className="text-xs uppercase text-iron-muted">kg</p>
         </div>
 
-        <div className="border-2 border-black p-3 bg-[#efe3c2]">
-          <p className="text-xs uppercase font-bold">Target</p>
-          <p className="text-2xl font-black">{data.targetWeight}</p>
-          <p className="text-xs uppercase">{diffToTarget > 0 ? "+" : ""}{diffToTarget.toFixed(1)} kg</p>
+        <div className="border border-iron-border p-3 bg-iron-raised">
+          <p className="text-xs uppercase font-bold text-iron-gold">Target</p>
+          <p className="text-2xl font-black text-iron-text">{data.targetWeight}</p>
+          <p className="text-xs uppercase text-iron-muted">{diffToTarget > 0 ? "+" : ""}{diffToTarget.toFixed(1)} kg</p>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="border-2 border-black p-3 bg-[#f5ead0]">
+      <div className="border border-iron-border p-3 iron-card-panel">
         <div className="flex justify-between mb-2">
-          <span className="text-xs uppercase font-bold">Progress to Target</span>
-          <span className="text-xs font-bold">{progressPercent.toFixed(0)}%</span>
+          <span className="text-xs uppercase font-bold text-iron-gold">Progress to Target</span>
+          <span className="text-xs font-bold text-iron-cream">{progressPercent.toFixed(0)}%</span>
         </div>
-        <div className="w-full h-4 bg-[#e6e6e6] border border-black overflow-hidden">
+        <div className="w-full h-4 iron-progress-track overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-[#b22222] to-[#d4a574] transition-all"
+            className="h-full iron-progress-fill transition-all"
             style={{ width: `${Math.max(0, Math.min(100, progressPercent))}%` }}
           />
         </div>
@@ -103,7 +106,7 @@ export default function WeightProgressScreen() {
       {/* Update current weight */}
       {!showInput ? (
         <button
-          className="w-full bg-[#b22222] text-[#efe3c2] border-4 border-black py-3 uppercase font-black tracking-widest hover:bg-[#8b1a1a]"
+          className="w-full iron-interactive iron-btn-primary py-3 text-sm font-semibold rounded-sm"
           onClick={() => {
             setWeightInput(String(data.currentWeight));
             setShowInput(true);
@@ -112,9 +115,9 @@ export default function WeightProgressScreen() {
           Update Current Weight
         </button>
       ) : (
-        <div className="border-2 border-black p-3 bg-[#efe3c2]">
+        <div className="border border-iron-border p-3 iron-card-raised">
           <input
-            className="w-full p-2 border-2 border-black bg-white"
+            className={inputClass}
             type="number"
             step="0.1"
             value={weightInput}
@@ -124,13 +127,13 @@ export default function WeightProgressScreen() {
           />
           <div className="flex gap-2 mt-2">
             <button
-              className="flex-1 bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+              className="flex-1 bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
               onClick={handleSaveWeight}
             >
               Save
             </button>
             <button
-              className="flex-1 bg-[#e6e6e6] text-black border-2 border-black py-2 uppercase font-bold"
+              className="flex-1 bg-iron-charcoal text-iron-text border border-iron-border py-2 uppercase font-bold"
               onClick={() => setShowInput(false)}
             >
               Cancel
@@ -142,7 +145,7 @@ export default function WeightProgressScreen() {
       {/* Update target weight */}
       {!showTargetInput ? (
         <button
-          className="w-full bg-[#333] text-[#efe3c2] border-4 border-black py-3 uppercase font-black tracking-widest hover:bg-black"
+          className="w-full bg-iron-panel text-iron-cream border border-iron-border-strong py-3 uppercase font-black tracking-widest hover:border-iron-gold-dim"
           onClick={() => {
             setTargetInput(String(data.targetWeight));
             setShowTargetInput(true);
@@ -151,9 +154,9 @@ export default function WeightProgressScreen() {
           Set Target Weight
         </button>
       ) : (
-        <div className="border-2 border-black p-3 bg-[#efe3c2]">
+        <div className="border border-iron-border p-3 iron-card-raised">
           <input
-            className="w-full p-2 border-2 border-black bg-white"
+            className={inputClass}
             type="number"
             step="0.1"
             value={targetInput}
@@ -163,13 +166,13 @@ export default function WeightProgressScreen() {
           />
           <div className="flex gap-2 mt-2">
             <button
-              className="flex-1 bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+              className="flex-1 bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
               onClick={handleSaveTarget}
             >
               Save
             </button>
             <button
-              className="flex-1 bg-[#e6e6e6] text-black border-2 border-black py-2 uppercase font-bold"
+              className="flex-1 bg-iron-charcoal text-iron-text border border-iron-border py-2 uppercase font-bold"
               onClick={() => setShowTargetInput(false)}
             >
               Cancel
@@ -179,20 +182,20 @@ export default function WeightProgressScreen() {
       )}
 
       {/* Last update date */}
-      <div className="border-2 border-black p-3 bg-[#f5ead0] text-center">
-        <p className="text-xs uppercase font-bold">Last Updated</p>
-        <p className="text-lg font-black uppercase">{formatDate(lastUpdate)}</p>
+      <div className="border border-iron-border p-3 iron-card-panel text-center">
+        <p className="text-xs uppercase font-bold text-iron-gold">Last Updated</p>
+        <p className="text-lg font-black uppercase text-iron-cream">{formatDate(lastUpdate)}</p>
       </div>
 
       {/* Weight history */}
       {data.history.length > 0 && (
-        <div className="border-4 border-black p-4 bg-[#efe3c2]">
-          <p className="text-sm uppercase font-black mb-3">Weight History</p>
+        <div className="border border-iron-border-strong p-4 iron-card-raised">
+          <p className="text-sm uppercase font-black mb-3 text-iron-text">Weight History</p>
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {[...data.history].reverse().map((entry, idx) => (
-              <div key={idx} className="flex justify-between items-center border-b border-black pb-2">
-                <span className="text-xs uppercase">{formatDate(entry.date)}</span>
-                <span className="font-black">{entry.weight} kg</span>
+              <div key={idx} className="flex justify-between items-center border-b border-iron-border pb-2">
+                <span className="text-xs uppercase text-iron-muted">{formatDate(entry.date)}</span>
+                <span className="font-black text-iron-cream">{entry.weight} kg</span>
               </div>
             ))}
           </div>
@@ -201,7 +204,7 @@ export default function WeightProgressScreen() {
 
       {/* Reset */}
       <button
-        className="w-full bg-[#999] text-black border-4 border-black py-3 uppercase font-black tracking-widest hover:bg-[#888]"
+        className="w-full bg-iron-charcoal text-iron-muted border border-iron-border py-3 uppercase font-black tracking-widest hover:text-iron-text"
         onClick={reset}
       >
         Reset to Profile Weight

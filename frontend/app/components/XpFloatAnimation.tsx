@@ -9,7 +9,7 @@ type Props = {
 
 export default function XpFloatAnimation({ amount, onDone }: Props) {
   useEffect(() => {
-    const timer = window.setTimeout(onDone, 1200);
+    const timer = window.setTimeout(onDone, 1350);
     return () => window.clearTimeout(timer);
   }, [onDone]);
 
@@ -18,10 +18,8 @@ export default function XpFloatAnimation({ amount, onDone }: Props) {
       className="pointer-events-none fixed top-24 left-1/2 -translate-x-1/2 z-[60] animate-xp-float"
       aria-live="polite"
     >
-      <div className="border-4 border-black bg-[#f5ead0] px-6 py-3 shadow-2xl">
-        <p className="text-2xl font-black uppercase text-[#b22222] tracking-wider">
-          +{amount} XP
-        </p>
+      <div className="iron-shell-card px-6 py-3 border border-iron-border-strong">
+        <p className="text-xl font-semibold iron-text-accent">+{amount} XP</p>
       </div>
     </div>
   );

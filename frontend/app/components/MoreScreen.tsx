@@ -21,6 +21,9 @@ type Props = {
   equippedTitle?: string | null;
 };
 
+const menuBtn =
+  "iron-interactive w-full border p-5 sm:p-6 min-h-[48px] text-left hover:border-iron-gold-dim/50";
+
 export default function MoreScreen({
   onSelectProgress,
   onSelectAchievements,
@@ -42,19 +45,13 @@ export default function MoreScreen({
   equippedTitle,
 }: Props) {
   return (
-    <div className="mt-10 border-4 border-black p-6 bg-[#f5ead0] shadow-2xl mb-24">
+    <div className="mt-10 iron-shell-card p-6 mb-24">
       <div className="text-center">
-        <p className="uppercase tracking-[0.2em] text-sm font-bold">
-          Menu
-        </p>
+        <p className="iron-label">Menu</p>
 
-        <h2 className="text-4xl font-black uppercase mt-2">
-          More
-        </h2>
+        <h2 className="iron-heading text-3xl mt-2">More</h2>
 
-        <p className="mt-2 uppercase text-sm">
-          Additional options and records
-        </p>
+        <p className="mt-2 text-sm text-iron-muted">Records and settings</p>
       </div>
 
       <div className="mt-8">
@@ -74,117 +71,115 @@ export default function MoreScreen({
       <div className="mt-8 space-y-4">
         <button
           onClick={onSelectProfile}
-          className="w-full border-4 border-black p-5 sm:p-6 bg-[#e8d8b0] hover:bg-[#d4c89a] transition-colors min-h-[48px]"
+          className={`${menuBtn} iron-card-raised border-iron-border text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">Identity</p>
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">
+            Identity
+          </p>
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">👤 Profile</h3>
-          <p className="mt-3 text-sm uppercase text-black">
+          <p className="mt-3 text-sm uppercase text-iron-muted">
             Edit avatar, stats, and training goal
           </p>
         </button>
 
         <button
           onClick={onSelectStats}
-          className="w-full border-4 border-black p-5 sm:p-6 bg-[#efe3c2] hover:bg-[#e6dcc0] transition-colors min-h-[48px]"
+          className={`${menuBtn} iron-card-surface border-iron-border text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">Records</p>
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">
+            Records
+          </p>
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">📈 Stats</h3>
-          <p className="mt-3 text-sm uppercase text-black">
+          <p className="mt-3 text-sm uppercase text-iron-muted">
             View XP, streaks, workouts, and milestones
           </p>
         </button>
 
         <button
           onClick={onSelectBosses}
-          className="w-full border-4 border-black p-5 sm:p-6 bg-black text-[#efe3c2] hover:bg-[#1a1a1a] transition-colors min-h-[48px]"
+          className={`${menuBtn} iron-dossier text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold text-[#b22222]">
-            Inner War
-          </p>
-          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">
-            ⚔ Boss Trials
-          </h3>
-          <p className="mt-3 text-sm uppercase">
-            Face inner foes. Earn titles, badges, and glory
+          <p className="iron-label text-iron-danger">Operations</p>
+          <h3 className="iron-heading text-xl mt-2">Target dossiers</h3>
+          <p className="mt-2 text-sm text-iron-muted">
+            Mission files, requirements, and clearance rewards
           </p>
         </button>
 
         <button
           onClick={onSelectProgress}
-          className="w-full border-4 border-black p-5 sm:p-6 bg-black text-[#efe3c2] hover:bg-[#333] transition-colors min-h-[48px]"
+          className={`${menuBtn} iron-card-panel border-iron-border-strong text-iron-cream`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">
             View Progress
           </p>
-
-          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">
-            📊 Progress
-          </h3>
-
-          <p className="mt-3 text-sm uppercase">
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">📊 Progress</h3>
+          <p className="mt-3 text-sm uppercase text-iron-muted">
             Track your journey, weeks, and XP milestones
           </p>
         </button>
 
         <button
           onClick={onSelectLegacy}
-          className="w-full border-4 border-black p-6 bg-[#efe3c2] hover:bg-[#e6dcc0] transition-colors"
+          className={`${menuBtn} iron-card-surface border-iron-border text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">Legacy</p>
-
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">Legacy</p>
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">🏺 Legacy</h3>
-
-          <p className="mt-3 text-sm uppercase text-black">View completed seasons and records</p>
+          <p className="mt-3 text-sm uppercase text-iron-muted">
+            View completed seasons and records
+          </p>
         </button>
 
         <button
           onClick={onSelectAchievements}
-          className="w-full border-4 border-black p-6 bg-[#e8d8b0] hover:bg-[#d4c89a] transition-colors"
+          className={`${menuBtn} iron-card-raised border-iron-border text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">
             View Achievements
           </p>
-
-          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">
-            ⭐ Achievements
-          </h3>
-
-          <p className="mt-3 text-sm uppercase text-black">
+          <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">⭐ Achievements</h3>
+          <p className="mt-3 text-sm uppercase text-iron-muted">
             Unlock milestones and unlock your potential
           </p>
         </button>
 
         <button
           onClick={onSelectStrength}
-          className="w-full border-4 border-black p-6 bg-[#efe3c2] hover:bg-[#e6dcc0] transition-colors"
+          className={`${menuBtn} iron-card-surface border-iron-border text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">Strength Tracker</p>
-
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">
+            Strength Tracker
+          </p>
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">💪 Strength</h3>
-
-          <p className="mt-3 text-sm uppercase text-black">Track push-ups, pull-ups, dips, runs and weight</p>
+          <p className="mt-3 text-sm uppercase text-iron-muted">
+            Track push-ups, pull-ups, dips, runs and weight
+          </p>
         </button>
 
         <button
           onClick={onSelectSkillTree}
-          className="w-full border-4 border-black p-5 sm:p-6 bg-[#e8d8b0] hover:bg-[#d4c89a] transition-colors min-h-[48px]"
+          className={`${menuBtn} iron-card-raised border-iron-border text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">Abilities</p>
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">
+            Abilities
+          </p>
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">🌳 Skill Tree</h3>
-          <p className="mt-3 text-sm uppercase text-black">
+          <p className="mt-3 text-sm uppercase text-iron-muted">
             View class skills and unlock progress
           </p>
         </button>
 
         <button
           onClick={onSelectSettings}
-          className="w-full border-4 border-black p-6 bg-black text-[#efe3c2] hover:bg-[#333] transition-colors"
+          className={`${menuBtn} iron-card-panel border-iron-border text-iron-text`}
         >
-          <p className="uppercase tracking-[0.2em] text-sm font-bold">App Settings</p>
-
+          <p className="uppercase tracking-[0.2em] text-sm font-bold text-iron-gold">
+            App Settings
+          </p>
           <h3 className="text-2xl sm:text-3xl font-black uppercase mt-3">⚙ Settings</h3>
-
-          <p className="mt-3 text-sm uppercase">Reset progress and manage your data</p>
+          <p className="mt-3 text-sm uppercase text-iron-muted">
+            Reset progress and manage your data
+          </p>
         </button>
       </div>
     </div>

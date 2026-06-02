@@ -1,47 +1,341 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --iron-tan: #d8c7a1;
-  --iron-cream: #efe3c2;
-  --iron-paper: #f5ead0;
-  --iron-red: #b22222;
+  --background: #0f1113;
+  --foreground: #f3efe8;
+
+  /* 1950s discipline journal palette */
+  --iron-bg: #0f1113;
+  --iron-surface: #171a1d;
+  --iron-raised: #1c2024;
+  --iron-panel: #131619;
+  --iron-border: #22262b;
+  --iron-border-strong: #2c3238;
+  --iron-text: #f3efe8;
+  --iron-muted: #a09b93;
+  --iron-accent: #d2b48c;
+  --iron-accent-dim: #8b7355;
+  --iron-danger: #9e4a4a;
+  --iron-danger-muted: #6e3838;
+
+  /* Semantic aliases (compat) */
+  --iron-charcoal: var(--iron-panel);
+  --iron-steel: var(--iron-raised);
+  --iron-cream: var(--iron-text);
+  --iron-gold: var(--iron-accent);
+  --iron-gold-dim: var(--iron-accent-dim);
+  --iron-red: var(--iron-danger-muted);
+  --iron-red-bright: var(--iron-danger);
+
+  --iron-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --iron-shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --iron-bg-gradient: linear-gradient(180deg, #121518 0%, #0f1113 100%);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-iron-bg: var(--iron-bg);
+  --color-iron-charcoal: var(--iron-charcoal);
+  --color-iron-steel: var(--iron-steel);
+  --color-iron-surface: var(--iron-surface);
+  --color-iron-raised: var(--iron-raised);
+  --color-iron-panel: var(--iron-panel);
+  --color-iron-border: var(--iron-border);
+  --color-iron-border-strong: var(--iron-border-strong);
+  --color-iron-text: var(--iron-text);
+  --color-iron-muted: var(--iron-muted);
+  --color-iron-cream: var(--iron-cream);
+  --color-iron-accent: var(--iron-accent);
+  --color-iron-accent-dim: var(--iron-accent-dim);
+  --color-iron-gold: var(--iron-gold);
+  --color-iron-gold-dim: var(--iron-gold-dim);
+  --color-iron-danger: var(--iron-danger);
+  --color-iron-red: var(--iron-red);
+  --color-iron-red-bright: var(--iron-red-bright);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--iron-bg);
+  color: var(--iron-text);
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 html.telegram-webapp body {
-  background: var(--tg-bg-color, var(--background));
-  color: var(--tg-text-color, var(--foreground));
+  background: var(--tg-bg-color, var(--iron-bg));
+  color: var(--tg-text-color, var(--iron-text));
 }
 
+.iron-page {
+  background: var(--iron-bg-gradient);
+  color: var(--iron-text);
+}
+
+.iron-page-header h1 {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  letter-spacing: 0.06em;
+}
+
+.iron-page-header-sub {
+  color: var(--iron-muted);
+  font-family: var(--font-sans), Arial, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+/* ——— Typography helpers ——— */
+.iron-label {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--iron-accent-dim);
+}
+
+.iron-heading {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  color: var(--iron-text);
+}
+
+.iron-text-accent {
+  color: var(--iron-accent);
+}
+
+.iron-text-danger {
+  color: var(--iron-danger);
+}
+
+.iron-text-muted {
+  color: var(--iron-muted);
+}
+
+/* ——— Cards (matte journal / dossier) ——— */
+.iron-shell-card,
+.iron-card-surface,
+.iron-card-raised,
+.iron-card-panel {
+  background: var(--iron-surface);
+  border: 1px solid var(--iron-border);
+  box-shadow: var(--iron-shadow-card);
+  color: var(--iron-text);
+}
+
+.iron-shell-card {
+  animation: card-enter 0.35s ease-out both;
+}
+
+.iron-card-raised {
+  background: var(--iron-raised);
+}
+
+.iron-card-panel {
+  background: var(--iron-panel);
+}
+
+.iron-card-accent {
+  background: var(--iron-panel);
+  border-color: var(--iron-border-strong);
+}
+
+.iron-modal {
+  background: var(--iron-surface);
+  border: 1px solid var(--iron-border-strong);
+  box-shadow: var(--iron-shadow-modal);
+  color: var(--iron-text);
+}
+
+.iron-modal-overlay {
+  background: rgba(10, 12, 14, 0.82);
+}
+
+.iron-avatar-frame {
+  border: 1px solid var(--iron-border-strong);
+  box-shadow: var(--iron-shadow-card);
+}
+
+/* Target dossier (boss only) */
+.iron-boss-card,
+.iron-dossier {
+  background: var(--iron-panel);
+  border: 1px solid var(--iron-danger-muted);
+  box-shadow: var(--iron-shadow-card);
+}
+
+.iron-stagger > * {
+  animation: card-enter 0.32s ease-out both;
+}
+
+.iron-stagger > *:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.iron-stagger > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.iron-stagger > *:nth-child(3) {
+  animation-delay: 0.09s;
+}
+.iron-stagger > *:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.iron-stagger > *:nth-child(5) {
+  animation-delay: 0.15s;
+}
+
+/* ——— Progress ——— */
+.iron-progress-track {
+  background: var(--iron-panel);
+  border: 1px solid var(--iron-border);
+  border-radius: 2px;
+}
+
+.iron-progress-fill {
+  background: var(--iron-accent-dim);
+  border-radius: 1px;
+  transition: width 0.45s ease-out;
+}
+
+.iron-progress-fill-danger {
+  background: var(--iron-danger-muted);
+}
+
+/* ——— Chips ——— */
+.iron-chip-done {
+  border: 1px solid var(--iron-accent-dim);
+  background: rgba(210, 180, 140, 0.12);
+  color: var(--iron-text);
+}
+
+.iron-chip-pending {
+  border: 1px solid var(--iron-border);
+  background: var(--iron-panel);
+  color: var(--iron-muted);
+}
+
+/* ——— Navigation ——— */
+.iron-nav-glass {
+  background: rgba(15, 17, 19, 0.96);
+  border-top: 1px solid var(--iron-border);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.iron-nav-active-indicator {
+  background: var(--iron-accent);
+}
+
+/* ——— Buttons ——— */
+.iron-interactive {
+  font-family: var(--font-sans), Arial, sans-serif;
+  transition:
+    transform 0.12s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.iron-interactive:hover:not(:disabled) {
+  border-color: var(--iron-accent-dim);
+}
+
+.iron-interactive:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.iron-btn-primary {
+  background: var(--iron-accent-dim);
+  color: var(--iron-bg);
+  border: 1px solid var(--iron-accent);
+}
+
+.iron-btn-primary:hover:not(:disabled) {
+  background: var(--iron-accent);
+}
+
+.iron-btn-secondary {
+  background: var(--iron-panel);
+  color: var(--iron-text);
+  border: 1px solid var(--iron-border-strong);
+}
+
+.iron-btn-ghost {
+  background: transparent;
+  color: var(--iron-text);
+  border: 1px solid var(--iron-border);
+}
+
+.iron-btn-danger {
+  background: var(--iron-danger-muted);
+  color: var(--iron-text);
+  border: 1px solid var(--iron-danger);
+}
+
+/* ——— Keyframes (subtle only) ——— */
 @keyframes screen-enter {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes xp-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -32px);
+  }
+}
+
+@keyframes nav-indicator {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
@@ -66,107 +360,7 @@ html.telegram-webapp body {
 @keyframes splash-logo {
   from {
     opacity: 0;
-    transform: scale(0.92) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes xp-float {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 12px) scale(0.85);
-  }
-  15% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1.08);
-  }
-  30% {
-    transform: translate(-50%, -4px) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -48px) scale(0.95);
-  }
-}
-
-@keyframes overlay-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes modal-pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.88) translateY(20px);
-  }
-  70% {
-    transform: scale(1.03) translateY(-2px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes xp-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.12);
-  }
-}
-
-@keyframes level-up-burst {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.15);
-  }
-  100% {
-    opacity: 0.6;
-    transform: scale(1.4);
-  }
-}
-
-@keyframes level-up-shake {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-2deg);
-  }
-  75% {
-    transform: rotate(2deg);
-  }
-}
-
-@keyframes achievement-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(178, 34, 34, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 24px 4px rgba(178, 34, 34, 0.35);
-  }
-}
-
-@keyframes achievement-slide {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -174,135 +368,90 @@ html.telegram-webapp body {
   }
 }
 
-@keyframes nav-indicator {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+.animate-splash-fade-in {
+  animation: splash-fade-in 0.4s ease-out both;
+}
+
+.animate-splash-fade-out {
+  animation: splash-fade-out 0.35s ease-in both;
+}
+
+.animate-splash-logo {
+  animation: splash-logo 0.5s ease-out both;
 }
 
 .animate-screen-enter {
   animation: screen-enter 0.28s ease-out both;
 }
 
-.animate-splash-fade-in {
-  animation: splash-fade-in 1s ease-out both;
-}
-
-.animate-splash-fade-out {
-  animation: splash-fade-out 0.4s ease-in both;
-}
-
-.animate-splash-logo {
-  animation: splash-logo 1s ease-out both;
-}
-
-.animate-xp-float {
-  animation: xp-float 1.2s ease-out both;
+.animate-card-enter {
+  animation: card-enter 0.32s ease-out both;
 }
 
 .animate-overlay-fade-in {
-  animation: overlay-fade-in 0.25s ease-out both;
+  animation: overlay-fade-in 0.22s ease-out both;
 }
 
-.animate-modal-pop-in {
-  animation: modal-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+.animate-modal-enter {
+  animation: modal-enter 0.32s ease-out both;
 }
 
-.animate-xp-pulse {
-  animation: xp-pulse 0.6s ease-in-out 0.3s 2;
-}
-
-.animate-level-up-burst {
-  animation: level-up-burst 0.8s ease-out both;
-}
-
-.animate-level-up-shake {
-  animation: level-up-shake 0.5s ease-in-out 0.2s 1;
-}
-
-.animate-achievement-glow {
-  animation: achievement-glow 1.2s ease-in-out infinite;
-}
-
-.animate-achievement-slide {
-  animation: achievement-slide 0.4s ease-out both;
+.animate-xp-float {
+  animation: xp-float 1.1s ease-out both;
 }
 
 .animate-nav-indicator {
-  animation: nav-indicator 0.25s ease-out both;
+  animation: nav-indicator 0.2s ease-out both;
 }
 
-@keyframes boss-defeat-pop {
-  0% {
-    opacity: 0;
-    transform: scale(0.6) translateY(20px);
-  }
-  60% {
-    transform: scale(1.05) translateY(-4px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+/* Legacy animation class aliases → calm equivalents */
+.animate-modal-pop-in,
+.animate-modal-impact {
+  animation: modal-enter 0.32s ease-out both;
 }
 
-@keyframes boss-defeat-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(178, 34, 34, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 24px 4px rgba(178, 34, 34, 0.6);
-  }
+.animate-xp-float-strong {
+  animation: xp-float 1.1s ease-out both;
 }
 
-@keyframes boss-defeat-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20%,
-  60% {
-    transform: translateX(-4px);
-  }
-  40%,
-  80% {
-    transform: translateX(4px);
-  }
-}
-
-.animate-boss-defeat-pop {
-  animation: boss-defeat-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
+.animate-reward-pulse,
+.animate-xp-pulse,
+.animate-level-up-burst,
+.animate-popup-ring,
+.animate-level-up-shake,
+.animate-boss-defeat-shake,
+.animate-subtle-glow,
+.animate-boss-pulse,
+.animate-achievement-glow,
 .animate-boss-defeat-glow {
-  animation: boss-defeat-glow 1.4s ease-in-out infinite;
+  animation: none;
 }
 
-.animate-boss-defeat-shake {
-  animation: boss-defeat-shake 0.5s ease-in-out 0.3s 2;
+.animate-boss-defeat-pop,
+.animate-achievement-slide {
+  animation: modal-enter 0.32s ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-screen-enter,
-  .animate-splash-fade-in,
-  .animate-splash-fade-out,
-  .animate-splash-logo,
-  .animate-xp-float,
-  .animate-overlay-fade-in,
-  .animate-modal-pop-in,
-  .animate-xp-pulse,
-  .animate-level-up-burst,
-  .animate-level-up-shake,
-  .animate-achievement-glow,
-  .animate-achievement-slide,
-  .animate-nav-indicator,
-  .animate-boss-defeat-pop,
-  .animate-boss-defeat-glow,
-  .animate-boss-defeat-shake {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .iron-shell-card,
+  .iron-card-surface,
+  .iron-card-raised,
+  .iron-card-panel,
+  .iron-stagger > *,
+  .iron-progress-fill {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .iron-interactive:active:not(:disabled) {
+    transform: none;
   }
 }

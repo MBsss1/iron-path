@@ -38,9 +38,9 @@ export default function AchievementsScreen({
       <IronCard variant="dark">
         <p className="uppercase text-xs font-bold text-center">Completion</p>
         <p className="text-4xl font-black text-center mt-1">{completionPercent}%</p>
-        <div className="w-full h-4 border-2 border-[#efe3c2] mt-4">
+        <div className="w-full h-4 iron-progress-track mt-4 overflow-hidden">
           <div
-            className="h-full bg-[#b22222] transition-all duration-500"
+            className="h-full iron-progress-fill transition-all duration-500"
             style={{ width: `${completionPercent}%` }}
           />
         </div>
@@ -55,7 +55,7 @@ export default function AchievementsScreen({
 
         return (
           <div key={category}>
-            <h3 className="text-xl font-black uppercase mb-3">
+            <h3 className="text-xl font-black uppercase mb-3 text-iron-text">
               {formatCategoryLabel(category)}
             </h3>
 
@@ -86,10 +86,10 @@ export default function AchievementsScreen({
                       </div>
 
                       <span
-                        className={`shrink-0 px-2 py-1 border-2 border-black text-[10px] sm:text-xs font-black uppercase ${
+                        className={`shrink-0 px-2 py-1 border border-iron-border text-[10px] sm:text-xs font-black uppercase ${
                           isUnlocked
-                            ? "bg-[#b22222] text-[#efe3c2]"
-                            : "bg-gray-400 text-gray-700"
+                            ? "bg-iron-accent-dim text-iron-bg"
+                            : "bg-iron-charcoal text-iron-muted"
                         }`}
                       >
                         {isUnlocked ? "Unlocked" : "Locked"}
@@ -104,9 +104,9 @@ export default function AchievementsScreen({
                             {current} / {target}
                           </span>
                         </div>
-                        <div className="w-full h-3 border-2 border-black mt-2 bg-[#f5ead0]">
+                        <div className="w-full h-3 iron-progress-track mt-2 overflow-hidden">
                           <div
-                            className="h-full bg-[#b22222] transition-all duration-500"
+                            className="h-full iron-progress-fill transition-all duration-500"
                             style={{ width: `${percent}%` }}
                           />
                         </div>

@@ -7,9 +7,9 @@ type Props = {
 };
 
 const variants = {
-  paper: "bg-[#f5ead0]",
-  dark: "bg-black text-[#efe3c2]",
-  tan: "bg-[#e8d8b0]",
+  paper: "iron-card-surface",
+  dark: "iron-card-panel",
+  tan: "iron-card-raised",
 };
 
 export default function IronCard({
@@ -18,9 +18,7 @@ export default function IronCard({
   className = "",
 }: Props) {
   return (
-    <div
-      className={`border-2 border-black p-4 sm:p-5 ${variants[variant]} ${className}`}
-    >
+    <div className={`p-4 sm:p-5 ${variants[variant]} ${className}`}>
       {children}
     </div>
   );

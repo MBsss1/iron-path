@@ -14,15 +14,11 @@ export default function DailyRewardPopup({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-overlay-fade-in">
-      <div className="bg-[#f5ead0] border-4 border-black p-6 w-full max-w-sm animate-modal-pop-in">
-        <p className="uppercase tracking-[0.2em] text-sm font-bold text-center text-[#b22222]">
-          Daily Login Reward
-        </p>
+    <div className="fixed inset-0 iron-modal-overlay flex items-center justify-center z-50 p-4 animate-overlay-fade-in">
+      <div className="iron-modal p-6 w-full max-w-sm animate-modal-enter">
+        <p className="iron-label text-center">Daily check-in</p>
 
-        <h2 className="text-3xl font-black uppercase text-center mt-3">
-          Day {day}
-        </h2>
+        <h2 className="iron-heading text-3xl text-center mt-3">Day {day}</h2>
 
         <div className="mt-4 grid grid-cols-7 gap-1">
           {Array.from({ length: 7 }, (_, i) => {
@@ -33,12 +29,12 @@ export default function DailyRewardPopup({
             return (
               <div
                 key={dayNum}
-                className={`border-2 border-black py-2 text-center text-xs font-black ${
+                className={`border py-2 text-center text-xs font-semibold rounded-sm ${
                   isCurrent
-                    ? "bg-[#b22222] text-[#efe3c2]"
+                    ? "border-iron-accent-dim bg-iron-accent/15 text-iron-text"
                     : isPast
-                      ? "bg-black text-[#efe3c2]"
-                      : "bg-[#e8d8b0] text-black"
+                      ? "border-iron-border bg-iron-panel text-iron-muted"
+                      : "border-iron-border bg-iron-charcoal text-iron-muted"
                 }`}
               >
                 {dayNum}
@@ -47,18 +43,17 @@ export default function DailyRewardPopup({
           })}
         </div>
 
-        <div className="mt-6 text-center uppercase">
-          <p className="text-2xl font-black text-[#b22222] animate-xp-pulse inline-block">
-            +{xpReward} XP
-          </p>
-          <p className="mt-2 text-sm">Check in today to keep your streak</p>
+        <div className="mt-6 text-center">
+          <p className="text-2xl font-semibold iron-text-accent">+{xpReward} XP</p>
+          <p className="mt-2 text-sm text-iron-muted">Check in today to keep your streak</p>
         </div>
 
         <button
+          type="button"
           onClick={onClaim}
-          className="w-full mt-6 bg-[#b22222] text-[#efe3c2] border-4 border-black py-3 uppercase font-black transition-transform active:scale-[0.98]"
+          className="iron-interactive iron-btn-primary w-full mt-6 py-3 text-sm font-semibold rounded-sm"
         >
-          Claim Reward
+          Record check-in
         </button>
       </div>
     </div>

@@ -6,9 +6,9 @@ import { useStrengthTracker } from "../hooks/useStrengthTracker";
 function ProgressBar({ percent, positive }: { percent: number; positive: boolean }) {
   const safe = Math.max(0, Math.min(100, Math.round(Math.abs(percent))));
   return (
-    <div className="w-full h-3 bg-[#e6e6e6] rounded overflow-hidden border border-black">
+    <div className="w-full h-3 iron-progress-track overflow-hidden">
       <div
-        className={`${positive ? "bg-green-600" : "bg-red-600"} h-full transition-all`}
+        className={`${positive ? "iron-progress-fill" : "bg-red-600"} h-full transition-all`}
         style={{ width: `${safe}%` }}
       />
     </div>
@@ -68,16 +68,21 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
     return ((cur! - prev) / Math.abs(prev)) * 100;
   };
 
+  const inputClass =
+    "w-full p-2 border border-iron-border bg-iron-panel text-iron-text";
+
+  const metricCardClass = "border border-iron-border p-4 iron-card-panel";
+
   return (
-    <div className="w-full max-w-md">
-      <div className="text-center mt-6">
-        <h1 className="text-3xl font-black tracking-wide">Strength Tracker</h1>
-        <p className="text-sm mt-2 uppercase tracking-[0.2em]">Log your lifts and runs — track progress</p>
+    <div className="w-full max-w-md iron-shell-card p-5 sm:p-6 mb-24">
+      <div className="text-center mt-2">
+        <h1 className="text-3xl font-black tracking-wide text-iron-text">Strength Tracker</h1>
+        <p className="text-sm mt-2 uppercase tracking-[0.2em] text-iron-muted">Log your lifts and runs — track progress</p>
       </div>
 
       <div className="flex justify-end mt-4">
         <button
-          className="bg-black text-[#efe3c2] border-2 border-black py-2 px-4 uppercase font-bold"
+          className="bg-iron-panel text-iron-cream border border-iron-border-strong py-2 px-4 uppercase font-bold"
           onClick={onBack}
         >
           Back
@@ -86,17 +91,17 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
 
       <div className="mt-6 space-y-4">
         {/* Push-ups */}
-        <div className="border-4 border-black p-4 bg-[#f5ead0]">
+        <div className={metricCardClass}>
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-xs uppercase">Push-ups (max)</p>
-              <p className="text-2xl font-black">{data.pushUps} <span className="text-sm">{diffText(data.pushUps, data.prevPushUps, 'reps')}</span></p>
-              <p className="text-xs">Previous: {data.prevPushUps ?? "—"}</p>
+              <p className="text-xs uppercase text-iron-gold">Push-ups (max)</p>
+              <p className="text-2xl font-black text-iron-cream">{data.pushUps} <span className="text-sm text-iron-muted">{diffText(data.pushUps, data.prevPushUps, 'reps')}</span></p>
+              <p className="text-xs text-iron-muted">Previous: {data.prevPushUps ?? "—"}</p>
             </div>
 
             <div className="w-40">
               <input
-                className="w-full p-2 border-2 border-black bg-white"
+                className={inputClass}
                 value={pushInput}
                 onChange={(e) => setPushInput(e.target.value)}
                 type="number"
@@ -104,7 +109,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
               />
               <div className="mt-2">
                 <button
-                  className="w-full bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
                   onClick={() => save("push", pushInput)}
                 >
                   Save
@@ -114,7 +119,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
           </div>
 
           <div className="mt-4">
-            <p className="text-xs">Progress</p>
+            <p className="text-xs text-iron-muted">Progress</p>
             <ProgressBar
               percent={deltaPercent(data.pushUps, data.prevPushUps)}
               positive={(data.prevPushUps ?? 0) <= data.pushUps}
@@ -123,17 +128,17 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
         </div>
 
         {/* Pull-ups */}
-        <div className="border-4 border-black p-4 bg-[#f5ead0]">
+        <div className={metricCardClass}>
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-xs uppercase">Pull-ups (max)</p>
-              <p className="text-2xl font-black">{data.pullUps} <span className="text-sm">{diffText(data.pullUps, data.prevPullUps, 'reps')}</span></p>
-              <p className="text-xs">Previous: {data.prevPullUps ?? "—"}</p>
+              <p className="text-xs uppercase text-iron-gold">Pull-ups (max)</p>
+              <p className="text-2xl font-black text-iron-cream">{data.pullUps} <span className="text-sm text-iron-muted">{diffText(data.pullUps, data.prevPullUps, 'reps')}</span></p>
+              <p className="text-xs text-iron-muted">Previous: {data.prevPullUps ?? "—"}</p>
             </div>
 
             <div className="w-40">
               <input
-                className="w-full p-2 border-2 border-black bg-white"
+                className={inputClass}
                 value={pullInput}
                 onChange={(e) => setPullInput(e.target.value)}
                 type="number"
@@ -141,7 +146,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
               />
               <div className="mt-2">
                 <button
-                  className="w-full bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
                   onClick={() => save("pull", pullInput)}
                 >
                   Save
@@ -151,7 +156,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
           </div>
 
           <div className="mt-4">
-            <p className="text-xs">Progress</p>
+            <p className="text-xs text-iron-muted">Progress</p>
             <ProgressBar
               percent={deltaPercent(data.pullUps, data.prevPullUps)}
               positive={(data.prevPullUps ?? 0) <= data.pullUps}
@@ -160,17 +165,17 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
         </div>
 
         {/* Dips */}
-        <div className="border-4 border-black p-4 bg-[#f5ead0]">
+        <div className={metricCardClass}>
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-xs uppercase">Dips (max)</p>
-              <p className="text-2xl font-black">{(data as any).dips} <span className="text-sm">{diffText((data as any).dips, (data as any).prevDips, 'reps')}</span></p>
-              <p className="text-xs">Previous: {(data as any).prevDips ?? "—"}</p>
+              <p className="text-xs uppercase text-iron-gold">Dips (max)</p>
+              <p className="text-2xl font-black text-iron-cream">{(data as any).dips} <span className="text-sm text-iron-muted">{diffText((data as any).dips, (data as any).prevDips, 'reps')}</span></p>
+              <p className="text-xs text-iron-muted">Previous: {(data as any).prevDips ?? "—"}</p>
             </div>
 
             <div className="w-40">
               <input
-                className="w-full p-2 border-2 border-black bg-white"
+                className={inputClass}
                 value={dipsInput}
                 onChange={(e) => setDipsInput(e.target.value)}
                 type="number"
@@ -178,7 +183,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
               />
               <div className="mt-2">
                 <button
-                  className="w-full bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
                   onClick={() => save("dips", dipsInput)}
                 >
                   Save
@@ -188,7 +193,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
           </div>
 
           <div className="mt-4">
-            <p className="text-xs">Progress</p>
+            <p className="text-xs text-iron-muted">Progress</p>
             <ProgressBar
               percent={deltaPercent((data as any).dips, (data as any).prevDips)}
               positive={((data as any).prevDips ?? 0) <= (data as any).dips}
@@ -197,17 +202,17 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
         </div>
 
         {/* Run distance */}
-        <div className="border-4 border-black p-4 bg-[#f5ead0]">
+        <div className={metricCardClass}>
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-xs uppercase">Run Distance (km)</p>
-              <p className="text-2xl font-black">{data.runDistance} <span className="text-sm">{diffText(data.runDistance, data.prevRunDistance, 'km')}</span></p>
-              <p className="text-xs">Previous: {data.prevRunDistance ?? "—"}</p>
+              <p className="text-xs uppercase text-iron-gold">Run Distance (km)</p>
+              <p className="text-2xl font-black text-iron-cream">{data.runDistance} <span className="text-sm text-iron-muted">{diffText(data.runDistance, data.prevRunDistance, 'km')}</span></p>
+              <p className="text-xs text-iron-muted">Previous: {data.prevRunDistance ?? "—"}</p>
             </div>
 
             <div className="w-40">
               <input
-                className="w-full p-2 border-2 border-black bg-white"
+                className={inputClass}
                 value={runInput}
                 onChange={(e) => setRunInput(e.target.value)}
                 type="number"
@@ -216,7 +221,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
               />
               <div className="mt-2">
                 <button
-                  className="w-full bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
                   onClick={() => save("run", runInput)}
                 >
                   Save
@@ -226,7 +231,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
           </div>
 
           <div className="mt-4">
-            <p className="text-xs">Progress</p>
+            <p className="text-xs text-iron-muted">Progress</p>
             <ProgressBar
               percent={deltaPercent(data.runDistance, data.prevRunDistance)}
               positive={(data.prevRunDistance ?? 0) <= data.runDistance}
@@ -235,17 +240,17 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
         </div>
 
         {/* Body weight */}
-        <div className="border-4 border-black p-4 bg-[#f5ead0]">
+        <div className={metricCardClass}>
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-xs uppercase">Body Weight (kg)</p>
-              <p className="text-2xl font-black">{data.weight} <span className="text-sm">{diffText(data.weight, data.prevWeight, 'kg')}</span></p>
-              <p className="text-xs">Previous: {data.prevWeight ?? "—"}</p>
+              <p className="text-xs uppercase text-iron-gold">Body Weight (kg)</p>
+              <p className="text-2xl font-black text-iron-cream">{data.weight} <span className="text-sm text-iron-muted">{diffText(data.weight, data.prevWeight, 'kg')}</span></p>
+              <p className="text-xs text-iron-muted">Previous: {data.prevWeight ?? "—"}</p>
             </div>
 
             <div className="w-40">
               <input
-                className="w-full p-2 border-2 border-black bg-white"
+                className={inputClass}
                 value={weightInput}
                 onChange={(e) => setWeightInput(e.target.value)}
                 type="number"
@@ -254,7 +259,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
               />
               <div className="mt-2">
                 <button
-                  className="w-full bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
                   onClick={() => save("weight", weightInput)}
                 >
                   Save
@@ -264,7 +269,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
           </div>
 
           <div className="mt-4">
-            <p className="text-xs">Progress</p>
+            <p className="text-xs text-iron-muted">Progress</p>
             <ProgressBar
               percent={deltaPercent(data.weight, data.prevWeight)}
               positive={(data.prevWeight ?? 0) >= data.weight ? false : true}
@@ -274,7 +279,7 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
 
         <div className="flex gap-2">
           <button
-            className="flex-1 bg-black text-[#efe3c2] border-2 border-black py-2 uppercase font-bold"
+            className="flex-1 bg-iron-charcoal text-iron-cream border border-iron-border py-2 uppercase font-bold"
             onClick={() => reset()}
           >
             Reset

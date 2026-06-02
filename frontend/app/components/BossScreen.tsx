@@ -27,9 +27,9 @@ type Props = {
 function statusLabel(status: BossStatus): string {
   switch (status) {
     case "defeated":
-      return "Defeated";
+      return "Cleared";
     case "ready":
-      return "Ready";
+      return "Ready to file";
     case "available":
       return "Active";
     default:
@@ -40,13 +40,13 @@ function statusLabel(status: BossStatus): string {
 function statusBadgeClass(status: BossStatus): string {
   switch (status) {
     case "defeated":
-      return "bg-[#b22222] text-[#efe3c2]";
+      return "border border-iron-danger/50 text-iron-danger bg-iron-panel";
     case "ready":
-      return "bg-black text-[#efe3c2] border-[#b22222]";
+      return "border border-iron-danger text-iron-text bg-iron-panel";
     case "available":
-      return "bg-[#e8d8b0] text-black";
+      return "border border-iron-border-strong text-iron-text bg-iron-raised";
     default:
-      return "bg-gray-400 text-gray-700";
+      return "border border-iron-border text-iron-muted bg-iron-panel";
   }
 }
 
@@ -61,46 +61,42 @@ export default function BossScreen({
 }: Props) {
   return (
     <ScreenShell
-      eyebrow="Inner War"
-      title="Boss Trials"
-      subtitle={`${defeatedCount} / ${BOSSES.length} defeated · ${completionPercent}% complete`}
+      eyebrow="Operations"
+      title="Target dossiers"
+      subtitle={`${defeatedCount} of ${BOSSES.length} cleared · ${completionPercent}% complete`}
       onBack={onBack}
     >
-      <IronCard variant="dark">
-        <p className="uppercase text-xs font-bold text-center tracking-widest">
-          Current Foe
-        </p>
+      <div className="iron-dossier p-4">
+        <p className="iron-label text-iron-danger">Active target</p>
         {currentBoss ? (
           <>
-            <h3 className="text-3xl font-black uppercase text-center mt-2 text-[#b22222]">
-              {currentBoss.name}
-            </h3>
-            <p className="text-xs uppercase text-center mt-2 leading-relaxed opacity-90">
+            <h3 className="iron-heading text-2xl mt-1">{currentBoss.name}</h3>
+            <p className="text-sm text-iron-muted mt-2 leading-relaxed">
               {currentBoss.description}
             </p>
-            <p className="text-[10px] uppercase text-center mt-3 italic opacity-70">
+            <p className="text-xs text-iron-muted mt-2 italic">
               &ldquo;{currentBoss.lore}&rdquo;
             </p>
           </>
         ) : (
-          <p className="text-lg font-black uppercase text-center mt-2">
-            All bosses defeated
+          <p className="text-sm text-iron-muted mt-2">
+            All targets cleared. Maintain discipline.
           </p>
         )}
-        <div className="w-full h-4 border-2 border-[#efe3c2] mt-4">
+        <div className="w-full h-2 iron-progress-track mt-4 overflow-hidden">
           <div
-            className="h-full bg-[#b22222] transition-all duration-500"
+            className="h-full iron-progress-fill iron-progress-fill-danger"
             style={{ width: `${completionPercent}%` }}
           />
         </div>
-      </IronCard>
+      </div>
 
       {BOSS_TIERS.map(({ tier, label }) => {
         const tierBosses = BOSSES.filter((b) => b.tier === tier);
 
         return (
           <div key={tier}>
-            <h3 className="text-xl font-black uppercase mb-3 border-b-4 border-black pb-2">
+            <h3 className="iron-heading text-lg mb-3 border-b border-iron-border pb-2">
               {label}
             </h3>
 
@@ -112,73 +108,67 @@ export default function BossScreen({
                 const isReady = status === "ready";
                 const progressPercent = getBossProgressPercent(boss, ctx);
                 const progressLabel = getBossProgressLabel(boss, ctx);
+                const requirementMet = progressPercent >= 100;
 
                 return (
                   <IronCard
                     key={boss.id}
                     variant={isDefeated ? "tan" : isLocked ? "paper" : "dark"}
-                    className={isLocked ? "opacity-75" : ""}
+                    className={isLocked ? "opacity-75" : isReady || status === "available" ? "iron-dossier !p-4" : ""}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-black uppercase tracking-wider opacity-70">
-                          Tier {boss.tier} · Lv {boss.requiredLevel} ·{" "}
-                          {boss.difficulty}
+                        <p className="text-xs text-iron-muted">
+                          Tier {boss.tier} · Level {boss.requiredLevel} · {boss.difficulty}
                         </p>
-                        <h4 className="text-xl font-black uppercase mt-1">
-                          {boss.name}
-                        </h4>
-                        <p className="text-xs uppercase mt-2 leading-relaxed">
+                        <h4 className="iron-heading text-lg mt-1">{boss.name}</h4>
+                        <p className="text-sm text-iron-muted mt-2 leading-relaxed">
                           {isLocked
-                            ? `Requires level ${boss.requiredLevel} and prior boss defeated.`
+                            ? `Requires level ${boss.requiredLevel} and prior target cleared.`
                             : boss.description}
                         </p>
                       </div>
 
                       <span
-                        className={`shrink-0 px-2 py-1 border-2 border-black text-[10px] font-black uppercase ${statusBadgeClass(status)}`}
+                        className={`shrink-0 px-2 py-1 text-[10px] font-semibold tracking-wide ${statusBadgeClass(status)}`}
                       >
                         {statusLabel(status)}
                       </span>
                     </div>
 
                     {!isLocked && !isDefeated && (
-                      <div className="mt-4 border-2 border-black p-3 bg-[#f5ead0] text-black">
-                        <p className="text-xs font-black uppercase">
-                          Requirement
+                      <div className="mt-4 border-t border-iron-border pt-3">
+                        <p className="iron-label mb-2">Requirements</p>
+                        <p className="text-sm flex items-start gap-2">
+                          <span className="text-iron-danger shrink-0">
+                            {requirementMet ? "✓" : "□"}
+                          </span>
+                          <span>{boss.requirement.label}</span>
                         </p>
-                        <p className="text-sm uppercase font-bold mt-1">
-                          {boss.requirement.label}
-                        </p>
-                        <div className="flex justify-between uppercase text-xs font-bold mt-3">
-                          <span>Progress</span>
-                          <span>{progressLabel}</span>
-                        </div>
-                        <div className="w-full h-3 border-2 border-black mt-2 bg-[#efe3c2]">
+                        <p className="text-xs text-iron-muted mt-1 pl-5">{progressLabel}</p>
+                        <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
                           <div
-                            className="h-full bg-[#b22222] transition-all duration-500"
+                            className="h-full iron-progress-fill iron-progress-fill-danger"
                             style={{ width: `${progressPercent}%` }}
                           />
                         </div>
                       </div>
                     )}
 
-                    <div className="mt-4 grid grid-cols-3 gap-2 text-center uppercase text-[10px] font-bold">
-                      <div className="border-2 border-black p-2 bg-[#e8d8b0]">
-                        <p>XP</p>
-                        <p className="text-sm font-black mt-1 text-[#b22222]">
+                    <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+                      <div className="border border-iron-border p-2 iron-card-raised">
+                        <p className="text-iron-accent-dim">XP</p>
+                        <p className="text-sm font-semibold mt-1 text-iron-accent">
                           +{boss.rewards.xp}
                         </p>
                       </div>
-                      <div className="border-2 border-black p-2 bg-black text-[#efe3c2]">
-                        <p>Title</p>
-                        <p className="text-sm font-black mt-1">
-                          {boss.rewards.title}
-                        </p>
+                      <div className="border border-iron-border p-2 iron-card-panel">
+                        <p className="text-iron-muted">Title</p>
+                        <p className="text-sm font-semibold mt-1">{boss.rewards.title}</p>
                       </div>
-                      <div className="border-2 border-black p-2 bg-[#e8d8b0]">
-                        <p>Badge</p>
-                        <p className="text-sm font-black mt-1">
+                      <div className="border border-iron-border p-2 iron-card-raised">
+                        <p className="text-iron-accent-dim">Badge</p>
+                        <p className="text-sm font-semibold mt-1">
                           {boss.rewards.badge.replace(/_/g, " ")}
                         </p>
                       </div>
@@ -188,9 +178,9 @@ export default function BossScreen({
                       <button
                         type="button"
                         onClick={() => onClaimBoss(boss.id)}
-                        className="w-full mt-4 bg-[#b22222] text-[#efe3c2] border-4 border-black py-3 uppercase font-black transition-transform active:scale-[0.98]"
+                        className="iron-interactive iron-btn-danger w-full mt-4 py-3 text-sm font-semibold rounded-sm"
                       >
-                        Claim Victory
+                        File clearance report
                       </button>
                     )}
                   </IronCard>

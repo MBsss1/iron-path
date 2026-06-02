@@ -6,15 +6,15 @@ export default function WeekProgress({ week }: Props) {
   const progress = (week / 24) * 100;
 
   return (
-    <div className="w-full mt-4 border-2 border-black p-3 bg-[#e8d8b0]">
-      <div className="flex justify-between text-xs uppercase font-black">
+    <div className="w-full mt-4 iron-card-raised p-3">
+      <div className="flex justify-between text-xs uppercase font-black text-iron-muted">
         <span>24 Week Path</span>
-        <span>Week {week} / 24</span>
+        <span className="text-iron-gold">Week {week} / 24</span>
       </div>
 
-      <div className="w-full h-4 border-2 border-black mt-2 bg-[#f5ead0]">
+      <div className="w-full h-4 iron-progress-track mt-2 overflow-hidden rounded-sm">
         <div
-          className="h-full bg-[#b22222] transition-all duration-500"
+          className="h-full iron-progress-fill transition-all duration-500"
           style={{
             width: `${progress}%`,
           }}

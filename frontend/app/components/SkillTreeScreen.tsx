@@ -58,9 +58,9 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
             </p>
           </div>
         </div>
-        <div className="w-full h-4 border-2 border-[#efe3c2] mt-4">
+        <div className="w-full h-4 iron-progress-track mt-4 overflow-hidden">
           <div
-            className="h-full bg-[#b22222] transition-all duration-500"
+            className="h-full iron-progress-fill transition-all duration-500"
             style={{
               width: `${Math.round((unlockedCount / totalSkills) * 100)}%`,
             }}
@@ -99,7 +99,7 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
                   {index === 0 && (
                     <p
                       className={`text-xs font-black uppercase mt-2 ${
-                        isUnlocked ? "text-[#b22222]" : "opacity-60"
+                        isUnlocked ? "text-iron-accent" : "text-iron-muted"
                       }`}
                     >
                       Passive: {classDef.skill1Passive.label}
@@ -109,10 +109,10 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
                 </div>
 
                 <span
-                  className={`shrink-0 px-2 py-1 border-2 border-black text-[10px] font-black uppercase ${
+                  className={`shrink-0 px-2 py-1 border border-iron-border text-[10px] font-black uppercase ${
                     isUnlocked
-                      ? "bg-[#b22222] text-[#efe3c2]"
-                      : "bg-gray-400 text-gray-700"
+                      ? "bg-iron-accent-dim text-iron-bg"
+                      : "bg-iron-charcoal text-iron-muted"
                   }`}
                 >
                   {isUnlocked ? "Unlocked" : "Locked"}
@@ -127,9 +127,9 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
                       Level {level} / {requiredLevel}
                     </span>
                   </div>
-                  <div className="w-full h-3 border-2 border-black mt-2 bg-[#f5ead0]">
+                  <div className="w-full h-3 iron-progress-track mt-2 overflow-hidden">
                     <div
-                      className="h-full bg-[#b22222] transition-all duration-500"
+                      className="h-full iron-progress-fill transition-all duration-500"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>

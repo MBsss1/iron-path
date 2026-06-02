@@ -1,13 +1,14 @@
 import { ButtonHTMLAttributes } from "react";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
 };
 
 const variants = {
-  primary: "bg-[#b22222] text-[#efe3c2] border-4 border-black",
-  secondary: "bg-black text-[#efe3c2] border-4 border-[#b22222]",
-  ghost: "bg-[#e8d8b0] text-black border-4 border-black",
+  primary: "iron-interactive iron-btn-primary",
+  secondary: "iron-interactive iron-btn-secondary",
+  ghost: "iron-interactive iron-btn-ghost",
+  danger: "iron-interactive iron-btn-danger",
 };
 
 export default function IronButton({
@@ -19,7 +20,7 @@ export default function IronButton({
   return (
     <button
       type="button"
-      className={`w-full py-3 sm:py-4 uppercase font-black tracking-wider min-h-[48px] transition-transform active:scale-[0.98] disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`w-full py-3 sm:py-4 text-sm font-semibold min-h-[48px] rounded-sm disabled:opacity-50 ${variants[variant]} ${className}`}
       {...props}
     >
       {children}

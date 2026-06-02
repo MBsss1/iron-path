@@ -16,55 +16,45 @@ export default function BossTrialPopup({
   if (!isOpen || !trial) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#f5ead0] border-4 border-black p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
-        <div className="text-center border-b-4 border-black pb-4 mb-4">
-          <p className="uppercase tracking-[0.2em] text-sm font-bold text-[#b22222]">
-            Boss Trial
-          </p>
-
-          <h2 className="text-4xl font-black uppercase mt-2">{trial.title}</h2>
-
-          <p className="mt-3 uppercase text-sm leading-relaxed">
-            {trial.description}
-          </p>
+    <div className="fixed inset-0 iron-modal-overlay flex items-center justify-center z-50 p-4 animate-overlay-fade-in">
+      <div className="iron-modal iron-dossier p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto animate-modal-enter">
+        <div className="border-b border-iron-border pb-4 mb-4">
+          <p className="iron-label text-iron-danger">Field assessment</p>
+          <h2 className="iron-heading text-2xl mt-2">{trial.title}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-iron-muted">{trial.description}</p>
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-black uppercase mb-3">Requirements</h3>
-
-          <div className="space-y-2 border-2 border-black p-3 bg-black text-[#efe3c2]">
+          <h3 className="iron-heading text-base mb-3">Requirements</h3>
+          <div className="space-y-2 border border-iron-border p-3 iron-card-panel">
             {trial.requirements.map((req, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <span className="font-black">•</span>
-                <p className="text-sm uppercase font-bold">{req}</p>
+              <div key={index} className="flex items-start gap-2 text-sm">
+                <span className="text-iron-danger shrink-0">□</span>
+                <p>{req}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="mb-6 border-2 border-black p-4 bg-[#e8d8b0] text-center">
-          <p className="uppercase text-xs font-bold tracking-widest">
-            Reward
-          </p>
-
-          <p className="text-4xl font-black text-[#b22222] mt-2">
-            +{trial.xpReward} XP
-          </p>
+        <div className="mb-6 border border-iron-border p-4 iron-card-raised text-center">
+          <p className="iron-label">Reward</p>
+          <p className="text-3xl font-semibold iron-text-accent mt-2">+{trial.xpReward} XP</p>
         </div>
 
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={onComplete}
-            className="flex-1 bg-[#b22222] text-[#efe3c2] border-4 border-black py-3 uppercase font-black"
+            className="flex-1 iron-interactive iron-btn-danger py-3 text-sm font-semibold rounded-sm"
           >
-            Accept Trial
+            Accept assessment
           </button>
 
           {onSkip && (
             <button
+              type="button"
               onClick={onSkip}
-              className="flex-1 bg-black text-[#efe3c2] border-4 border-[#b22222] py-3 uppercase font-black"
+              className="flex-1 iron-interactive iron-btn-secondary py-3 text-sm font-semibold rounded-sm"
             >
               Skip
             </button>

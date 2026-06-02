@@ -14,21 +14,20 @@ export default function AchievementPopup({
   if (!isOpen || !achievement) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-overlay-fade-in">
-      <div className="bg-[#f5ead0] border-4 border-black p-6 w-full max-w-sm text-center animate-achievement-slide animate-achievement-glow">
-        <p className="uppercase tracking-[0.2em] text-sm font-bold text-[#b22222]">
-          Achievement Unlocked
-        </p>
+    <div className="fixed inset-0 iron-modal-overlay flex items-center justify-center z-50 p-4 animate-overlay-fade-in">
+      <div className="iron-modal p-6 w-full max-w-sm text-center animate-modal-enter">
+        <p className="iron-label">Achievement recorded</p>
 
-        <h2 className="text-4xl font-black uppercase mt-4">{achievement.title}</h2>
+        <h2 className="iron-heading text-3xl mt-4">{achievement.title}</h2>
 
-        <p className="mt-4 uppercase text-sm leading-relaxed">
+        <p className="mt-4 text-sm leading-relaxed text-iron-muted">
           {achievement.description}
         </p>
 
         <button
+          type="button"
           onClick={onClose}
-          className="w-full mt-6 bg-[#b22222] text-[#efe3c2] border-4 border-black py-3 uppercase font-black transition-transform active:scale-[0.98]"
+          className="iron-interactive iron-btn-primary w-full mt-6 py-3 text-sm font-semibold rounded-sm"
         >
           Continue
         </button>

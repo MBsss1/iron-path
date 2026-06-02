@@ -52,10 +52,10 @@ export default function TodayScreen({
   };
 
   const taskClass = (id: DailyMission["id"]) =>
-    `w-full border-2 border-black p-4 sm:p-5 flex justify-between uppercase font-bold cursor-pointer min-h-[52px] ${
+    `iron-interactive w-full border border-iron-border p-4 sm:p-5 flex justify-between font-semibold cursor-pointer min-h-[52px] ${
       isCompleted(id)
-        ? "bg-[#e8d8b0] text-black opacity-60"
-        : "bg-black text-[#efe3c2]"
+        ? "bg-iron-raised text-iron-muted opacity-60"
+        : "iron-card-panel hover:border-iron-accent-dim/50"
     }`;
 
   const deepWorkDone = isCompleted("deepwork");
@@ -64,13 +64,11 @@ export default function TodayScreen({
   const workoutDone = isCompleted("workout");
 
   return (
-    <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
-      <h2 className="text-4xl font-black uppercase text-center">
-        TODAY'S WORK
-      </h2>
+    <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24">
+      <h2 className="iron-heading text-3xl text-center">Today&apos;s log</h2>
 
-      <div className="mt-4 text-center uppercase text-sm">
-        <p className="font-black">{program.phase}</p>
+      <div className="mt-4 text-center text-sm text-iron-muted">
+        <p className="font-semibold text-iron-accent">{program.phase}</p>
         <p>Week {program.week} / 24</p>
       </div>
 
@@ -83,13 +81,13 @@ export default function TodayScreen({
           <span>
             {deepWorkDone ? "✓ Deep Work 2 Hours" : "Deep Work 2 Hours"}
           </span>
-          <span>+{deepWorkXp} XP</span>
+          <span className="text-iron-gold">+{deepWorkXp} XP</span>
         </button>
 
         {program.workouts?.map((workout: string, index: number) => (
           <div
             key={index}
-            className={`border-2 border-black p-4 bg-[#e8d8b0] flex justify-between uppercase font-bold ${
+            className={`border border-iron-border p-4 iron-card-raised flex justify-between uppercase font-bold text-iron-text ${
               workoutDone ? "opacity-60" : ""
             }`}
           >
@@ -97,7 +95,7 @@ export default function TodayScreen({
               {workoutDone ? "✓ " : ""}
               {workout}
             </span>
-            <span>+{workoutXp} XP</span>
+            <span className="text-iron-gold">+{workoutXp} XP</span>
           </div>
         ))}
 
@@ -109,7 +107,7 @@ export default function TodayScreen({
           <span>
             {proteinDone ? "✓ Protein Target" : "Protein Target"}
           </span>
-          <span>+{proteinXp} XP</span>
+          <span className="text-iron-gold">+{proteinXp} XP</span>
         </button>
 
         <button
@@ -120,7 +118,7 @@ export default function TodayScreen({
           <span>
             {sleepDone ? "✓ Sleep Before 00:30" : "Sleep Before 00:30"}
           </span>
-          <span>+{sleepXp} XP</span>
+          <span className="text-iron-gold">+{sleepXp} XP</span>
         </button>
       </div>
     </div>

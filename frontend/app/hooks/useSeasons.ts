@@ -64,6 +64,7 @@ export function useSeasons() {
   const clearPending = () => setPendingSeasonComplete(false);
 
   return {
+    loaded,
     completedSeasons,
     pendingSeasonComplete,
     checkForSeasonComplete,

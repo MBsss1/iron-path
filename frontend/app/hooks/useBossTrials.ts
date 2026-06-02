@@ -51,6 +51,7 @@ export function useBossTrials() {
   };
 
   return {
+    loaded,
     completedTrials,
     pendingTrial,
     completeTrial,

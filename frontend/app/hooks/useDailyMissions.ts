@@ -69,6 +69,7 @@ export function useDailyMissions() {
   };
 
   return {
+    loaded,
     missions,
     completeMission,
     completedCount,

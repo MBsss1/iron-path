@@ -97,6 +97,7 @@ export function useDailyRewards() {
   }, [data, today]);
 
   return {
+    loaded,
     lastClaimDate: data.lastClaimDate,
     currentStreak: data.currentStreak,
     canClaim,

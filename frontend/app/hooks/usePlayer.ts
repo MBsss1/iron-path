@@ -216,6 +216,7 @@ export function usePlayer() {
   };
 
   return {
+    loaded,
     xp,
     level,
     week,

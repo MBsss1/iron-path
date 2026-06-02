@@ -21,12 +21,16 @@ export type Profile = {
 
 export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const migrated = migrateProfile();
-    if (migrated) {
-      queueMicrotask(() => setProfile(migrated));
-    }
+    queueMicrotask(() => {
+      if (migrated) {
+        setProfile(migrated);
+      }
+      setLoaded(true);
+    });
   }, []);
 
   const saveProfile = (profile: Profile) => {
@@ -41,6 +45,7 @@ export function useProfile() {
 
   return {
     profile,
+    loaded,
     saveProfile,
     clearProfile,
   };

@@ -77,7 +77,7 @@ function getNavActiveScreen(screen: string) {
 }
 
 export default function Home() {
-  const { profile, saveProfile, clearProfile } = useProfile();
+  const { profile, loaded: profileLoaded, saveProfile, clearProfile } = useProfile();
   const classId = profile?.classId;
   const [screen, setScreen] = useState("hero");
   const [showPopup, setShowPopup] = useState(false);
@@ -92,8 +92,6 @@ export default function Home() {
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
   const goBackToMore = useCallback(() => setScreen("more"), []);
-
-  const appReady = Boolean(profile?.classId);
 
   useEffect(() => {
     telegramReady();
@@ -114,16 +112,8 @@ export default function Home() {
     }
   }, [screen]);
 
-  useEffect(() => {
-    const visible =
-      appReady && getTelegramBackButtonTarget(screen, MORE_SUB_SCREENS) !== null;
-    return configureTelegramBackButton({
-      visible,
-      onClick: handleTelegramBack,
-    });
-  }, [appReady, screen, handleTelegramBack]);
-
   const {
+    loaded: playerLoaded,
     xp,
     level,
     week,
@@ -150,6 +140,7 @@ export default function Home() {
   } = usePlayer();
 
   const {
+    loaded: dailyMissionsLoaded,
     missions,
     completeMission,
     completedCount,
@@ -158,6 +149,7 @@ export default function Home() {
   } = useDailyMissions();
 
   const {
+    loaded: bossTrialsLoaded,
     pendingTrial,
     completeTrial,
     clearPendingTrial,
@@ -165,6 +157,7 @@ export default function Home() {
   } = useBossTrials();
 
   const {
+    loaded: bossesLoaded,
     defeatedBosses,
     equippedTitle,
     unlockedTitleIds,
@@ -186,6 +179,7 @@ export default function Home() {
   );
 
   const {
+    loaded: seasonsLoaded,
     completedSeasons,
     pendingSeasonComplete,
     checkForSeasonComplete,
@@ -193,10 +187,42 @@ export default function Home() {
     clearPending,
   } = useSeasons();
 
-  const { canClaim, rewardDay, xpReward, claimReward } = useDailyRewards();
+  const {
+    loaded: dailyRewardsLoaded,
+    canClaim,
+    rewardDay,
+    xpReward,
+    claimReward,
+  } = useDailyRewards();
 
-  const { stats, daysSinceStart, recordMissionComplete, recordDailyClaim } =
-    useStats(level);
+  const {
+    loaded: statsLoaded,
+    stats,
+    daysSinceStart,
+    recordMissionComplete,
+    recordDailyClaim,
+  } = useStats(level);
+
+  const storageReady =
+    profileLoaded &&
+    playerLoaded &&
+    dailyRewardsLoaded &&
+    dailyMissionsLoaded &&
+    statsLoaded &&
+    bossesLoaded &&
+    bossTrialsLoaded &&
+    seasonsLoaded;
+
+  const appReady = storageReady && Boolean(profile?.classId);
+
+  useEffect(() => {
+    const visible =
+      appReady && getTelegramBackButtonTarget(screen, MORE_SUB_SCREENS) !== null;
+    return configureTelegramBackButton({
+      visible,
+      onClick: handleTelegramBack,
+    });
+  }, [appReady, screen, handleTelegramBack]);
 
   const achievementProgressInput = useMemo(
     () => ({
@@ -218,11 +244,13 @@ export default function Home() {
   );
 
   useEffect(() => {
+    if (!storageReady) return;
     checkForNewTrial(Number(week));
     checkForSeasonComplete(Number(week));
-  }, [week, checkForNewTrial]);
+  }, [week, checkForNewTrial, checkForSeasonComplete, storageReady]);
 
   useEffect(() => {
+    if (!storageReady) return;
     checkAchievements(stats.currentLoginStreak, completedSeasons.length);
   }, [
     level,
@@ -232,13 +260,15 @@ export default function Home() {
     stats.currentLoginStreak,
     completedSeasons.length,
     checkAchievements,
+    storageReady,
   ]);
 
   useEffect(() => {
+    if (!storageReady) return;
     if (canClaim && profile && !showSplash) {
       setShowDailyReward(true);
     }
-  }, [canClaim, profile, showSplash]);
+  }, [canClaim, profile, showSplash, storageReady]);
 
   useEffect(() => {
     if (leveledUp) hapticLevelUp();
@@ -504,6 +534,19 @@ export default function Home() {
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
+      {!showSplash && !storageReady && (
+        <div
+          className="fixed inset-0 z-[99] flex items-center justify-center bg-gradient-to-b from-[#d8c7a1] to-[#efe3c2]"
+          aria-busy="true"
+          aria-label="Loading saved progress"
+        >
+          <div className="text-center border-4 border-black bg-[#f5ead0] py-8 px-10 shadow-2xl">
+            <p className="text-sm uppercase tracking-[0.3em] font-black">Loading</p>
+            <div className="mt-4 h-1 w-20 mx-auto bg-[#b22222]" />
+          </div>
+        </div>
+      )}
+
       {xpFloat !== null && (
         <XpFloatAnimation amount={xpFloat} onDone={clearXpFloat} />
       )}
@@ -520,16 +563,16 @@ export default function Home() {
             </p>
           </div>
 
-          {!profile && (
+          {profileLoaded && !profile && (
             <OnboardingScreen onFinish={() => window.location.reload()} />
           )}
 
-          {profile && !profile.classId && (
+          {profileLoaded && profile && !profile.classId && (
             <ClassSelectionScreen onConfirm={handleConfirmClass} />
           )}
 
           <ScreenTransition screen={screen}>
-            {profile && profile.classId && screen === "hero" && (
+            {storageReady && profile && profile.classId && screen === "hero" && (
               <HeroScreen
                 profile={profile}
                 level={level}
@@ -549,7 +592,7 @@ export default function Home() {
               />
             )}
 
-            {profile && profile.classId && screen === "today" && (
+            {storageReady && profile && profile.classId && screen === "today" && (
               <TodayScreen
                 program={program}
                 classId={classId}
@@ -561,7 +604,7 @@ export default function Home() {
               />
             )}
 
-            {screen === "training" && (
+            {storageReady && profile?.classId && screen === "training" && (
               <TrainingScreen
                 program={program}
                 classId={classId}
@@ -574,11 +617,11 @@ export default function Home() {
               />
             )}
 
-            {screen === "nutrition" && (
+            {storageReady && profile?.classId && screen === "nutrition" && (
               <NutritionScreen goal={profile?.goal} />
             )}
 
-            {screen === "progress" && (
+            {storageReady && profile?.classId && screen === "progress" && (
               <ProgressScreen
                 level={level}
                 rank={rank}
@@ -592,7 +635,7 @@ export default function Home() {
               />
             )}
 
-            {screen === "achievements" && (
+            {storageReady && profile?.classId && screen === "achievements" && (
               <AchievementsScreen
                 achievementsUnlocked={achievementsUnlocked}
                 progressInput={achievementProgressInput}
@@ -600,7 +643,7 @@ export default function Home() {
               />
             )}
 
-            {screen === "more" && (
+            {storageReady && profile?.classId && screen === "more" && (
               <MoreScreen
                 onSelectBosses={() => setScreen("bosses")}
                 onSelectProgress={() => setScreen("progress")}
@@ -623,7 +666,7 @@ export default function Home() {
               />
             )}
 
-            {screen === "profile" && profile && (
+            {storageReady && screen === "profile" && profile && (
               <ProfileScreen
                 profile={profile}
                 level={level}
@@ -636,7 +679,7 @@ export default function Home() {
               />
             )}
 
-            {screen === "stats" && (
+            {storageReady && profile?.classId && screen === "stats" && (
               <StatsScreen
                 totalXp={totalXp}
                 level={level}
@@ -657,18 +700,18 @@ export default function Home() {
               />
             )}
 
-            {screen === "strength" && (
+            {storageReady && profile?.classId && screen === "strength" && (
               <StrengthTrackerScreen onBack={goBackToMore} />
             )}
 
-            {screen === "legacy" && (
+            {storageReady && profile?.classId && screen === "legacy" && (
               <LegacyScreen
                 seasons={completedSeasons}
                 onBack={goBackToMore}
               />
             )}
 
-            {screen === "skilltree" && profile?.classId && (
+            {storageReady && screen === "skilltree" && profile?.classId && (
               <SkillTreeScreen
                 classId={profile.classId}
                 level={level}
@@ -676,14 +719,14 @@ export default function Home() {
               />
             )}
 
-            {screen === "settings" && (
+            {storageReady && profile?.classId && screen === "settings" && (
               <SettingsScreen
                 onBack={goBackToMore}
                 onReset={handleResetProgress}
               />
             )}
 
-            {screen === "bosses" && (
+            {storageReady && profile?.classId && screen === "bosses" && (
               <BossScreen
                 ctx={bossProgressContext}
                 currentBoss={currentBoss}
@@ -696,46 +739,52 @@ export default function Home() {
             )}
           </ScreenTransition>
 
-          <AppPopups
-            placement="inline"
-            pendingSeasonComplete={pendingSeasonComplete}
-            completedSeasons={completedSeasons}
-            onClaimSeason={handleClaimSeason}
-            onCloseSeason={clearPending}
-          />
+          {storageReady && profile?.classId && (
+            <AppPopups
+              placement="inline"
+              pendingSeasonComplete={pendingSeasonComplete}
+              completedSeasons={completedSeasons}
+              onClaimSeason={handleClaimSeason}
+              onCloseSeason={clearPending}
+            />
+          )}
         </div>
 
-        <AppPopups
-          placement="floating"
-          showWeekPopup={showWeekPopup}
-          week={weekNumber}
-          phase={program.phase}
-          onCloseWeekPopup={() => setShowWeekPopup(false)}
-          showPopup={showPopup}
-          lastXpReward={lastXpReward}
-          onCloseWorkoutPopup={() => setShowPopup(false)}
-          leveledUp={leveledUp}
-          level={level}
-          rank={rank}
-          onCloseLevelUp={clearLevelUp}
-          pendingAchievement={pendingAchievement}
-          onCloseAchievement={clearPendingAchievement}
-          pendingTrial={pendingTrial}
-          onCompleteBossTrial={handleCompleteBossTrial}
-          onSkipBossTrial={clearPendingTrial}
-          pendingBossDefeat={pendingBossDefeat}
-          bossDefeatXp={bossDefeatXp}
-          onCloseBossDefeat={handleCloseBossDefeat}
-        />
+        {storageReady && profile?.classId && (
+          <>
+            <AppPopups
+              placement="floating"
+              showWeekPopup={showWeekPopup}
+              week={weekNumber}
+              phase={program.phase}
+              onCloseWeekPopup={() => setShowWeekPopup(false)}
+              showPopup={showPopup}
+              lastXpReward={lastXpReward}
+              onCloseWorkoutPopup={() => setShowPopup(false)}
+              leveledUp={leveledUp}
+              level={level}
+              rank={rank}
+              onCloseLevelUp={clearLevelUp}
+              pendingAchievement={pendingAchievement}
+              onCloseAchievement={clearPendingAchievement}
+              pendingTrial={pendingTrial}
+              onCompleteBossTrial={handleCompleteBossTrial}
+              onSkipBossTrial={clearPendingTrial}
+              pendingBossDefeat={pendingBossDefeat}
+              bossDefeatXp={bossDefeatXp}
+              onCloseBossDefeat={handleCloseBossDefeat}
+            />
 
-        <DailyRewardPopup
-          isOpen={showDailyReward && canClaim}
-          day={rewardDay}
-          xpReward={xpReward}
-          onClaim={handleClaimDailyReward}
-        />
+            <DailyRewardPopup
+              isOpen={showDailyReward && canClaim}
+              day={rewardDay}
+              xpReward={xpReward}
+              onClaim={handleClaimDailyReward}
+            />
 
-        <BottomNav screen={navScreen} setScreen={setScreen} />
+            <BottomNav screen={navScreen} setScreen={setScreen} />
+          </>
+        )}
       </main>
     </>
   );

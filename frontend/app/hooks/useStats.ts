@@ -116,6 +116,7 @@ export function useStats(level: number) {
     : 0;
 
   return {
+    loaded,
     stats,
     daysSinceStart,
     recordMissionComplete,

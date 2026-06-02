@@ -11,6 +11,7 @@ import {
   type BossProgressContext,
   type BossStatus,
 } from "../utils/bossProgress";
+import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
 
@@ -23,19 +24,6 @@ type Props = {
   defeatedCount: number;
   completionPercent: number;
 };
-
-function statusLabel(status: BossStatus): string {
-  switch (status) {
-    case "defeated":
-      return "Cleared";
-    case "ready":
-      return "Ready to file";
-    case "available":
-      return "Active";
-    default:
-      return "Locked";
-  }
-}
 
 function statusBadgeClass(status: BossStatus): string {
   switch (status) {
@@ -59,15 +47,35 @@ export default function BossScreen({
   defeatedCount,
   completionPercent,
 }: Props) {
+  const { t } = useTranslation();
+
+  const statusLabel = (status: BossStatus): string => {
+    switch (status) {
+      case "defeated":
+        return t("boss.statusCleared");
+      case "ready":
+        return t("boss.statusReady");
+      case "available":
+        return t("boss.statusActive");
+      default:
+        return t("boss.statusLocked");
+    }
+  };
+
   return (
     <ScreenShell
-      eyebrow="Operations"
-      title="Target dossiers"
-      subtitle={`${defeatedCount} of ${BOSSES.length} cleared · ${completionPercent}% complete`}
+      eyebrow={t("boss.eyebrow")}
+      title={t("boss.title")}
+      subtitle={t("boss.subtitle", {
+        defeated: defeatedCount,
+        total: BOSSES.length,
+        percent: completionPercent,
+      })}
+      backLabel={t("common.back")}
       onBack={onBack}
     >
       <div className="iron-dossier p-4">
-        <p className="iron-label text-iron-danger">Active target</p>
+        <p className="iron-label text-iron-danger">{t("boss.activeTarget")}</p>
         {currentBoss ? (
           <>
             <h3 className="iron-heading text-2xl mt-1">{currentBoss.name}</h3>
@@ -79,9 +87,7 @@ export default function BossScreen({
             </p>
           </>
         ) : (
-          <p className="text-sm text-iron-muted mt-2">
-            All targets cleared. Maintain discipline.
-          </p>
+          <p className="text-sm text-iron-muted mt-2">{t("boss.allCleared")}</p>
         )}
         <div className="w-full h-2 iron-progress-track mt-4 overflow-hidden">
           <div
@@ -114,17 +120,27 @@ export default function BossScreen({
                   <IronCard
                     key={boss.id}
                     variant={isDefeated ? "tan" : isLocked ? "paper" : "dark"}
-                    className={isLocked ? "opacity-75" : isReady || status === "available" ? "iron-dossier !p-4" : ""}
+                    className={
+                      isLocked
+                        ? "opacity-75"
+                        : isReady || status === "available"
+                          ? "iron-dossier !p-4"
+                          : ""
+                    }
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-iron-muted">
-                          Tier {boss.tier} · Level {boss.requiredLevel} · {boss.difficulty}
+                          {t("boss.tierMeta", {
+                            tier: boss.tier,
+                            level: boss.requiredLevel,
+                            difficulty: boss.difficulty,
+                          })}
                         </p>
                         <h4 className="iron-heading text-lg mt-1">{boss.name}</h4>
                         <p className="text-sm text-iron-muted mt-2 leading-relaxed">
                           {isLocked
-                            ? `Requires level ${boss.requiredLevel} and prior target cleared.`
+                            ? t("boss.requiresLevel", { level: boss.requiredLevel })
                             : boss.description}
                         </p>
                       </div>
@@ -138,7 +154,7 @@ export default function BossScreen({
 
                     {!isLocked && !isDefeated && (
                       <div className="mt-4 border-t border-iron-border pt-3">
-                        <p className="iron-label mb-2">Requirements</p>
+                        <p className="iron-label mb-2">{t("boss.requirements")}</p>
                         <p className="text-sm flex items-start gap-2">
                           <span className="text-iron-danger shrink-0">
                             {requirementMet ? "✓" : "□"}
@@ -157,17 +173,17 @@ export default function BossScreen({
 
                     <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
                       <div className="border border-iron-border p-2 iron-card-raised">
-                        <p className="text-iron-accent-dim">XP</p>
+                        <p className="text-iron-accent-dim">{t("boss.rewardXp")}</p>
                         <p className="text-sm font-semibold mt-1 text-iron-accent">
                           +{boss.rewards.xp}
                         </p>
                       </div>
                       <div className="border border-iron-border p-2 iron-card-panel">
-                        <p className="text-iron-muted">Title</p>
+                        <p className="text-iron-muted">{t("boss.rewardTitle")}</p>
                         <p className="text-sm font-semibold mt-1">{boss.rewards.title}</p>
                       </div>
                       <div className="border border-iron-border p-2 iron-card-raised">
-                        <p className="text-iron-accent-dim">Badge</p>
+                        <p className="text-iron-accent-dim">{t("boss.rewardBadge")}</p>
                         <p className="text-sm font-semibold mt-1">
                           {boss.rewards.badge.replace(/_/g, " ")}
                         </p>
@@ -180,7 +196,7 @@ export default function BossScreen({
                         onClick={() => onClaimBoss(boss.id)}
                         className="iron-interactive iron-btn-danger w-full mt-4 py-3 text-sm font-semibold rounded-sm"
                       >
-                        File clearance report
+                        {t("boss.fileClearance")}
                       </button>
                     )}
                   </IronCard>

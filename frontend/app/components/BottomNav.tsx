@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { hapticTab } from "../utils/haptics";
+import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   screen: string;
@@ -8,14 +9,16 @@ type Props = {
 };
 
 const NAV_ITEMS = [
-  { id: "hero", label: "Home", icon: "★" },
-  { id: "today", label: "Today", icon: "✓" },
-  { id: "training", label: "Train", icon: "◆" },
-  { id: "nutrition", label: "Food", icon: "◇" },
-  { id: "more", label: "More", icon: "☰" },
+  { id: "hero", labelKey: "nav.home", icon: "★" },
+  { id: "today", labelKey: "nav.today", icon: "✓" },
+  { id: "training", labelKey: "nav.train", icon: "◆" },
+  { id: "nutrition", labelKey: "nav.food", icon: "◇" },
+  { id: "more", labelKey: "nav.more", icon: "☰" },
 ] as const;
 
 export default function BottomNav({ screen, setScreen }: Props) {
+  const { t } = useTranslation();
+
   const handleSelect = (name: string) => {
     if (screen !== name) {
       hapticTab();
@@ -26,10 +29,10 @@ export default function BottomNav({ screen, setScreen }: Props) {
   return (
     <nav
       className="fixed bottom-0 left-0 w-full z-40 iron-nav-glass pb-[env(safe-area-inset-bottom)]"
-      aria-label="Main navigation"
+      aria-label={t("nav.ariaLabel")}
     >
       <div className="max-w-md mx-auto flex justify-around items-stretch px-1">
-        {NAV_ITEMS.map(({ id, label, icon }) => {
+        {NAV_ITEMS.map(({ id, labelKey, icon }) => {
           const isActive = screen === id;
 
           return (
@@ -53,7 +56,9 @@ export default function BottomNav({ screen, setScreen }: Props) {
                 {icon}
               </span>
 
-              <span className={`mt-1 ${isActive ? "text-iron-text" : ""}`}>{label}</span>
+              <span className={`mt-1 ${isActive ? "text-iron-text" : ""}`}>
+                {t(labelKey)}
+              </span>
             </button>
           );
         })}

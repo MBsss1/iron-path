@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { Locale } from "../i18n";
+import { getLocaleLabel } from "../i18n";
+import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   onBack: () => void;
@@ -8,6 +11,7 @@ type Props = {
 };
 
 export default function SettingsScreen({ onBack, onReset }: Props) {
+  const { t, locale, setLocale } = useTranslation();
   const [confirming, setConfirming] = useState(false);
 
   const handleConfirmReset = () => {
@@ -15,32 +19,63 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
     setConfirming(false);
   };
 
+  const handleLanguageChange = (next: Locale) => {
+    setLocale(next);
+  };
+
   return (
     <div className="mt-10 iron-shell-card p-6 mb-24">
       <div className="flex items-start justify-between gap-4">
         <div className="text-center flex-1">
-          <p className="iron-label">Options</p>
-          <h2 className="iron-heading text-3xl mt-2">Settings</h2>
-          <p className="mt-2 text-sm text-iron-muted">App preferences and data</p>
+          <p className="iron-label">{t("settings.options")}</p>
+          <h2 className="iron-heading text-3xl mt-2">{t("settings.title")}</h2>
+          <p className="mt-2 text-sm text-iron-muted">{t("settings.subtitle")}</p>
         </div>
 
         <button
           type="button"
           onClick={onBack}
-          className="border border-iron-border-strong px-4 py-2 bg-iron-panel text-iron-cream uppercase text-xs font-black shrink-0 transition-transform active:scale-95"
+          className="iron-interactive iron-btn-ghost px-4 py-2 text-xs font-semibold shrink-0 rounded-sm"
         >
-          Back
+          {t("settings.back")}
         </button>
       </div>
 
-      <div className="mt-8 border border-iron-border-strong iron-card-raised p-5">
-        <p className="iron-label text-iron-danger">Danger zone</p>
+      <div className="mt-8 border border-iron-border iron-card-raised p-5">
+        <p className="iron-label">{t("settings.language")}</p>
+        <p className="mt-2 text-sm text-iron-muted">
+          {t("settings.languageCurrent", { language: getLocaleLabel(locale) })}
+        </p>
 
-        <h3 className="iron-heading text-xl mt-3">Reset progress</h3>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => handleLanguageChange("ru")}
+            className={`iron-interactive py-3 text-sm font-semibold rounded-sm ${
+              locale === "ru" ? "iron-btn-primary" : "iron-btn-secondary"
+            }`}
+          >
+            {t("settings.languageRussian")}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLanguageChange("en")}
+            className={`iron-interactive py-3 text-sm font-semibold rounded-sm ${
+              locale === "en" ? "iron-btn-primary" : "iron-btn-secondary"
+            }`}
+          >
+            {t("settings.languageEnglish")}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-8 border border-iron-border-strong iron-card-raised p-5">
+        <p className="iron-label text-iron-danger">{t("settings.dangerZone")}</p>
+
+        <h3 className="iron-heading text-xl mt-3">{t("settings.resetProgress")}</h3>
 
         <p className="mt-3 text-sm leading-relaxed text-iron-muted">
-          Clears your profile, XP, level, week, stats, and all saved progress.
-          This cannot be undone.
+          {t("settings.resetDescription")}
         </p>
 
         {!confirming ? (
@@ -49,21 +84,21 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
             onClick={() => setConfirming(true)}
             className="w-full mt-5 iron-interactive iron-btn-secondary py-3 text-sm font-semibold rounded-sm border-iron-danger"
           >
-            Reset Progress
+            {t("settings.resetButton")}
           </button>
         ) : (
           <div className="mt-5 border border-iron-border iron-card-panel p-4">
-            <p className="uppercase text-sm font-bold text-center text-iron-cream">
-              Are you sure? All progress will be lost.
+            <p className="text-sm font-semibold text-center text-iron-text">
+              {t("settings.confirmText")}
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setConfirming(false)}
-                className="border border-iron-border py-3 uppercase font-black iron-card-raised text-iron-text transition-transform active:scale-[0.98]"
+                className="iron-interactive iron-btn-secondary py-3 text-sm font-semibold rounded-sm"
               >
-                Cancel
+                {t("settings.cancel")}
               </button>
 
               <button
@@ -71,7 +106,7 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
                 onClick={handleConfirmReset}
                 className="iron-interactive iron-btn-danger py-3 text-sm font-semibold rounded-sm"
               >
-                Confirm Reset
+                {t("settings.confirmReset")}
               </button>
             </div>
           </div>

@@ -5,6 +5,7 @@ import type { ClassId } from "../data/classes";
 import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
 import { applyClassXpBonus } from "../utils/classBonuses";
 import type { DailyMission } from "../hooks/useDailyMissions";
+import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   program: any;
@@ -25,6 +26,8 @@ export default function TodayScreen({
   onCompleteProtein,
   onCompleteSleep,
 }: Props) {
+  const { t } = useTranslation();
+
   const isCompleted = (id: DailyMission["id"]) =>
     missions.find((mission) => mission.id === id)?.completed ?? false;
 
@@ -65,21 +68,22 @@ export default function TodayScreen({
 
   return (
     <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24">
-      <h2 className="iron-heading text-3xl text-center">Today&apos;s log</h2>
+      <h2 className="iron-heading text-3xl text-center">{t("today.title")}</h2>
 
       <div className="mt-4 text-center text-sm text-iron-muted">
         <p className="font-semibold text-iron-accent">{program.phase}</p>
-        <p>Week {program.week} / 24</p>
+        <p>{t("today.week", { week: program.week })}</p>
       </div>
 
       <div className="mt-8 space-y-4">
         <button
+          type="button"
           onClick={() => tryComplete("deepwork", onCompleteDeepWork)}
           disabled={deepWorkDone}
           className={taskClass("deepwork")}
         >
           <span>
-            {deepWorkDone ? "✓ Deep Work 2 Hours" : "Deep Work 2 Hours"}
+            {deepWorkDone ? t("today.deepWorkDone") : t("today.deepWork")}
           </span>
           <span className="text-iron-gold">+{deepWorkXp} XP</span>
         </button>
@@ -87,7 +91,7 @@ export default function TodayScreen({
         {program.workouts?.map((workout: string, index: number) => (
           <div
             key={index}
-            className={`border border-iron-border p-4 iron-card-raised flex justify-between uppercase font-bold text-iron-text ${
+            className={`border border-iron-border p-4 iron-card-raised flex justify-between font-bold text-iron-text ${
               workoutDone ? "opacity-60" : ""
             }`}
           >
@@ -100,24 +104,22 @@ export default function TodayScreen({
         ))}
 
         <button
+          type="button"
           onClick={() => tryComplete("protein", onCompleteProtein)}
           disabled={proteinDone}
           className={taskClass("protein")}
         >
-          <span>
-            {proteinDone ? "✓ Protein Target" : "Protein Target"}
-          </span>
+          <span>{proteinDone ? t("today.proteinDone") : t("today.protein")}</span>
           <span className="text-iron-gold">+{proteinXp} XP</span>
         </button>
 
         <button
+          type="button"
           onClick={() => tryComplete("sleep", onCompleteSleep)}
           disabled={sleepDone}
           className={taskClass("sleep")}
         >
-          <span>
-            {sleepDone ? "✓ Sleep Before 00:30" : "Sleep Before 00:30"}
-          </span>
+          <span>{sleepDone ? t("today.sleepDone") : t("today.sleep")}</span>
           <span className="text-iron-gold">+{sleepXp} XP</span>
         </button>
       </div>

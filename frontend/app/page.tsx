@@ -63,6 +63,9 @@ import {
   telegramExpand,
   telegramReady,
 } from "./utils/telegram";
+import LanguageProvider from "./i18n/LanguageProvider";
+import { useTranslation } from "./i18n/useTranslation";
+import LanguageSelectionScreen from "./components/LanguageSelectionScreen";
 
 const MORE_SUB_SCREENS = [
   "progress",
@@ -81,6 +84,15 @@ function getNavActiveScreen(screen: string) {
 }
 
 export default function Home() {
+  return (
+    <LanguageProvider>
+      <HomeContent />
+    </LanguageProvider>
+  );
+}
+
+function HomeContent() {
+  const { loaded: languageLoaded, languageChosen, setLocale, t } = useTranslation();
   const { profile, loaded: profileLoaded, saveProfile, clearProfile } = useProfile();
   const classId = profile?.classId;
   const [screen, setScreen] = useState("hero");
@@ -551,31 +563,36 @@ export default function Home() {
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
-      {!showSplash && !storageReady && (
+      {!showSplash && languageLoaded && !languageChosen && (
+        <LanguageSelectionScreen onSelect={setLocale} />
+      )}
+
+      {!showSplash && languageLoaded && languageChosen && !storageReady && (
         <div
           className="fixed inset-0 z-[99] flex items-center justify-center iron-page"
           aria-busy="true"
           aria-label="Loading saved progress"
         >
           <div className="text-center iron-shell-card py-8 px-10">
-            <p className="iron-label">Loading</p>
+            <p className="iron-label">{t("app.loading")}</p>
             <div className="mt-4 h-0.5 w-20 mx-auto bg-iron-accent-dim" />
           </div>
         </div>
       )}
 
-      {xpFloat !== null && (
+      {languageChosen && xpFloat !== null && (
         <XpFloatAnimation amount={xpFloat} onDone={clearXpFloat} />
       )}
 
+      {languageChosen && (
       <main className="min-h-screen iron-page flex flex-col items-center px-4 sm:px-6 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <div className="w-full max-w-md">
           <div className="text-center mt-4 sm:mt-6 iron-page-header">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-wide text-iron-text">
-              Iron Path
+              {t("app.title")}
             </h1>
 
-            <p className="text-xs sm:text-sm mt-2 iron-page-header-sub">Est. 1950</p>
+            <p className="text-xs sm:text-sm mt-2 iron-page-header-sub">{t("app.est")}</p>
           </div>
 
           {profileLoaded && !profile && (
@@ -808,6 +825,7 @@ export default function Home() {
           </>
         )}
       </main>
+      )}
     </>
   );
 }

@@ -4,6 +4,7 @@ type Props = {
   eyebrow?: string;
   title: string;
   subtitle?: string;
+  backLabel?: string;
   onBack?: () => void;
   children: ReactNode;
 };
@@ -12,6 +13,7 @@ export default function ScreenShell({
   eyebrow,
   title,
   subtitle,
+  backLabel = "Back",
   onBack,
   children,
 }: Props) {
@@ -33,7 +35,7 @@ export default function ScreenShell({
               onClick={onBack}
               className="iron-interactive iron-btn-ghost px-3 py-2 text-xs font-semibold shrink-0 rounded-sm"
             >
-              Back
+              {backLabel}
             </button>
           )}
         </div>

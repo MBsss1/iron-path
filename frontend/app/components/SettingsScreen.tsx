@@ -25,20 +25,18 @@ export default function SettingsScreen({ onBack, onReset }: Props) {
 
   return (
     <div className="mt-10 iron-shell-card p-6 mb-24">
-      <div className="flex items-start justify-between gap-4">
-        <div className="text-center flex-1">
-          <p className="iron-label">{t("settings.options")}</p>
-          <h2 className="iron-heading text-3xl mt-2">{t("settings.title")}</h2>
-          <p className="mt-2 text-sm text-iron-muted">{t("settings.subtitle")}</p>
-        </div>
+      <button
+        type="button"
+        onClick={onBack}
+        className="iron-interactive -ml-1 mb-3 text-sm text-iron-muted hover:text-iron-text font-medium"
+      >
+        ← {t("common.back")}
+      </button>
 
-        <button
-          type="button"
-          onClick={onBack}
-          className="iron-interactive iron-btn-ghost px-4 py-2 text-xs font-semibold shrink-0 rounded-sm"
-        >
-          {t("settings.back")}
-        </button>
+      <div className="text-center">
+        <p className="iron-label">{t("settings.options")}</p>
+        <h2 className="iron-heading text-3xl mt-2">{t("settings.title")}</h2>
+        <p className="mt-2 text-sm text-iron-muted">{t("settings.subtitle")}</p>
       </div>
 
       <div className="mt-8 border border-iron-border iron-card-raised p-5">

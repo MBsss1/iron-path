@@ -1,4 +1,5 @@
-import type { AchievementId } from "../data/achievements";
+import type { AchievementCategory, AchievementId } from "../data/achievements";
+import type { AvatarId } from "../data/avatar";
 import type { BossDefinition } from "../data/bosses";
 import type { ClassId } from "../data/classes";
 import type { NutritionMissionId } from "../hooks/useNutritionMissions";
@@ -106,11 +107,44 @@ export function translatePhase(phaseName: string, t: TranslateFn): string {
 
 export function translateAchievement(
   id: AchievementId,
-  field: "title" | "description",
+  field: "title" | "description" | "hint",
   fallback: string,
   t: TranslateFn
 ): string {
   return tr(t, `achievement.${id}.${field}`, undefined, fallback);
+}
+
+export function translateAchievementCategory(
+  category: AchievementCategory,
+  t: TranslateFn
+): string {
+  return t(`achievementCategory.${category}`);
+}
+
+export function translateClassSkill(
+  classId: ClassId,
+  skillId: string,
+  field: "name" | "description",
+  fallback: string,
+  t: TranslateFn
+): string {
+  return tr(t, `skill.${classId}.${skillId}.${field}`, undefined, fallback);
+}
+
+export function translateSkillPassive(
+  classId: ClassId,
+  fallback: string,
+  t: TranslateFn
+): string {
+  return tr(t, `skill.passive.${classId}`, undefined, fallback);
+}
+
+export function translateAvatarLabel(
+  avatarId: string,
+  fallback: string,
+  t: TranslateFn
+): string {
+  return tr(t, `avatar.${avatarId}.label`, undefined, fallback);
 }
 
 export function translateBossField(

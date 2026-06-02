@@ -75,7 +75,6 @@ export default function BossScreen({
         total: BOSSES.length,
         percent: completionPercent,
       })}
-      backLabel={t("common.back")}
       onBack={onBack}
     >
       <div className="iron-dossier p-4">

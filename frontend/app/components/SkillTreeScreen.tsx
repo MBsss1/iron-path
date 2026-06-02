@@ -7,6 +7,12 @@ import {
   isSkillUnlockedAtLevel,
   type ClassId,
 } from "../data/classes";
+import {
+  translateClassName,
+  translateClassSkill,
+  translateSkillPassive,
+} from "../i18n/labels";
+import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
 
@@ -17,19 +23,20 @@ type Props = {
 };
 
 export default function SkillTreeScreen({ classId, level, onBack }: Props) {
+  const { t } = useTranslation();
   const classDef = getClass(classId);
 
   if (!classDef) {
     return (
       <ScreenShell
-        eyebrow="Abilities"
-        title="Skill Tree"
-        subtitle="Select a class first"
+        eyebrow={t("skillTreeScreen.eyebrow")}
+        title={t("skillTreeScreen.noClassTitle")}
+        subtitle={t("skillTreeScreen.noClassSubtitle")}
         onBack={onBack}
       >
         <IronCard variant="paper">
           <p className="uppercase text-sm font-bold text-center">
-            No class selected. Choose a class from your profile.
+            {t("skillTreeScreen.noClassBody")}
           </p>
         </IronCard>
       </ScreenShell>
@@ -38,12 +45,18 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
 
   const unlockedCount = getUnlockedSkillCount(level);
   const totalSkills = classDef.skills.length;
+  const className = translateClassName(classDef.id, t);
 
   return (
     <ScreenShell
-      eyebrow="Abilities"
-      title="Skill Tree"
-      subtitle={`${classDef.name} — ${unlockedCount} / ${totalSkills} unlocked · Level ${level}`}
+      eyebrow={t("skillTreeScreen.eyebrow")}
+      title={t("skillTreeScreen.title")}
+      subtitle={t("skillTreeScreen.subtitle", {
+        className,
+        unlocked: unlockedCount,
+        total: totalSkills,
+        level,
+      })}
       onBack={onBack}
     >
       <IronCard variant="dark">
@@ -52,9 +65,9 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
             {classDef.icon}
           </span>
           <div className="flex-1 min-w-0">
-            <p className="uppercase text-xs font-bold">{classDef.name}</p>
+            <p className="uppercase text-xs font-bold">{className}</p>
             <p className="text-sm uppercase mt-1 opacity-80">
-              Skills unlock automatically at levels 5, 10, and 15
+              {t("skillTreeScreen.unlockHint")}
             </p>
           </div>
         </div>
@@ -76,6 +89,11 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
             100,
             Math.round((level / requiredLevel) * 100)
           );
+          const passiveLabel = translateSkillPassive(
+            classDef.id,
+            classDef.skill1Passive.label,
+            t
+          );
 
           return (
             <IronCard
@@ -86,15 +104,32 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-black uppercase tracking-wider opacity-70">
-                    Skill {index + 1} · Level {requiredLevel}
+                    {t("skillTreeScreen.skillMeta", {
+                      index: index + 1,
+                      level: requiredLevel,
+                    })}
                   </p>
                   <h3 className="text-lg font-black uppercase mt-1">
-                    {skill.name}
+                    {translateClassSkill(
+                      classDef.id,
+                      skill.id,
+                      "name",
+                      skill.name,
+                      t
+                    )}
                   </h3>
                   <p className="text-xs uppercase mt-2 leading-relaxed">
                     {isUnlocked
-                      ? skill.description
-                      : `Requires level ${requiredLevel} to unlock.`}
+                      ? translateClassSkill(
+                          classDef.id,
+                          skill.id,
+                          "description",
+                          skill.description,
+                          t
+                        )
+                      : t("skillTreeScreen.requiresLevel", {
+                          level: requiredLevel,
+                        })}
                   </p>
                   {index === 0 && (
                     <p
@@ -102,8 +137,11 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
                         isUnlocked ? "text-iron-accent" : "text-iron-muted"
                       }`}
                     >
-                      Passive: {classDef.skill1Passive.label}
-                      {!isUnlocked && ` · unlocks at level ${requiredLevel}`}
+                      {t("skillTreeScreen.passive", { label: passiveLabel })}
+                      {!isUnlocked &&
+                        t("skillTreeScreen.passiveUnlocks", {
+                          level: requiredLevel,
+                        })}
                     </p>
                   )}
                 </div>
@@ -115,16 +153,19 @@ export default function SkillTreeScreen({ classId, level, onBack }: Props) {
                       : "bg-iron-charcoal text-iron-muted"
                   }`}
                 >
-                  {isUnlocked ? "Unlocked" : "Locked"}
+                  {isUnlocked ? t("common.unlocked") : t("common.locked")}
                 </span>
               </div>
 
               {!isUnlocked && (
                 <div className="mt-4">
                   <div className="flex justify-between uppercase text-xs font-bold">
-                    <span>Progress</span>
+                    <span>{t("common.progress")}</span>
                     <span>
-                      Level {level} / {requiredLevel}
+                      {t("skillTreeScreen.levelProgress", {
+                        current: level,
+                        required: requiredLevel,
+                      })}
                     </span>
                   </div>
                   <div className="w-full h-3 iron-progress-track mt-2 overflow-hidden">

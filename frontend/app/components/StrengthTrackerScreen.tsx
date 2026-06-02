@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useStrengthTracker } from "../hooks/useStrengthTracker";
+import { useTranslation } from "../i18n/useTranslation";
+import ScreenShell from "./ScreenShell";
 
 function ProgressBar({ percent, positive }: { percent: number; positive: boolean }) {
   const safe = Math.max(0, Math.min(100, Math.round(Math.abs(percent))));
@@ -21,22 +23,23 @@ function diffText(cur?: number, prev?: number, unit = "") {
   const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
   const n = Math.abs(diff);
   const formatted = Number.isInteger(n) ? String(n) : n.toFixed(1);
-  return `${sign}${formatted}${unit ? " " + unit : ""}`;
+  return `${sign}${formatted}${unit ? ` ${unit}` : ""}`;
 }
 
 export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
   const { data, updateMetric, reset } = useStrengthTracker();
 
   const [pushInput, setPushInput] = useState(String(data.pushUps ?? 0));
   const [pullInput, setPullInput] = useState(String(data.pullUps ?? 0));
-  const [dipsInput, setDipsInput] = useState(String((data as any).dips ?? 0));
+  const [dipsInput, setDipsInput] = useState(String((data as { dips?: number }).dips ?? 0));
   const [runInput, setRunInput] = useState(String(data.runDistance ?? 0));
   const [weightInput, setWeightInput] = useState(String(data.weight ?? 0));
 
   useEffect(() => {
     setPushInput(String(data.pushUps ?? 0));
     setPullInput(String(data.pullUps ?? 0));
-    setDipsInput(String((data as any).dips ?? 0));
+    setDipsInput(String((data as { dips?: number }).dips ?? 0));
     setRunInput(String(data.runDistance ?? 0));
     setWeightInput(String(data.weight ?? 0));
   }, [data]);
@@ -73,219 +76,134 @@ export default function StrengthTrackerScreen({ onBack }: { onBack: () => void }
 
   const metricCardClass = "border border-iron-border p-4 iron-card-panel";
 
-  return (
-    <div className="w-full max-w-md iron-shell-card p-5 sm:p-6 mb-24">
-      <div className="text-center mt-2">
-        <h1 className="text-3xl font-black tracking-wide text-iron-text">Strength Tracker</h1>
-        <p className="text-sm mt-2 uppercase tracking-[0.2em] text-iron-muted">Log your lifts and runs — track progress</p>
+  const formatPrevious = (value?: number) =>
+    value === undefined || value === null
+      ? t("strengthScreen.previousEmpty")
+      : t("strengthScreen.previous", { value });
+
+  const renderMetric = (
+    label: string,
+    current: number | undefined,
+    previous: number | undefined,
+    unit: string,
+    inputValue: string,
+    onInput: (value: string) => void,
+    saveKey: string,
+    positiveWhen: boolean
+  ) => (
+    <div className={metricCardClass}>
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="text-xs uppercase text-iron-gold">{label}</p>
+          <p className="text-2xl font-black text-iron-cream">
+            {current}{" "}
+            <span className="text-sm text-iron-muted">
+              {diffText(current, previous, unit)}
+            </span>
+          </p>
+          <p className="text-xs text-iron-muted">{formatPrevious(previous)}</p>
+        </div>
+
+        <div className="w-40">
+          <input
+            className={inputClass}
+            value={inputValue}
+            onChange={(e) => onInput(e.target.value)}
+            type="number"
+            min={0}
+            step={saveKey === "run" || saveKey === "weight" ? "0.1" : "1"}
+          />
+          <div className="mt-2">
+            <button
+              type="button"
+              className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
+              onClick={() => save(saveKey, inputValue)}
+            >
+              {t("strengthScreen.save")}
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="flex justify-end mt-4">
-        <button
-          className="bg-iron-panel text-iron-cream border border-iron-border-strong py-2 px-4 uppercase font-bold"
-          onClick={onBack}
-        >
-          Back
-        </button>
-      </div>
-
-      <div className="mt-6 space-y-4">
-        {/* Push-ups */}
-        <div className={metricCardClass}>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs uppercase text-iron-gold">Push-ups (max)</p>
-              <p className="text-2xl font-black text-iron-cream">{data.pushUps} <span className="text-sm text-iron-muted">{diffText(data.pushUps, data.prevPushUps, 'reps')}</span></p>
-              <p className="text-xs text-iron-muted">Previous: {data.prevPushUps ?? "—"}</p>
-            </div>
-
-            <div className="w-40">
-              <input
-                className={inputClass}
-                value={pushInput}
-                onChange={(e) => setPushInput(e.target.value)}
-                type="number"
-                min={0}
-              />
-              <div className="mt-2">
-                <button
-                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
-                  onClick={() => save("push", pushInput)}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-xs text-iron-muted">Progress</p>
-            <ProgressBar
-              percent={deltaPercent(data.pushUps, data.prevPushUps)}
-              positive={(data.prevPushUps ?? 0) <= data.pushUps}
-            />
-          </div>
-        </div>
-
-        {/* Pull-ups */}
-        <div className={metricCardClass}>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs uppercase text-iron-gold">Pull-ups (max)</p>
-              <p className="text-2xl font-black text-iron-cream">{data.pullUps} <span className="text-sm text-iron-muted">{diffText(data.pullUps, data.prevPullUps, 'reps')}</span></p>
-              <p className="text-xs text-iron-muted">Previous: {data.prevPullUps ?? "—"}</p>
-            </div>
-
-            <div className="w-40">
-              <input
-                className={inputClass}
-                value={pullInput}
-                onChange={(e) => setPullInput(e.target.value)}
-                type="number"
-                min={0}
-              />
-              <div className="mt-2">
-                <button
-                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
-                  onClick={() => save("pull", pullInput)}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-xs text-iron-muted">Progress</p>
-            <ProgressBar
-              percent={deltaPercent(data.pullUps, data.prevPullUps)}
-              positive={(data.prevPullUps ?? 0) <= data.pullUps}
-            />
-          </div>
-        </div>
-
-        {/* Dips */}
-        <div className={metricCardClass}>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs uppercase text-iron-gold">Dips (max)</p>
-              <p className="text-2xl font-black text-iron-cream">{(data as any).dips} <span className="text-sm text-iron-muted">{diffText((data as any).dips, (data as any).prevDips, 'reps')}</span></p>
-              <p className="text-xs text-iron-muted">Previous: {(data as any).prevDips ?? "—"}</p>
-            </div>
-
-            <div className="w-40">
-              <input
-                className={inputClass}
-                value={dipsInput}
-                onChange={(e) => setDipsInput(e.target.value)}
-                type="number"
-                min={0}
-              />
-              <div className="mt-2">
-                <button
-                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
-                  onClick={() => save("dips", dipsInput)}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-xs text-iron-muted">Progress</p>
-            <ProgressBar
-              percent={deltaPercent((data as any).dips, (data as any).prevDips)}
-              positive={((data as any).prevDips ?? 0) <= (data as any).dips}
-            />
-          </div>
-        </div>
-
-        {/* Run distance */}
-        <div className={metricCardClass}>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs uppercase text-iron-gold">Run Distance (km)</p>
-              <p className="text-2xl font-black text-iron-cream">{data.runDistance} <span className="text-sm text-iron-muted">{diffText(data.runDistance, data.prevRunDistance, 'km')}</span></p>
-              <p className="text-xs text-iron-muted">Previous: {data.prevRunDistance ?? "—"}</p>
-            </div>
-
-            <div className="w-40">
-              <input
-                className={inputClass}
-                value={runInput}
-                onChange={(e) => setRunInput(e.target.value)}
-                type="number"
-                step="0.1"
-                min={0}
-              />
-              <div className="mt-2">
-                <button
-                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
-                  onClick={() => save("run", runInput)}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-xs text-iron-muted">Progress</p>
-            <ProgressBar
-              percent={deltaPercent(data.runDistance, data.prevRunDistance)}
-              positive={(data.prevRunDistance ?? 0) <= data.runDistance}
-            />
-          </div>
-        </div>
-
-        {/* Body weight */}
-        <div className={metricCardClass}>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs uppercase text-iron-gold">Body Weight (kg)</p>
-              <p className="text-2xl font-black text-iron-cream">{data.weight} <span className="text-sm text-iron-muted">{diffText(data.weight, data.prevWeight, 'kg')}</span></p>
-              <p className="text-xs text-iron-muted">Previous: {data.prevWeight ?? "—"}</p>
-            </div>
-
-            <div className="w-40">
-              <input
-                className={inputClass}
-                value={weightInput}
-                onChange={(e) => setWeightInput(e.target.value)}
-                type="number"
-                step="0.1"
-                min={0}
-              />
-              <div className="mt-2">
-                <button
-                  className="w-full bg-iron-panel text-iron-cream border border-iron-border py-2 uppercase font-bold"
-                  onClick={() => save("weight", weightInput)}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-xs text-iron-muted">Progress</p>
-            <ProgressBar
-              percent={deltaPercent(data.weight, data.prevWeight)}
-              positive={(data.prevWeight ?? 0) >= data.weight ? false : true}
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            className="flex-1 bg-iron-charcoal text-iron-cream border border-iron-border py-2 uppercase font-bold"
-            onClick={() => reset()}
-          >
-            Reset
-          </button>
-        </div>
+      <div className="mt-4">
+        <p className="text-xs text-iron-muted">{t("common.progress")}</p>
+        <ProgressBar
+          percent={deltaPercent(current, previous)}
+          positive={positiveWhen}
+        />
       </div>
     </div>
+  );
+
+  return (
+    <ScreenShell
+      title={t("strengthScreen.title")}
+      subtitle={t("strengthScreen.subtitle")}
+      onBack={onBack}
+    >
+      {renderMetric(
+        t("strengthScreen.pushUps"),
+        data.pushUps,
+        data.prevPushUps,
+        t("strengthScreen.reps"),
+        pushInput,
+        setPushInput,
+        "push",
+        (data.prevPushUps ?? 0) <= data.pushUps
+      )}
+
+      {renderMetric(
+        t("strengthScreen.pullUps"),
+        data.pullUps,
+        data.prevPullUps,
+        t("strengthScreen.reps"),
+        pullInput,
+        setPullInput,
+        "pull",
+        (data.prevPullUps ?? 0) <= data.pullUps
+      )}
+
+      {renderMetric(
+        t("strengthScreen.dips"),
+        (data as { dips?: number }).dips,
+        (data as { prevDips?: number }).prevDips,
+        t("strengthScreen.reps"),
+        dipsInput,
+        setDipsInput,
+        "dips",
+        ((data as { prevDips?: number }).prevDips ?? 0) <=
+          ((data as { dips?: number }).dips ?? 0)
+      )}
+
+      {renderMetric(
+        t("strengthScreen.runDistance"),
+        data.runDistance,
+        data.prevRunDistance,
+        "km",
+        runInput,
+        setRunInput,
+        "run",
+        (data.prevRunDistance ?? 0) <= data.runDistance
+      )}
+
+      {renderMetric(
+        t("strengthScreen.bodyWeight"),
+        data.weight,
+        data.prevWeight,
+        "kg",
+        weightInput,
+        setWeightInput,
+        "weight",
+        (data.prevWeight ?? 0) >= data.weight ? false : true
+      )}
+
+      <button
+        type="button"
+        className="w-full bg-iron-charcoal text-iron-cream border border-iron-border py-2 uppercase font-bold"
+        onClick={() => reset()}
+      >
+        {t("strengthScreen.reset")}
+      </button>
+    </ScreenShell>
   );
 }

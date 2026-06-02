@@ -6,10 +6,11 @@ import {
   type AchievementId,
 } from "../data/achievements";
 import {
-  formatCategoryLabel,
-  getAchievementProgress,
-  type AchievementProgressInput,
-} from "../utils/achievementProgress";
+  translateAchievement,
+  translateAchievementCategory,
+} from "../i18n/labels";
+import { useTranslation } from "../i18n/useTranslation";
+import { getAchievementProgress, type AchievementProgressInput } from "../utils/achievementProgress";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
 
@@ -24,19 +25,26 @@ export default function AchievementsScreen({
   progressInput,
   onBack,
 }: Props) {
+  const { t } = useTranslation();
   const unlockedCount = achievementsUnlocked.length;
   const totalCount = ACHIEVEMENTS.length;
   const completionPercent = Math.round((unlockedCount / totalCount) * 100);
 
   return (
     <ScreenShell
-      eyebrow="Path Milestones"
-      title="Achievements"
-      subtitle={`${unlockedCount} / ${totalCount} unlocked · ${completionPercent}% complete`}
+      eyebrow={t("achievementsScreen.eyebrow")}
+      title={t("achievementsScreen.title")}
+      subtitle={t("achievementsScreen.subtitle", {
+        unlocked: unlockedCount,
+        total: totalCount,
+        percent: completionPercent,
+      })}
       onBack={onBack}
     >
       <IronCard variant="dark">
-        <p className="uppercase text-xs font-bold text-center">Completion</p>
+        <p className="uppercase text-xs font-bold text-center">
+          {t("achievementsScreen.completion")}
+        </p>
         <p className="text-4xl font-black text-center mt-1">{completionPercent}%</p>
         <div className="w-full h-4 iron-progress-track mt-4 overflow-hidden">
           <div
@@ -56,7 +64,7 @@ export default function AchievementsScreen({
         return (
           <div key={category}>
             <h3 className="text-xl font-black uppercase mb-3 text-iron-text">
-              {formatCategoryLabel(category)}
+              {translateAchievementCategory(category, t)}
             </h3>
 
             <div className="space-y-3">
@@ -76,12 +84,27 @@ export default function AchievementsScreen({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <h4 className="text-base sm:text-lg font-black uppercase">
-                          {achievement.title}
+                          {translateAchievement(
+                            achievement.id,
+                            "title",
+                            achievement.title,
+                            t
+                          )}
                         </h4>
                         <p className="text-xs sm:text-sm mt-1 uppercase leading-relaxed">
                           {isUnlocked
-                            ? achievement.description
-                            : achievement.hint}
+                            ? translateAchievement(
+                                achievement.id,
+                                "description",
+                                achievement.description,
+                                t
+                              )
+                            : translateAchievement(
+                                achievement.id,
+                                "hint",
+                                achievement.hint,
+                                t
+                              )}
                         </p>
                       </div>
 
@@ -92,14 +115,16 @@ export default function AchievementsScreen({
                             : "bg-iron-charcoal text-iron-muted"
                         }`}
                       >
-                        {isUnlocked ? "Unlocked" : "Locked"}
+                        {isUnlocked
+                          ? t("common.unlocked")
+                          : t("common.locked")}
                       </span>
                     </div>
 
                     {!isUnlocked && (
                       <div className="mt-4">
                         <div className="flex justify-between uppercase text-xs font-bold">
-                          <span>Progress</span>
+                          <span>{t("common.progress")}</span>
                           <span>
                             {current} / {target}
                           </span>

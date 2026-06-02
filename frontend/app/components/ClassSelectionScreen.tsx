@@ -21,7 +21,6 @@ export default function ClassSelectionScreen({ onConfirm, onClose }: Props) {
       eyebrow={t("classSelect.eyebrow")}
       title={t("classSelect.title")}
       subtitle={t("classSelect.subtitle")}
-      backLabel={t("common.back")}
       onBack={onClose}
     >
       <div className="space-y-3">

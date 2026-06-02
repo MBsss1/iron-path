@@ -10,11 +10,16 @@ export function useBossTrials() {
     safeGet(STORAGE_KEYS.bossTrials, [] as BossTrialId[])
   );
   const [pendingTrial, setPendingTrial] = useState<BossTrialId | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  // Save to localStorage whenever completed trials change
   useEffect(() => {
+    queueMicrotask(() => setLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
     safeSet(STORAGE_KEYS.bossTrials, completedTrials);
-  }, [completedTrials]);
+  }, [completedTrials, loaded]);
 
   const completeTrial = (trialId: BossTrialId) => {
     if (!completedTrials.includes(trialId)) {

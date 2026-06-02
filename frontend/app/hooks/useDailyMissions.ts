@@ -10,29 +10,41 @@ export type DailyMission = {
   completed: boolean;
 };
 
+const DEFAULT_MISSIONS: DailyMission[] = [
+  { id: "workout", name: "Workout", completed: false },
+  { id: "deepwork", name: "Deep Work", completed: false },
+  { id: "protein", name: "Protein", completed: false },
+  { id: "sleep", name: "Sleep", completed: false },
+];
+
+function loadDailyMissions(): DailyMission[] {
+  const saved = safeGet<{ date: string; missions: DailyMission[] } | null>(
+    STORAGE_KEYS.dailyMissions,
+    null
+  );
+  const today = new Date().toDateString();
+
+  if (saved?.date === today && saved.missions) {
+    return saved.missions;
+  }
+
+  return DEFAULT_MISSIONS;
+}
+
 export function useDailyMissions() {
-  const [missions, setMissions] = useState<DailyMission[]>(() => {
-    const defaults: DailyMission[] = [
-      { id: "workout", name: "Workout", completed: false },
-      { id: "deepwork", name: "Deep Work", completed: false },
-      { id: "protein", name: "Protein", completed: false },
-      { id: "sleep", name: "Sleep", completed: false },
-    ];
-    const saved = safeGet<{ date: string; missions: DailyMission[] } | null>(
-      STORAGE_KEYS.dailyMissions,
-      null
-    );
-    const today = new Date().toDateString();
-    if (saved?.date === today && saved.missions) {
-      return saved.missions;
-    }
-    return defaults;
-  });
+  const [missions, setMissions] = useState<DailyMission[]>(loadDailyMissions);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    queueMicrotask(() => setLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+
     const today = new Date().toDateString();
     safeSet(STORAGE_KEYS.dailyMissions, { date: today, missions });
-  }, [missions]);
+  }, [missions, loaded]);
 
   const completeMission = (id: "workout" | "deepwork" | "protein" | "sleep") => {
     setMissions((current) =>

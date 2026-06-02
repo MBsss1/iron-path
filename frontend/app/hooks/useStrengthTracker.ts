@@ -30,10 +30,16 @@ export function useStrengthTracker() {
   const [data, setData] = useState<StrengthData>(() =>
     safeGet(STORAGE_KEYS.strength, DEFAULT)
   );
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    queueMicrotask(() => setLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
     safeSet(STORAGE_KEYS.strength, data);
-  }, [data]);
+  }, [data, loaded]);
 
   const updateMetric = (metric: keyof StrengthData, value: number) => {
     setData((cur) => {
@@ -70,7 +76,6 @@ export function useStrengthTracker() {
 
   const reset = () => {
     setData(DEFAULT);
-    safeSet(STORAGE_KEYS.strength, DEFAULT);
   };
 
   return { data, updateMetric, reset } as const;

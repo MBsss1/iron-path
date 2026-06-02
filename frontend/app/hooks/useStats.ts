@@ -69,8 +69,12 @@ export function useStats(level: number) {
   const [stats, setStats] = useState<StatsData>(() =>
     safeGet<StatsData | null>(STORAGE_KEYS.stats, null) ?? DEFAULT_STATS
   );
-  const loaded = true;
+  const [loaded, setLoaded] = useState(false);
   const [nowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    queueMicrotask(() => setLoaded(true));
+  }, []);
 
   useEffect(() => {
     if (!loaded) return;

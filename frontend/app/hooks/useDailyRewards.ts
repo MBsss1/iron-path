@@ -4,8 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { safeGet, safeSet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 
-const STORAGE_KEY = STORAGE_KEYS.dailyRewards;
-
 export const DAILY_REWARD_XP = [50, 75, 100, 125, 150, 200, 300] as const;
 
 export type DailyRewardsData = {
@@ -42,25 +40,31 @@ function evaluateStreak(data: DailyRewardsData): DailyRewardsData {
   return { lastClaimDate: data.lastClaimDate, currentStreak: 1 };
 }
 
+function loadDailyRewards(): DailyRewardsData {
+  const saved = safeGet<DailyRewardsData | null>(STORAGE_KEYS.dailyRewards, null);
+  const initial: DailyRewardsData = saved ?? {
+    lastClaimDate: null,
+    currentStreak: 1,
+  };
+  return evaluateStreak(initial);
+}
+
 export function getRewardXpForDay(day: number) {
   const index = Math.min(Math.max(day, 1), 7) - 1;
   return DAILY_REWARD_XP[index];
 }
 
 export function useDailyRewards() {
-  const [data, setData] = useState<DailyRewardsData>(() => {
-    const saved = safeGet<DailyRewardsData | null>(STORAGE_KEY, null);
-    const initial: DailyRewardsData = saved ?? {
-      lastClaimDate: null,
-      currentStreak: 1,
-    };
-    return evaluateStreak(initial);
-  });
-  const loaded = true;
+  const [data, setData] = useState<DailyRewardsData>(loadDailyRewards);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    queueMicrotask(() => setLoaded(true));
+  }, []);
 
   useEffect(() => {
     if (!loaded) return;
-    safeSet(STORAGE_KEY, data);
+    safeSet(STORAGE_KEYS.dailyRewards, data);
   }, [data, loaded]);
 
   const today = getTodayString();

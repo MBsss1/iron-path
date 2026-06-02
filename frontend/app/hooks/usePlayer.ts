@@ -35,45 +35,54 @@ const DEFAULT_PLAYER: PlayerData = {
   highestLevel: 3,
 };
 
+type StoredPlayerSnapshot = {
+  player: PlayerData;
+  achievements: AchievementId[];
+};
+
+function loadStoredPlayerSnapshot(): StoredPlayerSnapshot {
+  const player = safeGet<Partial<PlayerData> | null>(STORAGE_KEYS.player, null);
+  const achievements =
+    safeGet<AchievementId[] | null>(STORAGE_KEYS.achievements, null) ?? [];
+
+  return {
+    player: {
+      xp: player?.xp ?? DEFAULT_PLAYER.xp,
+      level: player?.level ?? DEFAULT_PLAYER.level,
+      week: player?.week ?? DEFAULT_PLAYER.week,
+      body: player?.body ?? DEFAULT_PLAYER.body,
+      mind: player?.mind ?? DEFAULT_PLAYER.mind,
+      work: player?.work ?? DEFAULT_PLAYER.work,
+      totalXp: player?.totalXp ?? player?.xp ?? DEFAULT_PLAYER.totalXp,
+      workoutCount: player?.workoutCount ?? DEFAULT_PLAYER.workoutCount,
+      highestLevel:
+        player?.highestLevel ?? player?.level ?? DEFAULT_PLAYER.highestLevel,
+    },
+    achievements,
+  };
+}
+
 export function usePlayer() {
-  const [xp, setXp] = useState(DEFAULT_PLAYER.xp);
-  const [level, setLevel] = useState(DEFAULT_PLAYER.level);
-  const [week, setWeek] = useState(DEFAULT_PLAYER.week);
-  const [body, setBody] = useState(DEFAULT_PLAYER.body);
+  const [snapshot] = useState(loadStoredPlayerSnapshot);
+
+  const [xp, setXp] = useState(snapshot.player.xp);
+  const [level, setLevel] = useState(snapshot.player.level);
+  const [week, setWeek] = useState(snapshot.player.week);
+  const [body, setBody] = useState(snapshot.player.body);
   const [leveledUp, setLeveledUp] = useState(false);
-  const [mind, setMind] = useState(DEFAULT_PLAYER.mind);
-  const [work, setWork] = useState(DEFAULT_PLAYER.work);
-  const [totalXp, setTotalXp] = useState(DEFAULT_PLAYER.totalXp);
-  const [workoutCount, setWorkoutCount] = useState(DEFAULT_PLAYER.workoutCount);
-  const [highestLevel, setHighestLevel] = useState(DEFAULT_PLAYER.highestLevel);
-  const [achievementsUnlocked, setAchievementsUnlocked] = useState<AchievementId[]>([]);
+  const [mind, setMind] = useState(snapshot.player.mind);
+  const [work, setWork] = useState(snapshot.player.work);
+  const [totalXp, setTotalXp] = useState(snapshot.player.totalXp);
+  const [workoutCount, setWorkoutCount] = useState(snapshot.player.workoutCount);
+  const [highestLevel, setHighestLevel] = useState(snapshot.player.highestLevel);
+  const [achievementsUnlocked, setAchievementsUnlocked] = useState<AchievementId[]>(
+    snapshot.achievements
+  );
   const [pendingAchievement, setPendingAchievement] = useState<AchievementDefinition | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const player = safeGet<Partial<PlayerData> | null>(STORAGE_KEYS.player, null);
-    if (player) {
-      queueMicrotask(() => {
-        setXp(player.xp ?? DEFAULT_PLAYER.xp);
-        setLevel(player.level ?? DEFAULT_PLAYER.level);
-        setWeek(player.week ?? DEFAULT_PLAYER.week);
-        setBody(player.body ?? DEFAULT_PLAYER.body);
-        setMind(player.mind ?? DEFAULT_PLAYER.mind);
-        setWork(player.work ?? DEFAULT_PLAYER.work);
-        setTotalXp(player.totalXp ?? player.xp ?? DEFAULT_PLAYER.totalXp);
-        setWorkoutCount(player.workoutCount ?? DEFAULT_PLAYER.workoutCount);
-        setHighestLevel(
-          player.highestLevel ?? player.level ?? DEFAULT_PLAYER.highestLevel
-        );
-      });
-    }
-
-    const savedAchievements = safeGet<AchievementId[] | null>(
-      STORAGE_KEYS.achievements,
-      null
-    );
-    if (savedAchievements) {
-      queueMicrotask(() => setAchievementsUnlocked(savedAchievements));
-    }
+    queueMicrotask(() => setLoaded(true));
   }, []);
 
   const addMind = (amount: number) => {
@@ -131,12 +140,14 @@ export function usePlayer() {
   );
 
   useEffect(() => {
+    if (!loaded) return;
     queueMicrotask(() => {
       setHighestLevel((current) => Math.max(current, level));
     });
-  }, [level]);
+  }, [level, loaded]);
 
   useEffect(() => {
+    if (!loaded) return;
     safeSet(STORAGE_KEYS.player, {
       xp,
       level,
@@ -148,11 +159,12 @@ export function usePlayer() {
       workoutCount,
       highestLevel: Math.max(highestLevel, level),
     });
-  }, [xp, level, week, body, mind, work, totalXp, workoutCount, highestLevel]);
+  }, [xp, level, week, body, mind, work, totalXp, workoutCount, highestLevel, loaded]);
 
   useEffect(() => {
+    if (!loaded) return;
     safeSet(STORAGE_KEYS.achievements, achievementsUnlocked);
-  }, [achievementsUnlocked]);
+  }, [achievementsUnlocked, loaded]);
 
   const addXp = (amount: number) => {
     const newXp = xp + amount;

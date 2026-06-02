@@ -17,9 +17,25 @@ export type WeightProgressData = {
   history: WeightEntry[];
 };
 
+function createInitialWeightProgress(profileWeight: number): WeightProgressData {
+  const today = new Date().toISOString().split("T")[0];
+  return {
+    startWeight: profileWeight,
+    currentWeight: profileWeight,
+    targetWeight: profileWeight + 5,
+    history: [
+      {
+        date: today,
+        weight: profileWeight,
+      },
+    ],
+  };
+}
+
 export function useWeightProgress() {
   const { profile } = useProfile();
   const [data, setData] = useState<WeightProgressData | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!profile?.weight) return;
@@ -32,27 +48,20 @@ export function useWeightProgress() {
       null
     );
 
-    if (saved && saved.startWeight && saved.history) {
-      // Use saved data
-      queueMicrotask(() => setData(saved));
-    } else {
-      // Initialize from profile weight
-      const today = new Date().toISOString().split("T")[0];
-      const initialized: WeightProgressData = {
-        startWeight: profileWeight,
-        currentWeight: profileWeight,
-        targetWeight: profileWeight + 5, // Default target: +5 kg
-        history: [
-          {
-            date: today,
-            weight: profileWeight,
-          },
-        ],
-      };
-      safeSet(STORAGE_KEYS.weightProgress, initialized);
-      queueMicrotask(() => setData(initialized));
-    }
+    queueMicrotask(() => {
+      if (saved && saved.startWeight && saved.history) {
+        setData(saved);
+      } else {
+        setData(createInitialWeightProgress(profileWeight));
+      }
+      setLoaded(true);
+    });
   }, [profile]);
+
+  useEffect(() => {
+    if (!loaded || !data) return;
+    safeSet(STORAGE_KEYS.weightProgress, data);
+  }, [data, loaded]);
 
   const updateWeight = (newWeight: number) => {
     if (!data || Number.isNaN(newWeight)) return;
@@ -60,7 +69,6 @@ export function useWeightProgress() {
     const today = new Date().toISOString().split("T")[0];
     const lastEntry = data.history[data.history.length - 1];
 
-    // Only add new entry if weight changed or it's a new day
     const updated: WeightProgressData = {
       ...data,
       currentWeight: newWeight,
@@ -70,20 +78,16 @@ export function useWeightProgress() {
           : [...data.history, { date: today, weight: newWeight }],
     };
 
-    safeSet(STORAGE_KEYS.weightProgress, updated);
     setData(updated);
   };
 
   const setTargetWeight = (target: number) => {
     if (!data || Number.isNaN(target)) return;
 
-    const updated = {
+    setData({
       ...data,
       targetWeight: target,
-    };
-
-    safeSet(STORAGE_KEYS.weightProgress, updated);
-    setData(updated);
+    });
   };
 
   const reset = () => {
@@ -92,21 +96,7 @@ export function useWeightProgress() {
     const profileWeight = parseFloat(profile.weight);
     if (Number.isNaN(profileWeight)) return;
 
-    const today = new Date().toISOString().split("T")[0];
-    const initialized: WeightProgressData = {
-      startWeight: profileWeight,
-      currentWeight: profileWeight,
-      targetWeight: profileWeight + 5,
-      history: [
-        {
-          date: today,
-          weight: profileWeight,
-        },
-      ],
-    };
-
-    safeSet(STORAGE_KEYS.weightProgress, initialized);
-    setData(initialized);
+    setData(createInitialWeightProgress(profileWeight));
   };
 
   return {

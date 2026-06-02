@@ -18,10 +18,16 @@ export function useSeasons() {
     safeGet(STORAGE_KEYS.seasons, [] as SeasonRecord[])
   );
   const [pendingSeasonComplete, setPendingSeasonComplete] = useState<boolean>(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    queueMicrotask(() => setLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
     safeSet(STORAGE_KEYS.seasons, completedSeasons);
-  }, [completedSeasons]);
+  }, [completedSeasons, loaded]);
 
   const checkForSeasonComplete = (week: number) => {
     if (week >= 24) {

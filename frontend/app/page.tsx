@@ -29,7 +29,7 @@ import {
   applyClassLevelUpBonus,
 } from "./utils/classBonuses";
 import { getWorkoutXp, MISSION_XP } from "./data/xpRewards";
-import { useDailyMissions } from "./hooks/useDailyMissions";
+import { useDailyMissions, type DailyMission } from "./hooks/useDailyMissions";
 import { useBossTrials } from "./hooks/useBossTrials";
 import { useBosses } from "./hooks/useBosses";
 import { getBossTrialByWeek } from "./data/bossTrials";
@@ -251,7 +251,15 @@ export default function Home() {
     classId,
   ]);
 
+  const isMissionCompleted = useCallback(
+    (id: DailyMission["id"]) =>
+      missions.find((mission) => mission.id === id)?.completed ?? false,
+    [missions]
+  );
+
   const completeWorkout = useCallback(() => {
+    if (isMissionCompleted("workout")) return;
+
     const reward = applyClassXpBonus(
       getWorkoutXp(program.phase),
       classId,
@@ -269,6 +277,7 @@ export default function Home() {
     setShowPopup(true);
     hapticWorkout();
   }, [
+    isMissionCompleted,
     program.phase,
     classId,
     level,
@@ -281,6 +290,8 @@ export default function Home() {
   ]);
 
   const completeDeepWork = useCallback(() => {
+    if (isMissionCompleted("deepwork")) return;
+
     const reward = applyClassXpBonus(MISSION_XP.deepWork, classId, "deepWork", level);
     addXp(reward);
     addWork(1);
@@ -289,9 +300,20 @@ export default function Home() {
     recordMissionComplete();
     setXpFloat(reward);
     hapticMission();
-  }, [classId, level, addXp, addWork, recordDeepWork, completeMission, recordMissionComplete]);
+  }, [
+    isMissionCompleted,
+    classId,
+    level,
+    addXp,
+    addWork,
+    recordDeepWork,
+    completeMission,
+    recordMissionComplete,
+  ]);
 
   const completeProtein = useCallback(() => {
+    if (isMissionCompleted("protein")) return;
+
     const reward = applyClassXpBonus(MISSION_XP.protein, classId, "mission", level);
     addXp(reward);
     addBody(1);
@@ -299,9 +321,19 @@ export default function Home() {
     recordMissionComplete();
     setXpFloat(reward);
     hapticMission();
-  }, [classId, level, addXp, addBody, completeMission, recordMissionComplete]);
+  }, [
+    isMissionCompleted,
+    classId,
+    level,
+    addXp,
+    addBody,
+    completeMission,
+    recordMissionComplete,
+  ]);
 
   const completeSleep = useCallback(() => {
+    if (isMissionCompleted("sleep")) return;
+
     const reward = applyClassXpBonus(MISSION_XP.sleep, classId, "mission", level);
     addXp(reward);
     addMind(1);
@@ -309,7 +341,15 @@ export default function Home() {
     recordMissionComplete();
     setXpFloat(reward);
     hapticMission();
-  }, [classId, level, addXp, addMind, completeMission, recordMissionComplete]);
+  }, [
+    isMissionCompleted,
+    classId,
+    level,
+    addXp,
+    addMind,
+    completeMission,
+    recordMissionComplete,
+  ]);
 
   const handleClaimDailyReward = useCallback(() => {
     const reward = claimReward();
@@ -476,6 +516,7 @@ export default function Home() {
                 program={program}
                 classId={classId}
                 level={level}
+                missions={missions}
                 onCompleteDeepWork={completeDeepWork}
                 onCompleteProtein={completeProtein}
                 onCompleteSleep={completeSleep}

@@ -32,12 +32,18 @@ const DEFAULT_SAVE: BossSaveData = {
   pendingDefeat: null,
 };
 
+function loadBossSave(): BossSaveData {
+  const stored = safeGet<BossSaveData | null>(STORAGE_KEYS.bossV2, null);
+  return stored ? { ...DEFAULT_SAVE, ...stored } : DEFAULT_SAVE;
+}
+
 export function useBosses() {
-  const [save, setSave] = useState<BossSaveData>(() => {
-    const stored = safeGet<BossSaveData | null>(STORAGE_KEYS.bossV2, null);
-    return stored ? { ...DEFAULT_SAVE, ...stored } : DEFAULT_SAVE;
-  });
-  const loaded = true;
+  const [save, setSave] = useState<BossSaveData>(loadBossSave);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    queueMicrotask(() => setLoaded(true));
+  }, []);
 
   useEffect(() => {
     if (!loaded) return;

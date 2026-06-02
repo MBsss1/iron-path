@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { ClassId } from "../data/classes";
 import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
 import { applyClassXpBonus } from "../utils/classBonuses";
+import type { DailyMission } from "../hooks/useDailyMissions";
 
 type Props = {
   program: any;
   classId?: ClassId | string | null;
   level: number;
+  missions: DailyMission[];
   onCompleteDeepWork: () => void;
   onCompleteProtein: () => void;
   onCompleteSleep: () => void;
@@ -18,11 +20,13 @@ export default function TodayScreen({
   program,
   classId,
   level,
+  missions,
   onCompleteDeepWork,
   onCompleteProtein,
   onCompleteSleep,
 }: Props) {
-  const [completed, setCompleted] = useState<string[]>([]);
+  const isCompleted = (id: DailyMission["id"]) =>
+    missions.find((mission) => mission.id === id)?.completed ?? false;
 
   const deepWorkXp = useMemo(
     () => applyClassXpBonus(MISSION_XP.deepWork, classId, "deepWork", level),
@@ -42,19 +46,22 @@ export default function TodayScreen({
     [program.phase, classId, level]
   );
 
-  const completeTask = (task: string, action: () => void) => {
-    if (completed.includes(task)) return;
-
+  const tryComplete = (id: DailyMission["id"], action: () => void) => {
+    if (isCompleted(id)) return;
     action();
-    setCompleted([...completed, task]);
   };
 
-  const taskClass = (task: string) =>
+  const taskClass = (id: DailyMission["id"]) =>
     `w-full border-2 border-black p-4 sm:p-5 flex justify-between uppercase font-bold cursor-pointer min-h-[52px] ${
-      completed.includes(task)
+      isCompleted(id)
         ? "bg-[#e8d8b0] text-black opacity-60"
         : "bg-black text-[#efe3c2]"
     }`;
+
+  const deepWorkDone = isCompleted("deepwork");
+  const proteinDone = isCompleted("protein");
+  const sleepDone = isCompleted("sleep");
+  const workoutDone = isCompleted("workout");
 
   return (
     <div className="mt-8 sm:mt-10 border-4 border-black p-5 sm:p-6 bg-[#f5ead0] shadow-2xl mb-24">
@@ -69,14 +76,12 @@ export default function TodayScreen({
 
       <div className="mt-8 space-y-4">
         <button
-          onClick={() => completeTask("deepWork", onCompleteDeepWork)}
-          disabled={completed.includes("deepWork")}
-          className={taskClass("deepWork")}
+          onClick={() => tryComplete("deepwork", onCompleteDeepWork)}
+          disabled={deepWorkDone}
+          className={taskClass("deepwork")}
         >
           <span>
-            {completed.includes("deepWork")
-              ? "✓ Deep Work 2 Hours"
-              : "Deep Work 2 Hours"}
+            {deepWorkDone ? "✓ Deep Work 2 Hours" : "Deep Work 2 Hours"}
           </span>
           <span>+{deepWorkXp} XP</span>
         </button>
@@ -84,35 +89,36 @@ export default function TodayScreen({
         {program.workouts?.map((workout: string, index: number) => (
           <div
             key={index}
-            className="border-2 border-black p-4 bg-[#e8d8b0] flex justify-between uppercase font-bold"
+            className={`border-2 border-black p-4 bg-[#e8d8b0] flex justify-between uppercase font-bold ${
+              workoutDone ? "opacity-60" : ""
+            }`}
           >
-            <span>{workout}</span>
+            <span>
+              {workoutDone ? "✓ " : ""}
+              {workout}
+            </span>
             <span>+{workoutXp} XP</span>
           </div>
         ))}
 
         <button
-          onClick={() => completeTask("protein", onCompleteProtein)}
-          disabled={completed.includes("protein")}
+          onClick={() => tryComplete("protein", onCompleteProtein)}
+          disabled={proteinDone}
           className={taskClass("protein")}
         >
           <span>
-            {completed.includes("protein")
-              ? "✓ Protein Target"
-              : "Protein Target"}
+            {proteinDone ? "✓ Protein Target" : "Protein Target"}
           </span>
           <span>+{proteinXp} XP</span>
         </button>
 
         <button
-          onClick={() => completeTask("sleep", onCompleteSleep)}
-          disabled={completed.includes("sleep")}
+          onClick={() => tryComplete("sleep", onCompleteSleep)}
+          disabled={sleepDone}
           className={taskClass("sleep")}
         >
           <span>
-            {completed.includes("sleep")
-              ? "✓ Sleep Before 00:30"
-              : "Sleep Before 00:30"}
+            {sleepDone ? "✓ Sleep Before 00:30" : "Sleep Before 00:30"}
           </span>
           <span>+{sleepXp} XP</span>
         </button>

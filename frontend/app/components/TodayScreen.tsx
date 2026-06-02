@@ -5,6 +5,7 @@ import type { ClassId } from "../data/classes";
 import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
 import { applyClassXpBonus } from "../utils/classBonuses";
 import type { DailyMission } from "../hooks/useDailyMissions";
+import { translatePhase } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -71,7 +72,9 @@ export default function TodayScreen({
       <h2 className="iron-heading text-3xl text-center">{t("today.title")}</h2>
 
       <div className="mt-4 text-center text-sm text-iron-muted">
-        <p className="font-semibold text-iron-accent">{program.phase}</p>
+        <p className="font-semibold text-iron-accent">
+          {translatePhase(program.phase, t)}
+        </p>
         <p>{t("today.week", { week: program.week })}</p>
       </div>
 

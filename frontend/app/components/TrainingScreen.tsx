@@ -4,6 +4,7 @@ import { getNextMission } from "../data/workoutPlans";
 import { getWorkoutXp } from "../data/xpRewards";
 import type { ClassId } from "../data/classes";
 import { applyClassXpBonus } from "../utils/classBonuses";
+import { translatePhase } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -34,7 +35,9 @@ export default function TrainingScreen({
     <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24">
       <div className="text-center">
         <p className="iron-label">{t("training.currentPhase")}</p>
-        <h2 className="iron-heading text-3xl mt-2">{program.phase}</h2>
+        <h2 className="iron-heading text-3xl mt-2">
+          {translatePhase(program.phase, t)}
+        </h2>
         <p className="mt-2 text-sm text-iron-muted">
           {t("training.week", { week: program.week })}
         </p>

@@ -45,7 +45,6 @@ import DailyRewardPopup from "./components/DailyRewardPopup";
 import { ACHIEVEMENTS } from "./data/achievements";
 import { clearAllGameData } from "./utils/storageKeys";
 import {
-  getBossProgressLabel,
   getBossProgressPercent,
 } from "./utils/bossProgress";
 import {
@@ -487,12 +486,12 @@ function HomeContent() {
     ? getBossProgressPercent(currentBoss, bossProgressContext)
     : 0;
 
-  const bossProgressLabel = currentBoss
-    ? getBossProgressLabel(currentBoss, bossProgressContext)
-    : "";
-
-  const handleContinueToday = useCallback(() => setScreen("today"), []);
+  const handleStartTraining = useCallback(() => setScreen("training"), []);
+  const handleOpenToday = useCallback(() => setScreen("today"), []);
   const handleViewBoss = useCallback(() => setScreen("bosses"), []);
+
+  const workoutMissionCompleted =
+    missions.find((m) => m.id === "workout")?.completed ?? false;
 
   const pendingBossDefeat = getPendingDefeatBoss();
 
@@ -621,12 +620,15 @@ function HomeContent() {
                 totalCount={totalCount}
                 progress={progress}
                 streak={loginStreak}
+                workoutCount={workoutCount}
+                workoutMissionCompleted={workoutMissionCompleted}
                 equippedTitle={equippedTitle}
                 currentBoss={currentBoss}
                 bossProgressPercent={bossProgressPercent}
-                bossProgressLabel={bossProgressLabel}
+                bossProgressContext={bossProgressContext}
                 allBossesDefeated={allBossesDefeated}
-                onContinueToday={handleContinueToday}
+                onStartTraining={handleStartTraining}
+                onOpenToday={handleOpenToday}
                 onViewBoss={handleViewBoss}
               />
             )}

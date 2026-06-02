@@ -7,7 +7,16 @@ import { getTitleLabel } from "../data/bosses";
 import type { BossDefinition } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
 import type { DailyMission } from "../hooks/useDailyMissions";
-import { translateClassName, translateGoal, translateRank } from "../i18n/labels";
+import type { BossProgressContext } from "../utils/bossProgress";
+import {
+  translateBossField,
+  translateBossProgressLabel,
+  translateBossRequirement,
+  translateClassName,
+  translateGoal,
+  translatePhase,
+  translateRank,
+} from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -25,12 +34,15 @@ type Props = {
   totalCount: number;
   progress: number;
   streak: number;
+  workoutCount: number;
+  workoutMissionCompleted: boolean;
   equippedTitle?: string | null;
   currentBoss: BossDefinition | null;
   bossProgressPercent: number;
-  bossProgressLabel: string;
+  bossProgressContext: BossProgressContext;
   allBossesDefeated: boolean;
-  onContinueToday: () => void;
+  onStartTraining: () => void;
+  onOpenToday: () => void;
   onViewBoss: () => void;
 };
 
@@ -49,28 +61,41 @@ export default function HeroScreen({
   totalCount,
   progress,
   streak,
+  workoutCount,
+  workoutMissionCompleted,
   equippedTitle,
   currentBoss,
   bossProgressPercent,
-  bossProgressLabel,
+  bossProgressContext,
   allBossesDefeated,
-  onContinueToday,
+  onStartTraining,
+  onOpenToday,
   onViewBoss,
 }: Props) {
   const { t } = useTranslation();
   const classDef = getClass(profile.classId);
   const titleLabel = getTitleLabel(equippedTitle);
-  const rankEn = getRank(level);
-  const rank = translateRank(rankEn, t);
+  const rank = translateRank(getRank(level), t);
   const nextRankEn = getNextRank(level);
   const nextRank = translateRank(nextRankEn, t);
   const xpPercent = maxXp > 0 ? Math.min(100, Math.round((xp / maxXp) * 100)) : 0;
-  const allMissionsDone = totalCount > 0 && completedCount >= totalCount;
   const bossRequirementMet = bossProgressPercent >= 100;
   const isMaxRank = nextRankEn === "MAX RANK";
+  const isNewUser = workoutCount === 0;
+  const hasDayProgress = completedCount > 0;
+  const showNextReward = hasDayProgress || xp > 0 || level > 1;
+  const showBossBlock = workoutCount > 0;
+  const phaseLabel = translatePhase(program.phase, t);
+  const bossProgressLabel = currentBoss
+    ? translateBossProgressLabel(currentBoss, bossProgressContext, t)
+    : "";
+
+  const mainCta = workoutMissionCompleted
+    ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
+    : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
 
   return (
-    <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 iron-stagger space-y-3">
+    <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-3">
       <section className="flex gap-3 items-center border-b border-iron-border pb-3">
         <img
           src={getAvatar(level, profile.avatarId)}
@@ -78,7 +103,7 @@ export default function HeroScreen({
           className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
         />
         <div className="flex-1 min-w-0">
-          <p className="iron-label">{t("hero.operator")}</p>
+          <p className="iron-label">{t("hero.profileLabel")}</p>
           <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
             {t("hero.levelRank", { level, rank })}
           </h2>
@@ -104,9 +129,18 @@ export default function HeroScreen({
         </div>
       </section>
 
+      {isNewUser && (
+        <section className="iron-card-accent p-3 border border-iron-accent-dim/40">
+          <p className="iron-label">{t("hero.firstStepTitle")}</p>
+          <p className="text-sm text-iron-text mt-2 leading-relaxed">
+            {t("hero.firstStepBody")}
+          </p>
+        </section>
+      )}
+
       <section className="iron-card-raised p-3">
         <div className="flex justify-between items-baseline gap-2">
-          <h3 className="iron-heading text-sm">{t("hero.todaysDiscipline")}</h3>
+          <h3 className="iron-heading text-sm">{t("hero.todayTitle")}</h3>
           <span className="text-xs text-iron-muted">
             {completedCount} / {totalCount}
           </span>
@@ -122,7 +156,11 @@ export default function HeroScreen({
         <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-iron-muted">
           {missions.map((mission) => (
             <li key={mission.id} className="flex items-center gap-1.5 min-w-0">
-              <span className={mission.completed ? "text-iron-accent" : "text-iron-border-strong"}>
+              <span
+                className={
+                  mission.completed ? "text-iron-accent" : "text-iron-border-strong"
+                }
+              >
                 {mission.completed ? "✓" : "□"}
               </span>
               <span className="truncate">{t(`mission.${mission.id}`)}</span>
@@ -132,79 +170,85 @@ export default function HeroScreen({
 
         <button
           type="button"
-          onClick={onContinueToday}
-          className="iron-interactive iron-btn-primary w-full mt-3 py-2.5 text-sm font-semibold rounded-sm"
+          onClick={mainCta.action}
+          className="iron-interactive iron-btn-primary w-full mt-3 py-3 text-sm font-semibold rounded-sm"
         >
-          {allMissionsDone ? t("hero.reviewTodayLog") : t("hero.openTodayLog")}
+          {mainCta.label}
         </button>
       </section>
 
-      <section className="iron-card-surface p-3">
-        <div className="flex justify-between items-baseline gap-2">
-          <h3 className="iron-heading text-sm">{t("hero.nextReward")}</h3>
-          <span className="text-xs text-iron-muted">
-            {t("hero.xpProgress", { xp, maxXp })}
-          </span>
-        </div>
-        <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
-          <div
-            className="h-full iron-progress-fill"
-            style={{ width: `${xpPercent}%` }}
-          />
-        </div>
-        <p className="text-xs text-iron-muted mt-2">
-          {isMaxRank
-            ? t("hero.maxRank", { level })
-            : t("hero.nextRank", { nextRank, level: level + 1 })}
-        </p>
-      </section>
+      {showNextReward && (
+        <section className="iron-card-surface p-3">
+          <div className="flex justify-between items-baseline gap-2">
+            <h3 className="iron-heading text-sm">{t("hero.nextReward")}</h3>
+            <span className="text-xs text-iron-muted">
+              {t("hero.xpProgress", { xp, maxXp })}
+            </span>
+          </div>
+          <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
+            <div
+              className="h-full iron-progress-fill"
+              style={{ width: `${xpPercent}%` }}
+            />
+          </div>
+          <p className="text-xs text-iron-muted mt-2">
+            {isMaxRank
+              ? t("hero.maxRank", { level })
+              : t("hero.nextRank", { nextRank, level: level + 1 })}
+          </p>
+        </section>
+      )}
 
-      <section className="iron-dossier p-3">
-        <p className="iron-label text-iron-danger">{t("hero.targetDossier")}</p>
+      {showBossBlock && (
+        <section className="iron-dossier p-3">
+          <p className="iron-label text-iron-danger">{t("hero.trialLabel")}</p>
 
-        {allBossesDefeated ? (
-          <p className="text-sm text-iron-muted mt-2">{t("hero.allTargetsCleared")}</p>
-        ) : currentBoss ? (
-          <>
-            <h3 className="iron-heading text-lg mt-1 text-iron-text">{currentBoss.name}</h3>
-            <p className="text-xs text-iron-muted mt-1 leading-relaxed">
-              {currentBoss.description}
-            </p>
-            <div className="mt-3 border-t border-iron-border pt-2">
-              <p className="iron-label mb-1.5">{t("hero.requirements")}</p>
-              <p className="text-sm flex items-start gap-2">
-                <span className="text-iron-danger shrink-0">
-                  {bossRequirementMet ? "✓" : "□"}
-                </span>
-                <span>{currentBoss.requirement.label}</span>
+          {allBossesDefeated ? (
+            <p className="text-sm text-iron-muted mt-2">{t("hero.allTrialsCleared")}</p>
+          ) : currentBoss ? (
+            <>
+              <h3 className="iron-heading text-lg mt-1">
+                {translateBossField(currentBoss, "name", t)}
+              </h3>
+              <p className="text-xs text-iron-muted mt-1 leading-relaxed">
+                {translateBossField(currentBoss, "description", t)}
               </p>
-              <p className="text-xs text-iron-muted mt-1 pl-5">{bossProgressLabel}</p>
-              <div className="w-full h-1.5 iron-progress-track mt-2 overflow-hidden">
-                <div
-                  className="h-full iron-progress-fill iron-progress-fill-danger"
-                  style={{ width: `${bossProgressPercent}%` }}
-                />
+              <div className="mt-3 border-t border-iron-border pt-2">
+                <p className="iron-label mb-1.5">{t("hero.requirements")}</p>
+                <p className="text-sm flex items-start gap-2">
+                  <span className="text-iron-danger shrink-0">
+                    {bossRequirementMet ? "✓" : "□"}
+                  </span>
+                  <span>{translateBossRequirement(currentBoss, t)}</span>
+                </p>
+                <p className="text-xs text-iron-muted mt-1 pl-5">{bossProgressLabel}</p>
+                <div className="w-full h-1.5 iron-progress-track mt-2 overflow-hidden">
+                  <div
+                    className="h-full iron-progress-fill iron-progress-fill-danger"
+                    style={{ width: `${bossProgressPercent}%` }}
+                  />
+                </div>
               </div>
-            </div>
-          </>
-        ) : (
-          <p className="text-sm text-iron-muted mt-2">{t("hero.noActiveTarget")}</p>
-        )}
+            </>
+          ) : (
+            <p className="text-sm text-iron-muted mt-2">{t("hero.noActiveTrial")}</p>
+          )}
 
-        <button
-          type="button"
-          onClick={onViewBoss}
-          className="iron-interactive iron-btn-secondary w-full mt-3 py-2 text-xs font-semibold rounded-sm"
-        >
-          {t("hero.openDossierFile")}
-        </button>
-      </section>
+          <button
+            type="button"
+            onClick={onViewBoss}
+            className="iron-interactive iron-btn-secondary w-full mt-3 py-2 text-xs font-semibold rounded-sm"
+          >
+            {t("hero.viewTrials")}
+          </button>
+        </section>
+      )}
 
       <section className="iron-card-panel px-3 py-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
         <div>
-          <p className="iron-label">{t("hero.currentObjective")}</p>
+          <p className="iron-label">{t("hero.currentGoal")}</p>
           <p className="text-iron-text mt-0.5">
-            {translateGoal(profile.goal, t)} · {program.phase}
+            {translateGoal(profile.goal, t)} · {phaseLabel}
           </p>
         </div>
         <p className="text-xs text-iron-muted">{t("hero.seasonWeek", { week })}</p>

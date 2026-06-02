@@ -6,11 +6,15 @@ import {
   type BossDefinition,
 } from "../data/bosses";
 import {
-  getBossProgressLabel,
   getBossProgressPercent,
   type BossProgressContext,
   type BossStatus,
 } from "../utils/bossProgress";
+import {
+  translateBossField,
+  translateBossProgressLabel,
+  translateBossRequirement,
+} from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
@@ -78,9 +82,11 @@ export default function BossScreen({
         <p className="iron-label text-iron-danger">{t("boss.activeTarget")}</p>
         {currentBoss ? (
           <>
-            <h3 className="iron-heading text-2xl mt-1">{currentBoss.name}</h3>
+            <h3 className="iron-heading text-2xl mt-1">
+              {translateBossField(currentBoss, "name", t)}
+            </h3>
             <p className="text-sm text-iron-muted mt-2 leading-relaxed">
-              {currentBoss.description}
+              {translateBossField(currentBoss, "description", t)}
             </p>
             <p className="text-xs text-iron-muted mt-2 italic">
               &ldquo;{currentBoss.lore}&rdquo;
@@ -113,7 +119,7 @@ export default function BossScreen({
                 const isDefeated = status === "defeated";
                 const isReady = status === "ready";
                 const progressPercent = getBossProgressPercent(boss, ctx);
-                const progressLabel = getBossProgressLabel(boss, ctx);
+                const progressLabel = translateBossProgressLabel(boss, ctx, t);
                 const requirementMet = progressPercent >= 100;
 
                 return (
@@ -137,11 +143,13 @@ export default function BossScreen({
                             difficulty: boss.difficulty,
                           })}
                         </p>
-                        <h4 className="iron-heading text-lg mt-1">{boss.name}</h4>
+                        <h4 className="iron-heading text-lg mt-1">
+                          {translateBossField(boss, "name", t)}
+                        </h4>
                         <p className="text-sm text-iron-muted mt-2 leading-relaxed">
                           {isLocked
                             ? t("boss.requiresLevel", { level: boss.requiredLevel })
-                            : boss.description}
+                            : translateBossField(boss, "description", t)}
                         </p>
                       </div>
 
@@ -159,7 +167,7 @@ export default function BossScreen({
                           <span className="text-iron-danger shrink-0">
                             {requirementMet ? "✓" : "□"}
                           </span>
-                          <span>{boss.requirement.label}</span>
+                          <span>{translateBossRequirement(boss, t)}</span>
                         </p>
                         <p className="text-xs text-iron-muted mt-1 pl-5">{progressLabel}</p>
                         <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">

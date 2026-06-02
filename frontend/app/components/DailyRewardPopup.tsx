@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "../i18n/useTranslation";
+
 type Props = {
   isOpen: boolean;
   day: number;
@@ -11,14 +15,18 @@ export default function DailyRewardPopup({
   xpReward,
   onClaim,
 }: Props) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 iron-modal-overlay flex items-center justify-center z-50 p-4 animate-overlay-fade-in">
       <div className="iron-modal p-6 w-full max-w-sm animate-modal-enter">
-        <p className="iron-label text-center">Daily check-in</p>
+        <p className="iron-label text-center">{t("popup.dailyReward.eyebrow")}</p>
 
-        <h2 className="iron-heading text-3xl text-center mt-3">Day {day}</h2>
+        <h2 className="iron-heading text-3xl text-center mt-3">
+          {t("popup.dailyReward.day", { day })}
+        </h2>
 
         <div className="mt-4 grid grid-cols-7 gap-1">
           {Array.from({ length: 7 }, (_, i) => {
@@ -44,8 +52,10 @@ export default function DailyRewardPopup({
         </div>
 
         <div className="mt-6 text-center">
-          <p className="text-2xl font-semibold iron-text-accent">+{xpReward} XP</p>
-          <p className="mt-2 text-sm text-iron-muted">Check in today to keep your streak</p>
+          <p className="text-2xl font-semibold iron-text-accent">
+            {t("popup.dailyReward.xp", { amount: xpReward })}
+          </p>
+          <p className="mt-2 text-sm text-iron-muted">{t("popup.dailyReward.hint")}</p>
         </div>
 
         <button
@@ -53,7 +63,7 @@ export default function DailyRewardPopup({
           onClick={onClaim}
           className="iron-interactive iron-btn-primary w-full mt-6 py-3 text-sm font-semibold rounded-sm"
         >
-          Record check-in
+          {t("popup.dailyReward.claim")}
         </button>
       </div>
     </div>

@@ -3,7 +3,6 @@
 import WeekProgress from "./WeekProgress";
 import { getRank, getNextRank } from "../data/ranks";
 import { getAvatar } from "../data/avatar";
-import { user } from "../data/user";
 import DailyMissionTracker from "./DailyMissionTracker";
 import StreakCalendar from "./StreakCalendar";
 import SeasonProgress from "./SeasonProgress";
@@ -16,6 +15,7 @@ type Props = {
   profile: Profile;
   level: number;
   xp: number;
+  maxXp: number;
   body: number;
   mind: number;
   work: number;
@@ -33,6 +33,7 @@ export default function HeroScreen({
   profile,
   level,
   xp,
+  maxXp,
   body,
   mind,
   work,
@@ -120,7 +121,7 @@ export default function HeroScreen({
             <div className="flex justify-between text-sm font-bold">
               <span>XP</span>
               <span>
-                {xp} / {user.maxXp}
+                {xp} / {maxXp}
               </span>
             </div>
 
@@ -128,7 +129,7 @@ export default function HeroScreen({
               <div
                 className="h-full bg-red-700 transition-all duration-500"
                 style={{
-                  width: `${(xp / user.maxXp) * 100}%`,
+                  width: `${(xp / maxXp) * 100}%`,
                 }}
               />
             </div>
@@ -142,7 +143,7 @@ export default function HeroScreen({
 
             <div className="flex justify-between uppercase text-sm mt-2">
               <span>Recovery</span>
-              <span>{user.recovery}%</span>
+              <span>—</span>
             </div>
             <div className="flex justify-between uppercase text-sm mt-2">
               <span>Watch</span>

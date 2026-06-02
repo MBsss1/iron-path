@@ -1,3 +1,5 @@
+export const MAX_XP_PER_LEVEL = 500;
+
 export const MISSION_XP = {
   deepWork: 60,
   protein: 40,

@@ -1,3 +1,10 @@
+import {
+  getTelegramWebApp,
+  isTelegramWebApp,
+  telegramHapticImpact,
+  telegramHapticNotification,
+} from "./telegram";
+
 type HapticPattern = number | number[];
 
 function vibrate(pattern: HapticPattern) {
@@ -11,26 +18,48 @@ function vibrate(pattern: HapticPattern) {
   }
 }
 
+function tryTelegramHaptic(telegramFn: () => void): boolean {
+  if (!isTelegramWebApp()) return false;
+
+  try {
+    telegramFn();
+    return Boolean(getTelegramWebApp()?.HapticFeedback);
+  } catch {
+    return false;
+  }
+}
+
+function hapticWithFallback(telegramFn: () => void, pattern: HapticPattern) {
+  if (tryTelegramHaptic(telegramFn)) return;
+  vibrate(pattern);
+}
+
 export function hapticWorkout() {
-  vibrate([20, 50, 30]);
+  hapticWithFallback(() => telegramHapticImpact("heavy"), [20, 50, 30]);
 }
 
 export function hapticMission() {
-  vibrate(15);
+  hapticWithFallback(() => telegramHapticImpact("medium"), 15);
 }
 
 export function hapticLevelUp() {
-  vibrate([30, 40, 30, 40, 60]);
+  hapticWithFallback(() => telegramHapticNotification("success"), [
+    30, 40, 30, 40, 60,
+  ]);
 }
 
 export function hapticAchievement() {
-  vibrate([25, 30, 25, 30, 40]);
+  hapticWithFallback(() => telegramHapticNotification("success"), [
+    25, 30, 25, 30, 40,
+  ]);
 }
 
 export function hapticBossDefeat() {
-  vibrate([40, 60, 30, 60, 30, 80, 100]);
+  hapticWithFallback(() => telegramHapticImpact("heavy"), [
+    40, 60, 30, 60, 30, 80, 100,
+  ]);
 }
 
 export function hapticTab() {
-  vibrate(8);
+  hapticWithFallback(() => telegramHapticImpact("light"), 8);
 }

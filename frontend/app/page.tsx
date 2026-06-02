@@ -2,7 +2,6 @@
 
 import OnboardingScreen from "./components/OnboardingScreen";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { user } from "./data/user";
 import { useProfile } from "./hooks/useProfile";
 import { generateProgram } from "./data/programGenerator";
 import { usePlayer } from "./hooks/usePlayer";
@@ -28,7 +27,7 @@ import {
   applyClassXpBonus,
   applyClassLevelUpBonus,
 } from "./utils/classBonuses";
-import { getWorkoutXp, MISSION_XP } from "./data/xpRewards";
+import { getWorkoutXp, MAX_XP_PER_LEVEL, MISSION_XP } from "./data/xpRewards";
 import { useDailyMissions, type DailyMission } from "./hooks/useDailyMissions";
 import { useBossTrials } from "./hooks/useBossTrials";
 import { useBosses } from "./hooks/useBosses";
@@ -52,6 +51,7 @@ import {
   hapticAchievement,
   hapticBossDefeat,
 } from "./utils/haptics";
+import { telegramExpand, telegramReady } from "./utils/telegram";
 
 const MORE_SUB_SCREENS = [
   "progress",
@@ -85,6 +85,11 @@ export default function Home() {
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
   const goBackToMore = useCallback(() => setScreen("more"), []);
+
+  useEffect(() => {
+    telegramReady();
+    telegramExpand();
+  }, []);
 
   const {
     xp,
@@ -497,6 +502,7 @@ export default function Home() {
                 profile={profile}
                 level={level}
                 xp={xp}
+                maxXp={MAX_XP_PER_LEVEL}
                 body={body}
                 mind={mind}
                 work={work}
@@ -545,7 +551,7 @@ export default function Home() {
                 week={weekNumber}
                 phase={program.phase}
                 xp={xp}
-                maxXp={user.maxXp}
+                maxXp={MAX_XP_PER_LEVEL}
                 weight={profile?.weight ?? "0"}
                 goal={profile?.goal ?? "unknown"}
                 onBack={goBackToMore}

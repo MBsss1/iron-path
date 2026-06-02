@@ -6,10 +6,9 @@ import {
   type AchievementDefinition,
   type AchievementId,
 } from "../data/achievements";
+import { MAX_XP_PER_LEVEL } from "../data/xpRewards";
 import { safeGet, safeSet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
-
-const MAX_XP = 500;
 
 type PlayerData = {
   xp: number;
@@ -170,9 +169,9 @@ export function usePlayer() {
     const newXp = xp + amount;
     setTotalXp((currentTotalXp) => currentTotalXp + amount);
 
-    if (newXp >= MAX_XP) {
+    if (newXp >= MAX_XP_PER_LEVEL) {
       setLevel((currentLevel) => currentLevel + 1);
-      setXp(newXp - MAX_XP);
+      setXp(newXp - MAX_XP_PER_LEVEL);
       setLeveledUp(true);
     } else {
       setXp(newXp);

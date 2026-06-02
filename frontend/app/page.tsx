@@ -45,6 +45,10 @@ import DailyRewardPopup from "./components/DailyRewardPopup";
 import { ACHIEVEMENTS } from "./data/achievements";
 import { clearAllGameData } from "./utils/storageKeys";
 import {
+  getBossProgressLabel,
+  getBossProgressPercent,
+} from "./utils/bossProgress";
+import {
   hapticWorkout,
   hapticMission,
   hapticLevelUp,
@@ -464,6 +468,19 @@ export default function Home() {
     [getCurrentBoss, bossProgressContext]
   );
 
+  const allBossesDefeated = defeatedBosses.length >= BOSSES.length;
+
+  const bossProgressPercent = currentBoss
+    ? getBossProgressPercent(currentBoss, bossProgressContext)
+    : 0;
+
+  const bossProgressLabel = currentBoss
+    ? getBossProgressLabel(currentBoss, bossProgressContext)
+    : "";
+
+  const handleContinueToday = useCallback(() => setScreen("today"), []);
+  const handleViewBoss = useCallback(() => setScreen("bosses"), []);
+
   const pendingBossDefeat = getPendingDefeatBoss();
 
   const defeatedBadges = useMemo(
@@ -589,6 +606,12 @@ export default function Home() {
                 progress={progress}
                 streak={loginStreak}
                 equippedTitle={equippedTitle}
+                currentBoss={currentBoss}
+                bossProgressPercent={bossProgressPercent}
+                bossProgressLabel={bossProgressLabel}
+                allBossesDefeated={allBossesDefeated}
+                onContinueToday={handleContinueToday}
+                onViewBoss={handleViewBoss}
               />
             )}
 
@@ -631,6 +654,7 @@ export default function Home() {
                 maxXp={MAX_XP_PER_LEVEL}
                 weight={profile?.weight ?? "0"}
                 goal={profile?.goal ?? "unknown"}
+                avatarId={profile.avatarId}
                 onBack={goBackToMore}
               />
             )}

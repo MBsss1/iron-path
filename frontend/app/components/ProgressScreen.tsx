@@ -1,3 +1,5 @@
+import { AVATAR_OPTIONS } from "../data/avatar";
+
 type Props = {
   level: number;
   rank: string;
@@ -7,6 +9,7 @@ type Props = {
   maxXp: number;
   weight: string;
   goal: string;
+  avatarId?: string;
   onBack: () => void;
 };
 
@@ -19,6 +22,7 @@ export default function ProgressScreen({
   maxXp,
   weight,
   goal,
+  avatarId,
   onBack,
 }: Props) {
   const pathProgress = (week / 24) * 100;
@@ -117,20 +121,28 @@ export default function ProgressScreen({
         </h3>
 
         <div className="mt-4 space-y-3 uppercase text-sm font-bold">
-          <div className="flex justify-between border-b border-black pb-2">
-            <span>Level 1</span>
-            <span>Awakening</span>
-          </div>
+          {AVATAR_OPTIONS.map((option, index) => {
+            const unlocked = level >= option.minLevel;
+            const isSelected = avatarId === option.id;
 
-          <div className="flex justify-between border-b border-black pb-2">
-            <span>Level 5</span>
-            <span>Disciplined</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>Level 10</span>
-            <span>Street Athlete</span>
-          </div>
+            return (
+              <div
+                key={option.id}
+                className={`flex justify-between items-center gap-3 ${
+                  index < AVATAR_OPTIONS.length - 1
+                    ? "border-b border-black pb-2"
+                    : ""
+                } ${unlocked ? "" : "opacity-60"}`}
+              >
+                <span>
+                  Level {option.minLevel} — {option.label}
+                </span>
+                <span className="shrink-0">
+                  {unlocked ? (isSelected ? "Equipped" : "Unlocked") : "Locked"}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

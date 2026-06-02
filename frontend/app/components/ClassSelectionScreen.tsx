@@ -5,27 +5,23 @@ import { CLASSES, type ClassId } from "../data/classes";
 import ClassCard from "./ClassCard";
 import ScreenShell from "./ScreenShell";
 import IronButton from "./IronButton";
+import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   onConfirm: (classId: ClassId) => void;
   onClose?: () => void;
-  title?: string;
-  subtitle?: string;
 };
 
-export default function ClassSelectionScreen({
-  onConfirm,
-  onClose,
-  title = "Choose Your Class",
-  subtitle = "Your class defines how you grow on the Iron Path",
-}: Props) {
+export default function ClassSelectionScreen({ onConfirm, onClose }: Props) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<ClassId>("warrior");
 
   return (
     <ScreenShell
-      eyebrow="Character"
-      title={title}
-      subtitle={subtitle}
+      eyebrow={t("classSelect.eyebrow")}
+      title={t("classSelect.title")}
+      subtitle={t("classSelect.subtitle")}
+      backLabel={t("common.back")}
       onBack={onClose}
     >
       <div className="space-y-3">
@@ -39,7 +35,9 @@ export default function ClassSelectionScreen({
         ))}
       </div>
 
-      <IronButton onClick={() => onConfirm(selected)}>Confirm Class</IronButton>
+      <IronButton onClick={() => onConfirm(selected)}>
+        {t("classSelect.confirm")}
+      </IronButton>
     </ScreenShell>
   );
 }

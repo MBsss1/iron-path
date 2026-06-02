@@ -64,6 +64,7 @@ import {
   telegramReady,
 } from "./utils/telegram";
 import LanguageProvider from "./i18n/LanguageProvider";
+import { translateRank } from "./i18n/labels";
 import { useTranslation } from "./i18n/useTranslation";
 import LanguageSelectionScreen from "./components/LanguageSelectionScreen";
 
@@ -453,7 +454,7 @@ function HomeContent() {
 
   const weekNumber = Number(week);
   const navScreen = getNavActiveScreen(screen);
-  const rank = useMemo(() => getRank(level), [level]);
+  const rank = useMemo(() => translateRank(getRank(level), t), [level, t]);
   const loginStreak = stats.currentLoginStreak;
 
   const bossProgressContext = useMemo(
@@ -592,7 +593,7 @@ function HomeContent() {
               {t("app.title")}
             </h1>
 
-            <p className="text-xs sm:text-sm mt-2 iron-page-header-sub">{t("app.est")}</p>
+            <p className="text-xs sm:text-sm mt-2 iron-page-header-sub">{t("app.tagline")}</p>
           </div>
 
           {profileLoaded && !profile && (

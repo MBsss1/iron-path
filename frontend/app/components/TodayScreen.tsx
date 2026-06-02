@@ -85,7 +85,7 @@ export default function TodayScreen({
           <span>
             {deepWorkDone ? t("today.deepWorkDone") : t("today.deepWork")}
           </span>
-          <span className="text-iron-gold">+{deepWorkXp} XP</span>
+          <span className="text-iron-gold">+{deepWorkXp} {t("common.xp")}</span>
         </button>
 
         {program.workouts?.map((workout: string, index: number) => (
@@ -99,7 +99,7 @@ export default function TodayScreen({
               {workoutDone ? "✓ " : ""}
               {workout}
             </span>
-            <span className="text-iron-gold">+{workoutXp} XP</span>
+            <span className="text-iron-gold">+{workoutXp} {t("common.xp")}</span>
           </div>
         ))}
 
@@ -110,7 +110,7 @@ export default function TodayScreen({
           className={taskClass("protein")}
         >
           <span>{proteinDone ? t("today.proteinDone") : t("today.protein")}</span>
-          <span className="text-iron-gold">+{proteinXp} XP</span>
+          <span className="text-iron-gold">+{proteinXp} {t("common.xp")}</span>
         </button>
 
         <button
@@ -120,7 +120,7 @@ export default function TodayScreen({
           className={taskClass("sleep")}
         >
           <span>{sleepDone ? t("today.sleepDone") : t("today.sleep")}</span>
-          <span className="text-iron-gold">+{sleepXp} XP</span>
+          <span className="text-iron-gold">+{sleepXp} {t("common.xp")}</span>
         </button>
       </div>
     </div>

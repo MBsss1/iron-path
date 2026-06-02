@@ -1,4 +1,11 @@
 import type { ClassDefinition } from "../data/classes";
+import {
+  translateClassBonuses,
+  translateClassDescription,
+  translateClassFocus,
+  translateClassName,
+} from "../i18n/labels";
+import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   classDef: ClassDefinition;
@@ -7,6 +14,10 @@ type Props = {
 };
 
 export default function ClassCard({ classDef, selected, onSelect }: Props) {
+  const { t } = useTranslation();
+  const bonuses = translateClassBonuses(classDef.id, t);
+  const focus = translateClassFocus(classDef.id, t);
+
   return (
     <button
       type="button"
@@ -24,15 +35,17 @@ export default function ClassCard({ classDef, selected, onSelect }: Props) {
 
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold text-iron-accent-dim">
-            Focus: {classDef.focus}
+            {t("classSelect.focusLabel", { focus })}
           </p>
-          <h3 className="iron-heading text-xl mt-1">{classDef.name}</h3>
+          <h3 className="iron-heading text-xl mt-1">
+            {translateClassName(classDef.id, t)}
+          </h3>
           <p className="text-sm mt-2 leading-relaxed text-iron-muted">
-            {classDef.description}
+            {translateClassDescription(classDef.id, t)}
           </p>
 
           <ul className="mt-3 space-y-1">
-            {classDef.bonusSummary.map((bonus) => (
+            {bonuses.map((bonus) => (
               <li key={bonus} className="text-xs font-medium text-iron-text">
                 • {bonus}
               </li>

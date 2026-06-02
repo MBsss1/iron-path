@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getTitleLabel } from "../data/bosses";
+import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   level: number;
@@ -15,48 +16,38 @@ type Props = {
   equippedTitle?: string | null;
 };
 
-function buildShareText({
-  level,
-  rank,
-  week,
-  phase,
-  streak,
-  body,
-  mind,
-  work,
-  equippedTitle,
-}: Props) {
-  const titleLine = equippedTitle
-    ? getTitleLabel(equippedTitle) ?? equippedTitle
-    : null;
-
-  return [
-    "IRON PATH",
-    titleLine ? `"${titleLine}"` : null,
-    `Level ${level} — ${rank}`,
-    `Week ${week}/24 · ${phase}`,
-    `Streak: ${streak} days`,
-    `Body ${body} · Mind ${mind} · Work ${work}`,
-    "",
-    "Stay on the path.",
-  ]
-    .filter(Boolean)
-    .join("\n");
-}
-
 export default function ShareProgressCard(props: Props) {
-  const { level, rank, week, phase, streak, body, mind, work, equippedTitle } =
-    props;
+  const { t } = useTranslation();
+  const { level, rank, week, phase, streak, body, mind, work, equippedTitle } = props;
   const [copied, setCopied] = useState(false);
   const titleLabel = getTitleLabel(equippedTitle);
 
+  const buildShareText = () => {
+    const titleLine = equippedTitle
+      ? getTitleLabel(equippedTitle) ?? equippedTitle
+      : null;
+
+    return [
+      t("app.title").toUpperCase(),
+      titleLine ? `"${titleLine}"` : null,
+      `${t("share.level")} ${level} — ${rank}`,
+      `${t("share.week")} ${week}/24 · ${phase}`,
+      `${t("share.streak")}: ${t("share.streakDays", { count: streak })}`,
+      `${t("stat.body")} ${body} · ${t("stat.mind")} ${mind} · ${t("stat.work")} ${work}`,
+      "",
+      t("share.stayOnPath"),
+    ]
+      .filter(Boolean)
+      .join("\n");
+  };
+
   const handleShare = async () => {
-    const text = buildShareText(props);
+    const text = buildShareText();
 
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share({
-          title: "IRON PATH",
+          title: t("app.title"),
           text,
         });
         return;
@@ -81,57 +72,57 @@ export default function ShareProgressCard(props: Props) {
   return (
     <div className="border border-iron-border-strong iron-card-panel p-5">
       <div className="text-center border-b border-iron-border pb-4">
-        <h3 className="text-3xl font-black tracking-wide text-iron-text">IRON PATH</h3>
-        <p className="text-xs mt-1 uppercase tracking-[0.2em] text-iron-gold">Est. 1950</p>
+        <h3 className="iron-heading text-2xl tracking-wide">{t("app.title")}</h3>
+        <p className="text-xs mt-2 iron-page-header-sub">{t("app.tagline")}</p>
       </div>
 
-      <div className="mt-4 space-y-3 uppercase text-sm font-bold">
+      <div className="mt-4 space-y-3 text-sm font-semibold">
         <div className={`${rowClass} iron-card-raised text-iron-text`}>
-          <span>Level</span>
-          <span className="font-black">{level}</span>
+          <span>{t("share.level")}</span>
+          <span>{level}</span>
         </div>
 
-        <div className={`${rowClass} iron-card-panel text-iron-cream`}>
-          <span>Rank</span>
-          <span className="font-black">{rank}</span>
+        <div className={`${rowClass} iron-card-panel text-iron-text`}>
+          <span>{t("share.rank")}</span>
+          <span>{rank}</span>
         </div>
 
         {titleLabel && (
           <div className="border border-iron-accent-dim px-4 py-3 bg-iron-panel text-center">
-            <p className="text-xs tracking-widest">Title</p>
-            <p className="font-black mt-1">{titleLabel}</p>
+            <p className="text-xs text-iron-muted">{t("share.title")}</p>
+            <p className="font-semibold mt-1">{titleLabel}</p>
           </div>
         )}
 
         <div className={`${rowClass} iron-card-raised text-iron-text`}>
-          <span>Week</span>
-          <span className="font-black">
+          <span>{t("share.week")}</span>
+          <span>
             {week} / 24
           </span>
         </div>
 
-        <div className="border border-iron-border px-4 py-3 iron-card-panel text-iron-cream text-center">
-          <p className="text-xs tracking-widest text-iron-gold">Current Phase</p>
-          <p className="font-black mt-1">{phase}</p>
+        <div className="border border-iron-border px-4 py-3 iron-card-panel text-center">
+          <p className="text-xs text-iron-accent">{t("share.currentPhase")}</p>
+          <p className="font-semibold mt-1">{phase}</p>
         </div>
 
         <div className={`${rowClass} iron-card-raised text-iron-text`}>
-          <span>Streak</span>
-          <span className="font-black">{streak} days</span>
+          <span>{t("share.streak")}</span>
+          <span>{t("share.streakDays", { count: streak })}</span>
         </div>
 
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="border border-iron-border p-3 iron-card-raised text-iron-text">
-            <p className="text-xs text-iron-gold">Body</p>
-            <p className="text-2xl font-black mt-1">{body}</p>
+            <p className="text-xs text-iron-accent">{t("stat.body")}</p>
+            <p className="text-2xl font-semibold mt-1">{body}</p>
           </div>
           <div className="border border-iron-border p-3 iron-card-raised text-iron-text">
-            <p className="text-xs text-iron-gold">Mind</p>
-            <p className="text-2xl font-black mt-1">{mind}</p>
+            <p className="text-xs text-iron-accent">{t("stat.mind")}</p>
+            <p className="text-2xl font-semibold mt-1">{mind}</p>
           </div>
           <div className="border border-iron-border p-3 iron-card-raised text-iron-text">
-            <p className="text-xs text-iron-gold">Work</p>
-            <p className="text-2xl font-black mt-1">{work}</p>
+            <p className="text-xs text-iron-accent">{t("stat.work")}</p>
+            <p className="text-2xl font-semibold mt-1">{work}</p>
           </div>
         </div>
       </div>
@@ -141,7 +132,7 @@ export default function ShareProgressCard(props: Props) {
         onClick={handleShare}
         className="w-full mt-5 iron-interactive iron-btn-primary py-3 text-sm font-semibold rounded-sm"
       >
-        {copied ? "Copied to Clipboard" : "Share Progress"}
+        {copied ? t("share.copied") : t("share.shareProgress")}
       </button>
     </div>
   );

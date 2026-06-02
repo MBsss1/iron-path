@@ -7,6 +7,7 @@ import { getTitleLabel } from "../data/bosses";
 import type { BossDefinition } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
 import type { DailyMission } from "../hooks/useDailyMissions";
+import { translateClassName, translateGoal, translateRank } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -32,11 +33,6 @@ type Props = {
   onContinueToday: () => void;
   onViewBoss: () => void;
 };
-
-function formatGoal(goal: string | undefined, t: (key: string) => string) {
-  if (!goal) return t("hero.goalNotSet");
-  return goal.replace(/_/g, " ");
-}
 
 export default function HeroScreen({
   profile,
@@ -64,11 +60,14 @@ export default function HeroScreen({
   const { t } = useTranslation();
   const classDef = getClass(profile.classId);
   const titleLabel = getTitleLabel(equippedTitle);
-  const rank = getRank(level);
-  const nextRank = getNextRank(level);
+  const rankEn = getRank(level);
+  const rank = translateRank(rankEn, t);
+  const nextRankEn = getNextRank(level);
+  const nextRank = translateRank(nextRankEn, t);
   const xpPercent = maxXp > 0 ? Math.min(100, Math.round((xp / maxXp) * 100)) : 0;
   const allMissionsDone = totalCount > 0 && completedCount >= totalCount;
   const bossRequirementMet = bossProgressPercent >= 100;
+  const isMaxRank = nextRankEn === "MAX RANK";
 
   return (
     <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 iron-stagger space-y-3">
@@ -86,12 +85,15 @@ export default function HeroScreen({
           {titleLabel && (
             <p className="text-sm text-iron-accent mt-0.5 truncate">{titleLabel}</p>
           )}
-          {classDef && (
+          {classDef && profile.classId && (
             <p className="text-sm text-iron-muted mt-0.5">
               {t("hero.classStats", {
-                className: classDef.name,
+                className: translateClassName(profile.classId, t),
+                bodyLabel: t("stat.body"),
                 body,
+                mindLabel: t("stat.mind"),
                 mind,
+                workLabel: t("stat.work"),
                 work,
               })}
             </p>
@@ -151,7 +153,7 @@ export default function HeroScreen({
           />
         </div>
         <p className="text-xs text-iron-muted mt-2">
-          {nextRank === "MAX RANK"
+          {isMaxRank
             ? t("hero.maxRank", { level })
             : t("hero.nextRank", { nextRank, level: level + 1 })}
         </p>
@@ -202,7 +204,7 @@ export default function HeroScreen({
         <div>
           <p className="iron-label">{t("hero.currentObjective")}</p>
           <p className="text-iron-text mt-0.5">
-            {formatGoal(profile.goal, t)} · {program.phase}
+            {translateGoal(profile.goal, t)} · {program.phase}
           </p>
         </div>
         <p className="text-xs text-iron-muted">{t("hero.seasonWeek", { week })}</p>

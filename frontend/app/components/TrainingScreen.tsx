@@ -4,7 +4,12 @@ import { getNextMission } from "../data/workoutPlans";
 import { getWorkoutXp } from "../data/xpRewards";
 import type { ClassId } from "../data/classes";
 import { applyClassXpBonus } from "../utils/classBonuses";
-import { translatePhase } from "../i18n/labels";
+import {
+  translatePhase,
+  translatePhaseFocus,
+  translateProgramWorkout,
+  translateWorkoutMission,
+} from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -23,7 +28,10 @@ export default function TrainingScreen({
   level,
 }: Props) {
   const { t } = useTranslation();
-  const mission = getNextMission(program.goal, program.phase);
+  const mission = translateWorkoutMission(
+    getNextMission(program.goal, program.phase),
+    t
+  );
   const workoutXp = applyClassXpBonus(
     getWorkoutXp(program.phase),
     classId,
@@ -58,14 +66,16 @@ export default function TrainingScreen({
 
       <div className="mt-6 border border-iron-border p-4 bg-iron-raised rounded-sm">
         <h3 className="iron-heading text-xl">{t("training.thisWeek")}</h3>
-        <p className="text-sm text-iron-muted mt-2">{program.focus}</p>
+        <p className="text-sm text-iron-muted mt-2">
+          {translatePhaseFocus(program.phase, program.focus, t)}
+        </p>
         <div className="mt-4 space-y-3 text-sm font-medium text-iron-text">
           {program.workouts?.map((workout: string, index: number) => (
             <div
               key={index}
               className="flex justify-between border-b border-iron-border pb-2"
             >
-              <span>{workout}</span>
+              <span>{translateProgramWorkout(workout, t)}</span>
             </div>
           ))}
 

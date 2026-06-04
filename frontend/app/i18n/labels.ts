@@ -105,6 +105,150 @@ export function translatePhase(phaseName: string, t: TranslateFn): string {
   return key ? t(key) : phaseName;
 }
 
+const PROGRAM_WORKOUT_KEY_BY_EN: Record<string, string> = {
+  Push: "program.workout.push",
+  Pull: "program.workout.pull",
+  "Pull + Easy Run": "program.workout.pull_easy_run",
+  "Legs + Intervals": "program.workout.legs_intervals",
+  "Full Body": "program.workout.full_body",
+  "Easy Run": "program.workout.easy_run",
+  Intervals: "program.workout.intervals",
+  Strength: "program.workout.strength",
+  "Long Run": "program.workout.long_run",
+  Run: "program.workout.run",
+  Walk: "program.workout.walk",
+};
+
+const PHASE_FOCUS_KEY_BY_NAME: Record<string, string> = {
+  Foundation: "phase.focus.foundation",
+  Building: "phase.focus.building",
+  Strength: "phase.focus.strength",
+  Hypertrophy: "phase.focus.hypertrophy",
+  Athlete: "phase.focus.athlete",
+  "Final Form": "phase.focus.finalForm",
+};
+
+const MISSION_TITLE_KEY_BY_EN: Record<string, string> = {
+  "Pull Day": "workoutPlan.title.pullDay",
+  "Runner Foundation": "workoutPlan.title.runnerFoundation",
+  "Runner Strength": "workoutPlan.title.runnerStrength",
+  "Runner Elite": "workoutPlan.title.runnerElite",
+  "Conditioning Day": "workoutPlan.title.conditioningDay",
+  "Hybrid Foundation": "workoutPlan.title.hybridFoundation",
+  "Hybrid Strength": "workoutPlan.title.hybridStrength",
+  "Hybrid Elite": "workoutPlan.title.hybridElite",
+};
+
+const EXERCISE_KEY_BY_EN: Record<string, string> = {
+  "Warm-up Walk": "workoutPlan.exercise.warmUpWalk",
+  "Easy Run": "workoutPlan.exercise.easyRun",
+  Mobility: "workoutPlan.exercise.mobility",
+  Plank: "workoutPlan.exercise.plank",
+  Intervals: "workoutPlan.exercise.intervals",
+  "Split Squats": "workoutPlan.exercise.splitSquats",
+  "Long Run": "workoutPlan.exercise.longRun",
+  "Core Circuit": "workoutPlan.exercise.coreCircuit",
+  "Push-ups": "workoutPlan.exercise.pushUps",
+  Squats: "workoutPlan.exercise.squats",
+  "Mountain Climbers": "workoutPlan.exercise.mountainClimbers",
+  "Pull-ups": "workoutPlan.exercise.pullUps",
+  Dips: "workoutPlan.exercise.dips",
+  "Bulgarian Squats": "workoutPlan.exercise.bulgarianSquats",
+  Run: "workoutPlan.exercise.run",
+  "Pistol Squats": "workoutPlan.exercise.pistolSquats",
+  "Australian Rows": "workoutPlan.exercise.australianRows",
+  "Backpack Rows": "workoutPlan.exercise.backpackRows",
+  "Hanging Knee Raises": "workoutPlan.exercise.hangingKneeRaises",
+};
+
+const PRESCRIPTION_KEY_BY_EN: Record<string, string> = {
+  "5 min": "workoutPlan.prescription.min5",
+  "10 min": "workoutPlan.prescription.min10",
+  "15 min": "workoutPlan.prescription.min15",
+  "2 km": "workoutPlan.prescription.km2",
+  "3 km": "workoutPlan.prescription.km3",
+  "4 km": "workoutPlan.prescription.km4",
+  "5 km": "workoutPlan.prescription.km5",
+  "8 km": "workoutPlan.prescription.km8",
+  "3×30 sec": "workoutPlan.prescription.sec3x30",
+  "3×60 sec": "workoutPlan.prescription.sec3x60",
+  "6×200m": "workoutPlan.prescription.m6x200",
+  "8×400m": "workoutPlan.prescription.m8x400",
+  "3×12": "workoutPlan.prescription.x3x12",
+  "4 rounds": "workoutPlan.prescription.rounds4",
+  "4×10": "workoutPlan.prescription.x4x10",
+  "4×20": "workoutPlan.prescription.x4x20",
+  "4×30 sec": "workoutPlan.prescription.sec4x30",
+  "3×max": "workoutPlan.prescription.max3x",
+  "3×15": "workoutPlan.prescription.x3x15",
+  "3×20": "workoutPlan.prescription.x3x20",
+  "5×max": "workoutPlan.prescription.max5x",
+  "5×10": "workoutPlan.prescription.x5x10",
+  "4×12": "workoutPlan.prescription.x4x12",
+  "6×max": "workoutPlan.prescription.max6x",
+  "6×12": "workoutPlan.prescription.x6x12",
+  "4×8": "workoutPlan.prescription.x4x8",
+  "4×max": "workoutPlan.prescription.max4x",
+  "4×10-15": "workoutPlan.prescription.x4x10_15",
+};
+
+export type WorkoutMissionInput = {
+  title: string;
+  exercises: string[][];
+};
+
+export type WorkoutMission = {
+  title: string;
+  exercises: [string, string][];
+};
+
+export function translateProgramWorkout(
+  workoutLabel: string,
+  t: TranslateFn
+): string {
+  const key = PROGRAM_WORKOUT_KEY_BY_EN[workoutLabel];
+  return key ? tr(t, key, undefined, workoutLabel) : workoutLabel;
+}
+
+export function translatePhaseFocus(
+  phaseName: string,
+  focusFallback: string,
+  t: TranslateFn
+): string {
+  const key = PHASE_FOCUS_KEY_BY_NAME[phaseName];
+  if (key) return tr(t, key, undefined, focusFallback);
+  return focusFallback;
+}
+
+function translateExerciseName(name: string, t: TranslateFn): string {
+  const key = EXERCISE_KEY_BY_EN[name];
+  return key ? tr(t, key, undefined, name) : name;
+}
+
+function translatePrescription(value: string, t: TranslateFn): string {
+  const key = PRESCRIPTION_KEY_BY_EN[value];
+  return key ? tr(t, key, undefined, value) : value;
+}
+
+export function translateWorkoutMission(
+  mission: WorkoutMissionInput,
+  t: TranslateFn
+): WorkoutMission {
+  const titleKey = MISSION_TITLE_KEY_BY_EN[mission.title];
+  return {
+    title: titleKey
+      ? tr(t, titleKey, undefined, mission.title)
+      : mission.title,
+    exercises: mission.exercises.map((row) => {
+      const [name, value] = row;
+      return [
+        translateExerciseName(name, t),
+        translatePrescription(value, t),
+      ] as [string, string];
+    }),
+  };
+}
+
 export function translateAchievement(
   id: AchievementId,
   field: "title" | "description" | "hint",

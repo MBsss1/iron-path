@@ -5,7 +5,7 @@ import type { ClassId } from "../data/classes";
 import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
 import { applyClassXpBonus } from "../utils/classBonuses";
 import type { DailyMission } from "../hooks/useDailyMissions";
-import { translatePhase } from "../i18n/labels";
+import { translatePhase, translateProgramWorkout } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -112,7 +112,10 @@ export default function TodayScreen({
                 key={index}
                 className="flex justify-between border-b border-iron-border pb-2 last:border-0 last:pb-0"
               >
-                <span>{workoutDone ? "✓ " : "· "}{workout}</span>
+                <span>
+                  {workoutDone ? "✓ " : "· "}
+                  {translateProgramWorkout(workout, t)}
+                </span>
               </li>
             ))}
           </ul>

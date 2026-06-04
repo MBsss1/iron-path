@@ -1,7 +1,9 @@
 import type { AchievementCategory, AchievementId } from "../data/achievements";
+import type { BossDefinition, BossTier } from "../data/bosses";
+import { BOSS_TIERS } from "../data/bosses";
+import type { BossTrialId } from "../data/bossTrials";
 import type { DayType } from "../data/workoutGeneratorV2";
 import type { AvatarId } from "../data/avatar";
-import type { BossDefinition } from "../data/bosses";
 import type { ClassId } from "../data/classes";
 import type { NutritionMissionId } from "../hooks/useNutritionMissions";
 import {
@@ -302,6 +304,62 @@ export function translateBossField(
   t: TranslateFn
 ): string {
   return tr(t, `boss.id.${boss.id}.${field}`, undefined, boss[field]);
+}
+
+export function translateBossLore(boss: BossDefinition, t: TranslateFn): string {
+  return tr(t, `boss.id.${boss.id}.lore`, undefined, boss.lore);
+}
+
+export function translateBossTier(tier: BossTier, t: TranslateFn): string {
+  const fallback = BOSS_TIERS.find((row) => row.tier === tier)?.label ?? "";
+  return tr(t, `boss.tier.${tier}`, undefined, fallback);
+}
+
+export function translateBossDifficulty(
+  difficulty: BossDefinition["difficulty"],
+  t: TranslateFn
+): string {
+  const key = difficulty.toLowerCase();
+  return tr(t, `boss.difficulty.${key}`, undefined, difficulty);
+}
+
+export function translateBossRewardTitle(boss: BossDefinition, t: TranslateFn): string {
+  return tr(
+    t,
+    `boss.titles.${boss.rewards.titleId}`,
+    undefined,
+    boss.rewards.title
+  );
+}
+
+export function translateBossRewardTitleById(
+  titleId: string | null | undefined,
+  t: TranslateFn
+): string | null {
+  if (!titleId) return null;
+  return tr(t, `boss.titles.${titleId}`, undefined, titleId);
+}
+
+export function translateBossBadge(badgeId: string, t: TranslateFn): string {
+  return tr(t, `boss.badge.${badgeId}`, undefined, badgeId.replace(/_/g, " "));
+}
+
+export function translateBossTrialField(
+  trialId: BossTrialId,
+  field: "title" | "description",
+  trial: { title: string; description: string },
+  t: TranslateFn
+): string {
+  return tr(t, `boss.trial.${trialId}.${field}`, undefined, trial[field]);
+}
+
+export function translateBossTrialRequirement(
+  trialId: BossTrialId,
+  index: number,
+  fallback: string,
+  t: TranslateFn
+): string {
+  return tr(t, `boss.trial.${trialId}.requirements.${index}`, undefined, fallback);
 }
 
 export function translateBossRequirement(

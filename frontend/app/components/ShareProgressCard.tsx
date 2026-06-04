@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getTitleLabel } from "../data/bosses";
+import { translateBossRewardTitleById } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -20,12 +20,10 @@ export default function ShareProgressCard(props: Props) {
   const { t } = useTranslation();
   const { level, rank, week, phase, streak, body, mind, work, equippedTitle } = props;
   const [copied, setCopied] = useState(false);
-  const titleLabel = getTitleLabel(equippedTitle);
+  const titleLabel = translateBossRewardTitleById(equippedTitle, t);
 
   const buildShareText = () => {
-    const titleLine = equippedTitle
-      ? getTitleLabel(equippedTitle) ?? equippedTitle
-      : null;
+    const titleLine = equippedTitle ? titleLabel ?? equippedTitle : null;
 
     return [
       t("app.title").toUpperCase(),

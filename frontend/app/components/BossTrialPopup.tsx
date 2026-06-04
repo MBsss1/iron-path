@@ -1,6 +1,10 @@
 "use client";
 
 import { BossTrial } from "../data/bossTrials";
+import {
+  translateBossTrialField,
+  translateBossTrialRequirement,
+} from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -25,9 +29,11 @@ export default function BossTrialPopup({
       <div className="iron-modal iron-dossier p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto animate-modal-enter">
         <div className="border-b border-iron-border pb-4 mb-4">
           <p className="iron-label text-iron-danger">{t("popup.bossTrial.eyebrow")}</p>
-          <h2 className="iron-heading text-2xl mt-2">{trial.title}</h2>
+          <h2 className="iron-heading text-2xl mt-2">
+            {translateBossTrialField(trial.id, "title", trial, t)}
+          </h2>
           <p className="mt-3 text-sm leading-relaxed text-iron-muted">
-            {trial.description}
+            {translateBossTrialField(trial.id, "description", trial, t)}
           </p>
         </div>
 
@@ -39,7 +45,7 @@ export default function BossTrialPopup({
             {trial.requirements.map((req, index) => (
               <div key={index} className="flex items-start gap-2 text-sm">
                 <span className="text-iron-danger shrink-0">□</span>
-                <p>{req}</p>
+                <p>{translateBossTrialRequirement(trial.id, index, req, t)}</p>
               </div>
             ))}
           </div>

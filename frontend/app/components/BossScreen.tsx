@@ -11,9 +11,14 @@ import {
   type BossStatus,
 } from "../utils/bossProgress";
 import {
+  translateBossBadge,
+  translateBossDifficulty,
   translateBossField,
+  translateBossLore,
   translateBossProgressLabel,
   translateBossRequirement,
+  translateBossRewardTitle,
+  translateBossTier,
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
@@ -88,7 +93,7 @@ export default function BossScreen({
               {translateBossField(currentBoss, "description", t)}
             </p>
             <p className="text-xs text-iron-muted mt-2 italic">
-              &ldquo;{currentBoss.lore}&rdquo;
+              &ldquo;{translateBossLore(currentBoss, t)}&rdquo;
             </p>
           </>
         ) : (
@@ -102,13 +107,13 @@ export default function BossScreen({
         </div>
       </div>
 
-      {BOSS_TIERS.map(({ tier, label }) => {
+      {BOSS_TIERS.map(({ tier }) => {
         const tierBosses = BOSSES.filter((b) => b.tier === tier);
 
         return (
           <div key={tier}>
             <h3 className="iron-heading text-lg mb-3 border-b border-iron-border pb-2">
-              {label}
+              {translateBossTier(tier, t)}
             </h3>
 
             <div className="space-y-3">
@@ -139,7 +144,7 @@ export default function BossScreen({
                           {t("boss.tierMeta", {
                             tier: boss.tier,
                             level: boss.requiredLevel,
-                            difficulty: boss.difficulty,
+                            difficulty: translateBossDifficulty(boss.difficulty, t),
                           })}
                         </p>
                         <h4 className="iron-heading text-lg mt-1">
@@ -186,13 +191,15 @@ export default function BossScreen({
                         </p>
                       </div>
                       <div className="border border-iron-border p-2 iron-card-panel">
-                        <p className="text-iron-muted">{t("boss.rewardTitle")}</p>
-                        <p className="text-sm font-semibold mt-1">{boss.rewards.title}</p>
+                        <p className="text-iron-muted">{t("boss.rewardTitleLabel")}</p>
+                        <p className="text-sm font-semibold mt-1">
+                          {translateBossRewardTitle(boss, t)}
+                        </p>
                       </div>
                       <div className="border border-iron-border p-2 iron-card-raised">
                         <p className="text-iron-accent-dim">{t("boss.rewardBadge")}</p>
                         <p className="text-sm font-semibold mt-1">
-                          {boss.rewards.badge.replace(/_/g, " ")}
+                          {translateBossBadge(boss.rewards.badge, t)}
                         </p>
                       </div>
                     </div>

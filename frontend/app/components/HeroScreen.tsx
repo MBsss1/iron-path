@@ -3,7 +3,6 @@
 import { getRank, getNextRank } from "../data/ranks";
 import { getAvatar } from "../data/avatar";
 import { getClass } from "../data/classes";
-import { getTitleLabel } from "../data/bosses";
 import type { BossDefinition } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
 import type { DailyMission } from "../hooks/useDailyMissions";
@@ -12,6 +11,7 @@ import {
   translateBossField,
   translateBossProgressLabel,
   translateBossRequirement,
+  translateBossRewardTitleById,
   translateClassName,
   translateGoal,
   translatePhase,
@@ -78,7 +78,7 @@ export default function HeroScreen({
 }: Props) {
   const { t } = useTranslation();
   const classDef = getClass(profile.classId);
-  const titleLabel = getTitleLabel(equippedTitle);
+  const titleLabel = translateBossRewardTitleById(equippedTitle, t);
   const rank = translateRank(getRank(level), t);
   const nextRankEn = getNextRank(level);
   const nextRank = translateRank(nextRankEn, t);

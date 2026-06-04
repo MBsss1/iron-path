@@ -9,9 +9,13 @@ import {
   isSkillUnlockedAtLevel,
   type ClassId,
 } from "../data/classes";
-import { getBadgeLabel, getTitleLabel } from "../data/bosses";
+import { getBadgeLabel } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
-import { translateAvatarLabel, translateSkillPassive } from "../i18n/labels";
+import {
+  translateAvatarLabel,
+  translateBossRewardTitleById,
+  translateSkillPassive,
+} from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import { canChangeClass, daysUntilClassChange } from "../utils/classBonuses";
 import ClassCard from "./ClassCard";
@@ -191,7 +195,7 @@ export default function ProfileScreen({
         </p>
         {equippedTitle && (
           <p className="text-center text-lg font-semibold iron-text-accent mb-3">
-            {getTitleLabel(equippedTitle)}
+            {translateBossRewardTitleById(equippedTitle, t)}
           </p>
         )}
         {unlockedTitleIds.length === 0 ? (
@@ -222,7 +226,7 @@ export default function ProfileScreen({
                     : "bg-transparent text-iron-text"
                 }`}
               >
-                {getTitleLabel(titleId)}
+                {translateBossRewardTitleById(titleId, t)}
               </button>
             ))}
           </div>

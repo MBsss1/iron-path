@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { useWeightProgress } from "../hooks/useWeightProgress";
 import { useTranslation } from "../i18n/useTranslation";
 
-export default function WeightProgressScreen() {
+type Props = {
+  compact?: boolean;
+};
+
+export default function WeightProgressScreen({ compact = false }: Props) {
   const { t, locale } = useTranslation();
   const { data, updateWeight, setTargetWeight, reset } = useWeightProgress();
   const [weightInput, setWeightInput] = useState("");
@@ -68,7 +72,7 @@ export default function WeightProgressScreen() {
     "w-full p-2 border border-iron-border bg-iron-panel text-iron-text";
 
   return (
-    <div className="mt-6 space-y-4">
+    <div className={`${compact ? "mt-0" : "mt-6"} space-y-4`}>
       <div className="border border-iron-border-strong p-4 iron-card-panel">
         <div className="flex justify-between items-center">
           <div>

@@ -1,7 +1,11 @@
 "use client";
 
 import type { BossDefinition } from "../data/bosses";
-import { translateBossField } from "../i18n/labels";
+import {
+  translateBossBadge,
+  translateBossField,
+  translateBossRewardTitle,
+} from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -40,13 +44,15 @@ export default function BossDefeatPopup({
 
           <div className="border-t border-iron-border pt-3">
             <p className="iron-label">{t("popup.bossDefeat.titleEarned")}</p>
-            <p className="text-xl font-semibold mt-1">{boss.rewards.title}</p>
+            <p className="text-xl font-semibold mt-1">
+              {translateBossRewardTitle(boss, t)}
+            </p>
           </div>
 
           <div className="border-t border-iron-border pt-3">
             <p className="iron-label">{t("popup.bossDefeat.badge")}</p>
             <p className="text-base font-semibold mt-1">
-              {boss.rewards.badge.replace(/_/g, " ")}
+              {translateBossBadge(boss.rewards.badge, t)}
             </p>
           </div>
         </div>

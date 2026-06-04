@@ -13,16 +13,20 @@ export default function ProgressSeasonsSection({ seasons }: Props) {
 
   if (seasons.length === 0) {
     return (
-      <div className="border border-iron-border p-4 iron-card-raised text-center">
-        <p className="uppercase font-black text-iron-text text-sm">
-          {t("legacyScreen.empty")}
+      <div className="space-y-4">
+        <p className="text-sm text-iron-muted leading-relaxed">
+          {t("progressScreen.historyEmpty")}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <p className="text-xs uppercase font-bold text-iron-gold">
+        {t("progressScreen.historyEvents")}
+      </p>
+      <div className="space-y-3">
       {seasons.map((s) => (
         <div key={s.id} className="border border-iron-border p-4 iron-card-panel">
           <div className="flex justify-between gap-4">
@@ -52,6 +56,7 @@ export default function ProgressSeasonsSection({ seasons }: Props) {
           </div>
         </div>
       ))}
+      </div>
     </div>
   );
 }

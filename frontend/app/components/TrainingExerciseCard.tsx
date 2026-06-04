@@ -4,6 +4,7 @@ import type { GeneratedExercise } from "../data/workoutGeneratorV2";
 import { getExerciseInfo, hasExerciseInfo } from "../data/exerciseLibrary";
 import { exerciseItemKey } from "../utils/trainingWorkoutView";
 import { useTranslation } from "../i18n/useTranslation";
+import { hapticDone } from "../utils/haptics";
 
 type Lang = "en" | "ru";
 
@@ -35,9 +36,14 @@ export default function TrainingExerciseCard({
   const hasDetails = hasExerciseInfo(item.exerciseId);
   const compact = variant === "warmup";
 
+  const handleToggle = () => {
+    if (!completed) hapticDone();
+    onToggleComplete(key);
+  };
+
   return (
     <article
-      className={`border rounded-sm transition-colors ${
+      className={`iron-card-tap border rounded-sm transition-colors ${
         completed
           ? "border-iron-accent/30 bg-iron-panel/50 opacity-80"
           : "border-iron-border bg-iron-raised/60 shadow-[var(--iron-shadow-card)]"
@@ -46,17 +52,17 @@ export default function TrainingExerciseCard({
       <div className="flex gap-3 items-start">
         <button
           type="button"
-          onClick={() => onToggleComplete(key)}
+          onClick={handleToggle}
           className={`shrink-0 w-9 h-9 rounded-sm border flex items-center justify-center iron-interactive ${
             completed
-              ? "border-iron-accent bg-iron-accent-dim/30 text-iron-accent"
+              ? "border-iron-accent bg-iron-accent-dim/30 text-iron-accent iron-done-pop"
               : "border-iron-border bg-iron-panel text-iron-muted"
           }`}
           aria-pressed={completed}
           aria-label={t("training.exercise.done")}
         >
           {completed ? (
-            <span className="text-base font-bold" aria-hidden="true">
+            <span className="text-base font-bold iron-done-pop" aria-hidden="true">
               ✓
             </span>
           ) : (

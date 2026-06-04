@@ -15,6 +15,7 @@ import { parseProfileGoal, type FitnessGoal } from "../data/fitnessGoals";
 import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronButton from "./IronButton";
+import CompletionMoment from "./ui/CompletionMoment";
 import AssessmentTimer from "./AssessmentTimer";
 
 type Props = {
@@ -268,6 +269,7 @@ export default function FitnessAssessmentScreen({
         title={t("assessment.results.title")}
         subtitle={t("assessment.results.subtitle")}
       >
+        <CompletionMoment message={t("completion.assessment")} className="mb-4" />
         <div className="iron-card-panel p-4 mb-4">
           <p className="iron-label">{t("assessment.results.overall")}</p>
           <p className="iron-heading text-xl mt-1">

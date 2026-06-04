@@ -40,6 +40,8 @@ import ExerciseDetailModal from "./ExerciseDetailModal";
 import TrainingTimer from "./TrainingTimer";
 import TrainingExerciseCard from "./TrainingExerciseCard";
 import RestTimerPanel from "./RestTimerPanel";
+import Stagger from "../animations/Stagger";
+import CompletionMoment from "./ui/CompletionMoment";
 
 type Props = {
   onCompleteWorkout: () => void;
@@ -113,7 +115,7 @@ function TrainingStageBlock({
           </p>
         )}
       </div>
-      <div className="space-y-2">
+      <Stagger className="space-y-2">
         {items.map((item) => (
           <TrainingExerciseCard
             key={exerciseItemKey(item)}
@@ -126,7 +128,7 @@ function TrainingStageBlock({
             onOpenRest={onOpenRest}
           />
         ))}
-      </div>
+      </Stagger>
     </div>
   );
 }
@@ -372,6 +374,7 @@ export default function TrainingScreen({
 
   return (
     <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-28 space-y-4">
+      <Stagger className="space-y-4">
       <div className="text-center">
         <p className="iron-label text-iron-accent">{t("training.screenTitle")}</p>
         <h2 className="iron-heading text-2xl sm:text-3xl mt-1">{todayTitle}</h2>
@@ -389,6 +392,9 @@ export default function TrainingScreen({
       <section className="border border-iron-accent-dim/40 bg-iron-panel p-4 rounded-sm space-y-4 min-h-[200px]">
         {activeStage === "warmup" && (
           <>
+            {allWarmupDone && (
+              <CompletionMoment message={t("completion.warmup")} />
+            )}
             <TrainingStageBlock
               stage="warmup"
               title={t("training.block.warmupTitle")}
@@ -428,6 +434,9 @@ export default function TrainingScreen({
 
         {activeStage === "workout" && (
           <>
+            {allWorkoutDone && (
+              <CompletionMoment message={t("completion.workout")} />
+            )}
             <TrainingStageBlock
               stage="workout"
               title={t("training.block.workoutTitle")}
@@ -492,6 +501,7 @@ export default function TrainingScreen({
           </>
         )}
       </section>
+      </Stagger>
 
       <ExerciseDetailModal
         exercise={detailExercise}

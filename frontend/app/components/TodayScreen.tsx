@@ -17,6 +17,7 @@ import {
 } from "../utils/trainingCalendar";
 import TodayPersonalTasksBlock from "./today/TodayPersonalTasksBlock";
 import TodayHabitControlBlock from "./today/TodayHabitControlBlock";
+import Stagger from "../animations/Stagger";
 
 type Props = {
   program: { phase: string; week: number };
@@ -122,6 +123,7 @@ export default function TodayScreen({
         <p>{t("today.week", { week: program.week })}</p>
       </div>
 
+      <Stagger className="mt-6 space-y-4">
       {assessmentComplete ? (
         <div className="mt-6 border border-iron-border p-4 iron-card-raised rounded-sm space-y-3">
           <div className="flex justify-between items-baseline gap-2">
@@ -259,6 +261,7 @@ export default function TodayScreen({
           <TodayPersonalTasksBlock compact />
         </div>
       )}
+      </Stagger>
     </div>
   );
 }

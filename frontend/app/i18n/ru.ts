@@ -6,6 +6,32 @@ const ru = {
     loadingJournal: "Открываем ваш журнал…",
     loadingAria: "Загрузка сохранённого прогресса",
   },
+  intro: {
+    scene1: {
+      title: "Iron Path",
+      tagline: "Дисциплина. Сила. Прогресс.",
+    },
+    scene2: {
+      line1: "Не очередной трекер привычек.",
+      line2: "Не очередной фитнес-план.",
+      line3: "Ваш путь к реальному прогрессу.",
+    },
+    scene3: {
+      assessment: "Оценка формы",
+      plan: "План тренировок",
+      progress: "Прогресс силы",
+    },
+    scene4: {
+      title: "Готов начать?",
+      cta: "Начать путь",
+    },
+  },
+  completion: {
+    warmup: "Разминка завершена",
+    workout: "Тренировка завершена",
+    assessment: "Оценка завершена",
+    milestone: "Следующая цель достигнута",
+  },
   lang: {
     selectTitle: "Choose your language",
     selectSubtitle: "You can change this later in Settings.",

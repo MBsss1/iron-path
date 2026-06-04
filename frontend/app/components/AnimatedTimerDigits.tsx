@@ -1,68 +1,47 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { usePrefersReducedMotion } from "../animations/usePrefersReducedMotion";
 
 type Props = {
   formatted: string;
   className?: string;
 };
 
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+const DIGIT_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const handler = () => setReduced(mq.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  return reduced;
-}
-
-function AnimatedDigit({
-  char,
-  prevChar,
-  animate,
+function DigitWheel({
+  digit,
+  reduced,
 }: {
-  char: string;
-  prevChar: string | undefined;
-  animate: boolean;
+  digit: number;
+  reduced: boolean;
 }) {
-  const [phase, setPhase] = useState<"idle" | "rolling">("idle");
-  const [outgoing, setOutgoing] = useState(prevChar ?? char);
-
-  useEffect(() => {
-    if (!animate || char === prevChar) return;
-    setOutgoing(prevChar ?? char);
-    setPhase("rolling");
-    const id = window.setTimeout(() => setPhase("idle"), 380);
-    return () => window.clearTimeout(id);
-  }, [char, prevChar, animate]);
-
-  if (!animate || phase === "idle") {
-    return <span className="timer-digit-current">{char}</span>;
-  }
+  const safe = Number.isFinite(digit) && digit >= 0 && digit <= 9 ? digit : 0;
 
   return (
-    <span className="timer-digit-wheel-inner">
-      <span className="timer-digit-outgoing" aria-hidden="true">
-        {outgoing}
+    <span className="digit-wheel-slot" aria-hidden="true">
+      <span
+        className="digit-wheel-strip"
+        style={{
+          transform: `translate3d(0, ${-safe * 10}%, 0)`,
+          transition: reduced
+            ? "none"
+            : "transform var(--motion-duration-normal) var(--motion-ease-out)",
+        }}
+      >
+        {DIGIT_VALUES.map((value) => (
+          <span key={value} className="digit-wheel-cell">
+            {value}
+          </span>
+        ))}
       </span>
-      <span className="timer-digit-incoming">{char}</span>
     </span>
   );
 }
 
 export default function AnimatedTimerDigits({ formatted, className = "" }: Props) {
-  const prevRef = useRef(formatted);
-  const prevFormatted = prevRef.current;
   const reduced = usePrefersReducedMotion();
-
-  useEffect(() => {
-    prevRef.current = formatted;
-  }, [formatted]);
+  let wheelIndex = 0;
 
   return (
     <span
@@ -72,20 +51,22 @@ export default function AnimatedTimerDigits({ formatted, className = "" }: Props
       {formatted.split("").map((char, index) => {
         if (char === ":") {
           return (
-            <span key={`sep-${index}`} className="timer-digit-separator mx-0.5">
+            <span key={`sep-${index}`} className="digit-wheel-separator">
               :
             </span>
           );
         }
-        return (
-          <span key={`d-${index}`} className="timer-digit-wheel">
-            <AnimatedDigit
-              char={char}
-              prevChar={prevFormatted[index]}
-              animate={!reduced}
-            />
-          </span>
-        );
+        const parsed = parseInt(char, 10);
+        if (Number.isNaN(parsed)) {
+          return (
+            <span key={`raw-${index}`} className="digit-wheel-cell">
+              {char}
+            </span>
+          );
+        }
+        const key = `wheel-${wheelIndex}`;
+        wheelIndex += 1;
+        return <DigitWheel key={key} digit={parsed} reduced={reduced} />;
       })}
     </span>
   );

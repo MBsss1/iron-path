@@ -38,7 +38,10 @@ import { useStats } from "./hooks/useStats";
 import HeroScreen from "./components/HeroScreen";
 import AppPopups from "./components/AppPopups";
 import SplashScreen from "./components/SplashScreen";
+import IntroExperience from "./components/IntroExperience";
 import ScreenTransition from "./components/ScreenTransition";
+import { ScreenLoadingSkeleton } from "./components/ui/Skeleton";
+import { hasIntroSeen } from "./utils/introStorage";
 import XpFloatAnimation from "./components/XpFloatAnimation";
 import DailyRewardPopup from "./components/DailyRewardPopup";
 import { ACHIEVEMENTS } from "./data/achievements";
@@ -114,12 +117,20 @@ function HomeContent() {
   const [lastXpReward, setLastXpReward] = useState(0);
   const [showWeekPopup, setShowWeekPopup] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
   const [xpFloat, setXpFloat] = useState<number | null>(null);
   const [showDailyReward, setShowDailyReward] = useState(false);
   const [bossDefeatXp, setBossDefeatXp] = useState(0);
   const levelUpBonusApplied = useRef(false);
 
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
+  const handleIntroComplete = useCallback(() => setShowIntro(false), []);
+
+  useEffect(() => {
+    if (!showSplash && languageChosen && !hasIntroSeen()) {
+      setShowIntro(true);
+    }
+  }, [showSplash, languageChosen]);
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
   const goBackToMore = useCallback(() => setScreen("more"), []);
 
@@ -639,28 +650,45 @@ function HomeContent() {
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
-      {!showSplash && languageLoaded && !languageChosen && (
+      {showIntro && !showSplash && languageChosen && (
+        <IntroExperience onComplete={handleIntroComplete} />
+      )}
+
+      {!showSplash && !showIntro && languageLoaded && !languageChosen && (
         <LanguageSelectionScreen onSelect={setLocale} />
       )}
 
-      {!showSplash && languageLoaded && languageChosen && !storageReady && (
-        <div
-          className="fixed inset-0 z-[99] flex items-center justify-center iron-page"
-          aria-busy="true"
-          aria-label={t("app.loadingAria")}
-        >
-          <div className="text-center iron-shell-card py-8 px-10">
-            <p className="iron-label">{t("app.loading")}</p>
-            <div className="mt-4 h-0.5 w-20 mx-auto bg-iron-accent-dim" />
+      {!showSplash &&
+        !showIntro &&
+        languageLoaded &&
+        languageChosen &&
+        !storageReady && (
+          <div
+            className="fixed inset-0 z-[99] iron-page px-4 pt-24 pb-24"
+            aria-busy="true"
+            aria-label={t("app.loadingAria")}
+          >
+            <div className="w-full max-w-md mx-auto">
+              <ScreenLoadingSkeleton
+                variant={
+                  screen === "today"
+                    ? "today"
+                    : screen === "training"
+                      ? "training"
+                      : screen === "progress"
+                        ? "progress"
+                        : "hero"
+                }
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {languageChosen && xpFloat !== null && (
         <XpFloatAnimation amount={xpFloat} onDone={clearXpFloat} />
       )}
 
-      {languageChosen && (
+      {languageChosen && !showIntro && (
       <main className="min-h-screen iron-page flex flex-col items-center px-4 sm:px-6 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <div className="w-full max-w-md">
           <div className="text-center mt-4 sm:mt-6 iron-page-header">

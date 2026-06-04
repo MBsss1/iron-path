@@ -71,3 +71,7 @@ export function hapticAssessmentTimerDone() {
 export function hapticRestTimerDone() {
   hapticWithFallback(() => telegramHapticNotification("success"), [15, 25, 15]);
 }
+
+export function hapticDone() {
+  hapticWithFallback(() => telegramHapticImpact("light"), [10, 18]);
+}

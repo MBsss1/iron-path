@@ -6,6 +6,32 @@ const en = {
     loadingJournal: "Loading your journal…",
     loadingAria: "Loading saved progress",
   },
+  intro: {
+    scene1: {
+      title: "Iron Path",
+      tagline: "Discipline. Strength. Progress.",
+    },
+    scene2: {
+      line1: "Not another habit tracker.",
+      line2: "Not another generic fitness plan.",
+      line3: "Your path to real progress.",
+    },
+    scene3: {
+      assessment: "Assessment",
+      plan: "Workout plan",
+      progress: "Strength progress",
+    },
+    scene4: {
+      title: "Ready to begin?",
+      cta: "Begin your path",
+    },
+  },
+  completion: {
+    warmup: "Warm-up complete",
+    workout: "Workout complete",
+    assessment: "Assessment complete",
+    milestone: "Next milestone reached",
+  },
   lang: {
     selectTitle: "Choose your language",
     selectSubtitle: "You can change this later in Settings.",

@@ -20,6 +20,7 @@ import {
   translateRank,
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
+import Stagger from "../animations/Stagger";
 
 type Props = {
   profile: Profile;
@@ -190,7 +191,7 @@ export default function HeroScreen({
   }
 
   return (
-    <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-3">
+    <Stagger className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-3">
       <section className="flex gap-3 items-center border-b border-iron-border pb-3">
         <img
           src={getAvatar(level, profile.avatarId)}
@@ -362,6 +363,6 @@ export default function HeroScreen({
         </div>
         <p className="text-xs text-iron-muted">{t("hero.seasonWeek", { week })}</p>
       </section>
-    </div>
+    </Stagger>
   );
 }

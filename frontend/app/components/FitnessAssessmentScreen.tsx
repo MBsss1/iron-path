@@ -504,6 +504,7 @@ export default function FitnessAssessmentScreen({
 
   return (
     <ScreenShell
+      transitionKey={currentStep}
       eyebrow={t("assessment.eyebrow", {
         current: stepIndex + 1,
         total: totalSteps,

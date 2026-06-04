@@ -83,7 +83,7 @@ export function getBossProgressLabel(
   }
 
   if (boss.requirement.type === "allBossesDefeated") {
-    return `${current} / ${target} bosses defeated`;
+    return `${current} / ${target} stages cleared`;
   }
 
   if (boss.requirement.type === "streakDays") {

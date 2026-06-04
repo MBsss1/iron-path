@@ -163,7 +163,7 @@ html.telegram-webapp body {
   box-shadow: var(--iron-shadow-card);
 }
 
-/* Target dossier (boss only) */
+/* Stage focus card (boss data layer) */
 .iron-boss-card,
 .iron-dossier {
   background: var(--iron-panel);
@@ -286,6 +286,39 @@ html.telegram-webapp body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes premium-screen-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes iron-section-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes iron-step-transition {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
@@ -443,6 +476,31 @@ html.telegram-webapp body {
   animation: screen-enter var(--motion-duration-normal) var(--motion-ease-out) both;
 }
 
+.iron-anim-premium-screen {
+  animation: premium-screen-enter var(--motion-duration-slow) var(--motion-ease-out) both;
+}
+
+.iron-anim-section-reveal {
+  animation: iron-section-reveal var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
+.iron-anim-step-transition {
+  animation: iron-step-transition var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
+.iron-nav-indicator-slide {
+  transition:
+    transform var(--motion-duration-slow) cubic-bezier(0.33, 1, 0.68, 1),
+    opacity var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.iron-nav-tab-icon,
+.iron-nav-tab-label {
+  transition:
+    color var(--motion-duration-normal) var(--motion-ease-out),
+    opacity var(--motion-duration-normal) var(--motion-ease-out);
+}
+
 .iron-anim-fade-in {
   animation: iron-fade-in var(--motion-duration-normal) var(--motion-ease-out) both;
 }
@@ -577,6 +635,153 @@ html.telegram-webapp body {
   vertical-align: bottom;
 }
 
+/* ——— Logo intro assembly (official mark) ——— */
+.logo-intro-scene {
+  min-height: min(70vh, 420px);
+  transition:
+    opacity var(--motion-duration-slow) var(--motion-ease-out),
+    transform var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+.logo-intro-scene--shrink {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+.logo-intro-hero {
+  position: relative;
+  width: 149px;
+  height: 134px;
+  color: var(--iron-text);
+  contain: layout style paint;
+}
+
+.logo-intro-hero__mark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 149px;
+  height: 76px;
+}
+
+.logo-intro-hero__official {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--motion-duration-normal) var(--motion-ease-out);
+  pointer-events: none;
+}
+
+.logo-intro-hero__official--visible {
+  opacity: 1;
+}
+
+.logo-intro-hero__img {
+  display: block;
+  width: 149px;
+  height: auto;
+  max-height: 134px;
+}
+
+.logo-intro-part {
+  opacity: 0;
+  transform: translate3d(var(--logo-part-x, 0), var(--logo-part-y, 0), 0);
+  will-change: transform, opacity;
+}
+
+.logo-intro-part--placed {
+  animation: logo-intro-part-place var(--motion-duration-slow) var(--motion-ease-out) both;
+}
+
+@keyframes logo-intro-part-place {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--logo-part-x, 0), var(--logo-part-y, 0), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.logo-intro-glint {
+  position: absolute;
+  inset: -4px;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    108deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.06) 44%,
+    rgba(220, 200, 170, 0.22) 50%,
+    rgba(255, 255, 255, 0.06) 56%,
+    transparent 62%
+  );
+  transform: translate3d(-130%, 0, 0);
+}
+
+.logo-intro-hero--glint .logo-intro-glint {
+  animation: logo-intro-glint-sweep 0.9s var(--motion-ease-out) both;
+}
+
+@keyframes logo-intro-glint-sweep {
+  0% {
+    opacity: 0;
+    transform: translate3d(-130%, 0, 0);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(130%, 0, 0);
+  }
+}
+
+.logo-intro-taglines {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+  transition:
+    opacity var(--motion-duration-normal) var(--motion-ease-out),
+    transform var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+.logo-intro-taglines--visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.logo-intro-tagline {
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+}
+
+.logo-intro-tagline--visible {
+  animation: logo-intro-tagline-in var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
+@keyframes logo-intro-tagline-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.logo-intro-scene--shrink .logo-intro-hero {
+  transform: scale(0.78) translate3d(0, -12px, 0);
+  transition: transform var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+.logo-intro-scene--shrink .logo-intro-taglines {
+  opacity: 0;
+  transform: translate3d(0, -6px, 0);
+}
+
 /* ——— Intro experience ——— */
 .intro-logo-shell {
   position: relative;
@@ -676,6 +881,35 @@ html.telegram-webapp body {
   }
 
   .intro-product-card {
+    transition: none !important;
+  }
+
+  .logo-intro-part--placed,
+  .logo-intro-hero--glint .logo-intro-glint,
+  .logo-intro-tagline--visible {
+    animation: none !important;
+  }
+
+  .logo-intro-part--placed {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .logo-intro-hero__official--visible {
+    opacity: 1;
+  }
+
+  .logo-intro-scene--shrink .logo-intro-hero {
+    transform: none !important;
+  }
+
+  .iron-anim-premium-screen,
+  .iron-anim-section-reveal,
+  .iron-anim-step-transition {
+    animation: none !important;
+  }
+
+  .iron-nav-indicator-slide {
     transition: none !important;
   }
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Stagger from "../animations/Stagger";
 import { fadeUp } from "../animations/classes";
 import { usePrefersReducedMotion } from "../animations/usePrefersReducedMotion";
+import LogoIntroSequence from "./intro/LogoIntroSequence";
 import { useTranslation } from "../i18n/useTranslation";
 import { markIntroSeen } from "../utils/introStorage";
 
@@ -11,14 +12,14 @@ type Props = {
   onComplete: () => void;
 };
 
-type Scene = 1 | 2 | 3 | 4;
+type Scene = "logo" | 2 | 3 | 4;
 
 const INTRO_CARDS = ["assessment", "plan", "progress"] as const;
 
 export default function IntroExperience({ onComplete }: Props) {
   const { t } = useTranslation();
   const reduced = usePrefersReducedMotion();
-  const [scene, setScene] = useState<Scene>(1);
+  const [scene, setScene] = useState<Scene>("logo");
   const [sceneVisible, setSceneVisible] = useState(true);
   const [visibleCards, setVisibleCards] = useState(0);
 
@@ -26,6 +27,7 @@ export default function IntroExperience({ onComplete }: Props) {
     setSceneVisible(false);
     window.setTimeout(() => {
       setScene((s) => {
+        if (s === "logo") return 2;
         if (s >= 4) return s;
         return (s + 1) as Scene;
       });
@@ -34,10 +36,6 @@ export default function IntroExperience({ onComplete }: Props) {
   }, [reduced]);
 
   useEffect(() => {
-    if (scene === 1) {
-      const id = window.setTimeout(advanceScene, reduced ? 800 : 2400);
-      return () => window.clearTimeout(id);
-    }
     if (scene === 2) {
       const id = window.setTimeout(advanceScene, reduced ? 600 : 3400);
       return () => window.clearTimeout(id);
@@ -71,26 +69,9 @@ export default function IntroExperience({ onComplete }: Props) {
   const anim = sceneVisible && !reduced ? fadeUp : "";
 
   return (
-    <div className="fixed inset-0 z-[101] iron-page flex flex-col items-center justify-center px-6 py-10">
-      {scene === 1 && (
-        <div className={`text-center max-w-sm ${anim}`}>
-          <div
-            className={`intro-logo-shell iron-shell-card py-12 px-10 border border-iron-border-strong inline-block ${
-              reduced ? "" : "intro-logo-enter"
-            }`}
-          >
-            <h1 className="iron-heading text-4xl tracking-wide text-iron-text">
-              {t("intro.scene1.title")}
-            </h1>
-            <p
-              className={`mt-4 text-sm text-iron-accent tracking-wide ${
-                reduced ? "" : "intro-tagline-enter"
-              }`}
-            >
-              {t("intro.scene1.tagline")}
-            </p>
-          </div>
-        </div>
+    <div className="fixed inset-0 z-[101] iron-page flex flex-col items-center justify-center px-6 py-10 bg-[var(--iron-bg)]">
+      {scene === "logo" && (
+        <LogoIntroSequence onComplete={() => advanceScene()} />
       )}
 
       {scene === 2 && (

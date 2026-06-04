@@ -7,6 +7,12 @@ const ru = {
     loadingAria: "Загрузка сохранённого прогресса",
   },
   intro: {
+    logo: {
+      ariaLabel: "Логотип Iron Path",
+      line1: "Дисциплина.",
+      line2: "Сила.",
+      line3: "Прогресс.",
+    },
     scene1: {
       title: "Iron Path",
       tagline: "Дисциплина. Сила. Прогресс.",
@@ -360,7 +366,7 @@ const ru = {
     },
     milestones: {
       subtitle: "Реальные показатели силы — не игровой опыт.",
-      needAssessment: "Пройдите оценку подготовки, чтобы увидеть физические вехи.",
+      needAssessment: "Пройдите оценку подготовки, чтобы увидеть физический прогресс.",
       nextTarget: "Следующая цель: {{value}} {{unit}}",
       percentToGoal: "{{percent}}% до следующей ступени",
       stageComplete: "Верхняя ступень на этом треке достигнута",
@@ -587,11 +593,11 @@ const ru = {
     xpGain: "+{{amount}} опыта",
     maxRank: "Максимальный ранг на уровне {{level}}.",
     nextRank: "Следующий ранг: {{nextRank}} на уровне {{level}}.",
-    trialLabel: "Веха",
-    allTrialsCleared: "Все испытания пройдены.",
+    trialLabel: "Этап",
+    allTrialsCleared: "Все этапы пройдены.",
     requirements: "Условие",
-    noActiveTrial: "Пока нет активного испытания. Продолжай тренировки.",
-    viewTrials: "Все испытания",
+    noActiveTrial: "Пока нет активного этапа. Продолжай тренировки.",
+    viewTrials: "Все этапы",
     currentGoal: "Цель",
     goalNotSet: "Не задана",
     seasonWeek: "Неделя {{week}} / 24",
@@ -889,11 +895,11 @@ const ru = {
     stats: {
       label: "Отчёты",
       title: "Статистика",
-      desc: "Опыт, серии, тренировки и вехи",
+      desc: "Опыт, серии, тренировки и этапы",
     },
     milestones: {
-      label: "Вехи",
-      title: "Вехи",
+      label: "Этапы",
+      title: "Этапы",
       desc: "Условия, прогресс и награды",
     },
     progress: {
@@ -962,7 +968,7 @@ const ru = {
       continue: "Продолжить",
     },
     bossDefeat: {
-      eyebrow: "Веха пройдена",
+      eyebrow: "Этап пройден",
       xp: "+{{amount}} опыта",
       xpLabel: "Опыт",
       titleEarned: "Звание открыто",
@@ -970,7 +976,7 @@ const ru = {
       continue: "Продолжить",
     },
     bossTrial: {
-      eyebrow: "Веха недели",
+      eyebrow: "Этап недели",
       requirements: "Условия",
       reward: "Награда",
       accept: "Принять",
@@ -998,10 +1004,10 @@ const ru = {
     progress: "Прогресс",
     streak: "Серия",
     legacy: "Наследие",
-    milestone: "Вехи",
+    milestone: "Этапы",
   },
   achievementsScreen: {
-    eyebrow: "Записи пути",
+    eyebrow: "Этапы пути",
     title: "Журнал",
     subtitle: "{{unlocked}} / {{total}} открыто · {{percent}}% завершено",
     completion: "Завершено",
@@ -1054,7 +1060,7 @@ const ru = {
   legacyScreen: {
     eyebrow: "Наследие",
     title: "Завершённые сезоны",
-    subtitle: "Записанные сезоны и вехи.",
+    subtitle: "Записанные сезоны и этапы.",
     empty: "Сезонов пока нет.",
     season: "Сезон {{id}}",
     completed: "Завершён {{date}}",
@@ -1097,9 +1103,9 @@ const ru = {
     goalConfirmChange: "Изменить цель",
     goalChangeCancel: "Отмена",
     titleSection: "Звание",
-    noTitles: "Пройди вехи, чтобы открыть звания",
+    noTitles: "Пройди этапы, чтобы открыть звания",
     noTitle: "Без звания",
-    bossBadges: "Знаки вех",
+    bossBadges: "Знаки этапов",
     save: "Сохранить профиль",
   },
   statsScreen: {
@@ -1107,8 +1113,8 @@ const ru = {
     title: "Статистика",
     subtitle: "Вся история на Железном пути",
     currentTitle: "Текущее звание",
-    bossesDefeated: "Испытаний пройдено",
-    bossCompletion: "Прогресс испытаний",
+    bossesDefeated: "Этапов пройдено",
+    bossCompletion: "Прогресс этапов",
     totalXp: "Всего опыта",
     currentLevel: "Текущий уровень",
     highestLevel: "Максимальный уровень",
@@ -1255,7 +1261,7 @@ const ru = {
     xp_5000: {
       title: "5000 опыта",
       description: "Накопи 5000 опыта.",
-      hint: "Долгая работа открывает эту веху.",
+      hint: "Долгая работа открывает эту запись.",
     },
     streak_7: {
       title: "Серия 7 дней",
@@ -1279,18 +1285,18 @@ const ru = {
     },
   },
   boss: {
-    eyebrow: "Вехи",
-    title: "Вехи",
+    eyebrow: "Этапы",
+    title: "Этапы",
     subtitle: "{{defeated}} из {{total}} пройдено · {{percent}}%",
-    activeTarget: "Текущий фокус",
-    allCleared: "Все вехи пройдены.",
+    activeTarget: "Текущий этап",
+    allCleared: "Все этапы пройдены.",
     requirements: "Условие",
     statusCleared: "Пройдено",
-    statusReady: "Можно забрать награду",
-    statusActive: "В работе",
-    statusLocked: "Недоступно",
+    statusReady: "Забрать награду",
+    statusActive: "Открыто",
+    statusLocked: "Закрыто",
     tierMeta: "Этап {{tier}} · Ур. {{level}} · {{difficulty}}",
-    requiresLevel: "Нужен {{level}} ур. и предыдущая веха.",
+    requiresLevel: "Нужен {{level}} ур. и предыдущий этап.",
     rewardXp: "Опыт",
     rewardTitleLabel: "Звание",
     rewardBadge: "Знак",
@@ -1311,7 +1317,7 @@ const ru = {
     },
     progress: {
       xp: "{{current}} / {{target}} опыта",
-      bossesDefeated: "{{current}} / {{target}} вех",
+      bossesDefeated: "{{current}} / {{target}} этапов",
       streak: "Серия {{current}} / {{target}} дн.",
       workouts: "{{current}} / {{target}} тренировок",
       missions: "{{current}} / {{target}} задач дня",
@@ -1323,7 +1329,7 @@ const ru = {
       deepWorkSessions: "Сделать {{target}} сессий фокуса",
       streakDays: "Серия входов {{target}} дн.",
       totalXp: "Накопить {{target}} опыта",
-      allBossesDefeated: "Пройти {{target}} вех",
+      allBossesDefeated: "Пройти {{target}} этапов",
     },
     titles: {
       awakened: "Пробуждение",
@@ -1357,7 +1363,7 @@ const ru = {
     },
     trial: {
       week_4: {
-        title: "Веха 4-й недели",
+        title: "Этап 4-й недели",
         description: "Первая большая проверка. Подтверди, что держишь ритм.",
         requirements: {
           "0": "Пройти 4 недели тренировок",
@@ -1366,7 +1372,7 @@ const ru = {
         },
       },
       week_10: {
-        title: "Веха 10-й недели",
+        title: "Этап 10-й недели",
         description: "Четверть пути. Фундамент уже стоит.",
         requirements: {
           "0": "Пройти 10 недель тренировок",
@@ -1375,7 +1381,7 @@ const ru = {
         },
       },
       week_18: {
-        title: "Веха 18-й недели",
+        title: "Этап 18-й недели",
         description: "Три четверти пути. Проверка характера и выдержки.",
         requirements: {
           "0": "Пройти 18 недель тренировок",
@@ -1384,8 +1390,8 @@ const ru = {
         },
       },
       week_24: {
-        title: "Веха 24-й недели",
-        description: "Финальная веха. Весь путь из 24 недель позади.",
+        title: "Этап 24-й недели",
+        description: "Финальный этап. Весь путь из 24 недель позади.",
         requirements: {
           "0": "Пройти 24 недели тренировок",
           "1": "Пройти все фазы программы",

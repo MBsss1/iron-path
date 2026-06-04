@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type ReactNode } from "react";
+import { sectionReveal } from "../../animations/classes";
 import { usePrefersReducedMotion } from "../../animations/usePrefersReducedMotion";
 
 type Props = {
@@ -37,7 +38,7 @@ export default function ProgressCollapsibleSection({
         </div>
         <span
           className={`shrink-0 text-iron-muted text-xs transition-transform ${
-            reduced ? "" : "duration-[var(--motion-duration-fast)]"
+            reduced ? "" : "duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)]"
           } ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         >
@@ -46,12 +47,26 @@ export default function ProgressCollapsibleSection({
       </button>
       <div
         id={panelId}
-        className={`grid ${reduced ? "" : "transition-[grid-template-rows] duration-[var(--motion-duration-normal)] ease-[var(--motion-ease-out)]"} ${
-          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
+        className={`grid ${
+          reduced
+            ? ""
+            : "transition-[grid-template-rows] duration-[var(--motion-duration-normal)] ease-[var(--motion-ease-out)]"
+        } ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
       >
         <div className="overflow-hidden">
-          <div className="px-4 pb-4 pt-0 border-t border-iron-border/60">{children}</div>
+          <div
+            className={`px-4 pb-4 pt-0 border-t border-iron-border/60 ${
+              reduced
+                ? ""
+                : `transition-[opacity,transform] duration-[var(--motion-duration-normal)] ease-[var(--motion-ease-out)] ${
+                    open
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 -translate-y-1"
+                  } ${open && !reduced ? sectionReveal : ""}`
+            }`}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>

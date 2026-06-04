@@ -7,6 +7,12 @@ const en = {
     loadingAria: "Loading saved progress",
   },
   intro: {
+    logo: {
+      ariaLabel: "Iron Path logo",
+      line1: "Discipline.",
+      line2: "Strength.",
+      line3: "Progress.",
+    },
     scene1: {
       title: "Iron Path",
       tagline: "Discipline. Strength. Progress.",
@@ -31,7 +37,7 @@ const en = {
     warmup: "Warm-up complete",
     workout: "Workout complete",
     assessment: "Assessment complete",
-    milestone: "Next milestone reached",
+    milestone: "Next goal reached",
   },
   lang: {
     selectTitle: "Choose your language",
@@ -360,7 +366,7 @@ const en = {
     },
     milestones: {
       subtitle: "Real strength markers — not game XP.",
-      needAssessment: "Complete the fitness assessment to see physical milestones.",
+      needAssessment: "Complete the fitness assessment to see your physical progress.",
       nextTarget: "Next: {{value}} {{unit}}",
       percentToGoal: "{{percent}}% to next step",
       stageComplete: "Top step reached on this track",
@@ -587,11 +593,11 @@ const en = {
     xpGain: "+{{amount}} XP",
     maxRank: "Maximum rank held at level {{level}}.",
     nextRank: "Next rank: {{nextRank}} at level {{level}}.",
-    trialLabel: "Milestone",
-    allTrialsCleared: "All trials cleared.",
+    trialLabel: "Stage",
+    allTrialsCleared: "All stages cleared.",
     requirements: "Requirement",
-    noActiveTrial: "No active trial yet. Keep training.",
-    viewTrials: "View trials",
+    noActiveTrial: "No active stage yet. Keep training.",
+    viewTrials: "All stages",
     currentGoal: "Goal",
     goalNotSet: "Not set",
     seasonWeek: "Season week {{week}}/24",
@@ -889,11 +895,11 @@ const en = {
     stats: {
       label: "Records",
       title: "Stats",
-      desc: "View XP, streaks, workouts, and milestones",
+      desc: "View XP, streaks, workouts, and stages",
     },
     milestones: {
-      label: "Milestones",
-      title: "Milestones",
+      label: "Stages",
+      title: "Stages",
       desc: "Weekly challenges, requirements, and rewards",
     },
     progress: {
@@ -962,7 +968,7 @@ const en = {
       continue: "Continue",
     },
     bossDefeat: {
-      eyebrow: "Trial complete",
+      eyebrow: "Stage complete",
       xp: "+{{amount}} XP",
       xpLabel: "Experience",
       titleEarned: "Title unlocked",
@@ -970,10 +976,10 @@ const en = {
       continue: "Continue",
     },
     bossTrial: {
-      eyebrow: "Field trial",
+      eyebrow: "Weekly stage",
       requirements: "Requirements",
       reward: "Reward",
-      accept: "Accept trial",
+      accept: "Accept",
       skip: "Skip",
     },
     weekComplete: {
@@ -998,10 +1004,10 @@ const en = {
     progress: "Progress",
     streak: "Streak",
     legacy: "Legacy",
-    milestone: "Milestones",
+    milestone: "Stages",
   },
   achievementsScreen: {
-    eyebrow: "Path milestones",
+    eyebrow: "Path stages",
     title: "Journal",
     subtitle: "{{unlocked}} / {{total}} unlocked · {{percent}}% complete",
     completion: "Completion",
@@ -1054,7 +1060,7 @@ const en = {
   legacyScreen: {
     eyebrow: "Legacy",
     title: "Completed seasons",
-    subtitle: "Your recorded seasons and milestones.",
+    subtitle: "Your recorded seasons and stages.",
     empty: "No seasons completed yet.",
     season: "Season {{id}}",
     completed: "Completed {{date}}",
@@ -1097,9 +1103,9 @@ const en = {
     goalConfirmChange: "Change goal",
     goalChangeCancel: "Cancel",
     titleSection: "Title",
-    noTitles: "Clear milestones to unlock titles",
+    noTitles: "Clear stages to unlock titles",
     noTitle: "No title",
-    bossBadges: "Milestone badges",
+    bossBadges: "Stage badges",
     save: "Save profile",
   },
   statsScreen: {
@@ -1107,8 +1113,8 @@ const en = {
     title: "Stats",
     subtitle: "Your complete Iron Path history",
     currentTitle: "Current title",
-    bossesDefeated: "Bosses defeated",
-    bossCompletion: "Boss completion",
+    bossesDefeated: "Stages cleared",
+    bossCompletion: "Stage progress",
     totalXp: "Total XP earned",
     currentLevel: "Current level",
     highestLevel: "Highest level",
@@ -1255,7 +1261,7 @@ const en = {
     xp_5000: {
       title: "5000 XP",
       description: "Earn 5,000 total experience.",
-      hint: "Long-term dedication unlocks this milestone.",
+      hint: "Long-term dedication unlocks this achievement.",
     },
     streak_7: {
       title: "7 Day Streak",
@@ -1279,19 +1285,19 @@ const en = {
     },
   },
   boss: {
-    eyebrow: "Milestones",
-    title: "Milestones",
+    eyebrow: "Stages",
+    title: "Stages",
     subtitle: "{{defeated}} of {{total}} cleared · {{percent}}% complete",
-    activeTarget: "Current focus",
-    allCleared: "All targets cleared. Maintain discipline.",
-    requirements: "Requirements",
+    activeTarget: "Current stage",
+    allCleared: "All stages cleared. Maintain discipline.",
+    requirements: "Requirement",
     statusCleared: "Cleared",
-    statusReady: "Ready to file",
-    statusActive: "Active",
-    statusLocked: "Locked",
+    statusReady: "Claim reward",
+    statusActive: "Open",
+    statusLocked: "Closed",
     tierMeta: "Tier {{tier}} · Level {{level}} · {{difficulty}}",
     requiresLevel:
-      "Requires level {{level}} and prior target cleared.",
+      "Requires level {{level}} and the previous stage cleared.",
     rewardXp: "XP",
     rewardTitleLabel: "Title",
     rewardBadge: "Badge",
@@ -1312,7 +1318,7 @@ const en = {
     },
     progress: {
       xp: "{{current}} / {{target}} XP",
-      bossesDefeated: "{{current}} / {{target}} trials cleared",
+      bossesDefeated: "{{current}} / {{target}} stages cleared",
       streak: "{{current}} / {{target}} day streak",
       workouts: "{{current}} / {{target}} workouts",
       missions: "{{current}} / {{target}} day tasks",
@@ -1324,7 +1330,7 @@ const en = {
       deepWorkSessions: "Complete {{target}} focus sessions",
       streakDays: "{{target}} day login streak",
       totalXp: "Earn {{target}} total XP",
-      allBossesDefeated: "Defeat {{target}} milestones",
+      allBossesDefeated: "Clear {{target}} stages",
     },
     titles: {
       awakened: "Awakened",
@@ -1358,7 +1364,7 @@ const en = {
     },
     trial: {
       week_4: {
-        title: "Week 4 milestone",
+        title: "Week 4 stage",
         description: "The first major checkpoint. Prove you are staying on the path.",
         requirements: {
           "0": "Complete 4 weeks of training",
@@ -1367,7 +1373,7 @@ const en = {
         },
       },
       week_10: {
-        title: "Week 10 milestone",
+        title: "Week 10 stage",
         description: "A quarter of the way. Your foundation is solid.",
         requirements: {
           "0": "Complete 10 weeks of training",
@@ -1376,7 +1382,7 @@ const en = {
         },
       },
       week_18: {
-        title: "Week 18 milestone",
+        title: "Week 18 stage",
         description: "Three quarters done. Character and resolve are tested.",
         requirements: {
           "0": "Complete 18 weeks of training",
@@ -1385,8 +1391,8 @@ const en = {
         },
       },
       week_24: {
-        title: "Week 24 milestone",
-        description: "The final milestone. The full 24-week path is behind you.",
+        title: "Week 24 stage",
+        description: "The final stage. The full 24-week path is behind you.",
         requirements: {
           "0": "Complete 24 weeks of training",
           "1": "Complete every program phase",

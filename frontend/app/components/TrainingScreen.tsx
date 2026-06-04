@@ -41,6 +41,7 @@ import TrainingTimer from "./TrainingTimer";
 import TrainingExerciseCard from "./TrainingExerciseCard";
 import RestTimerPanel from "./RestTimerPanel";
 import Stagger from "../animations/Stagger";
+import StepTransition from "../animations/StepTransition";
 import CompletionMoment from "./ui/CompletionMoment";
 
 type Props = {
@@ -390,6 +391,7 @@ export default function TrainingScreen({
       <TrainingTimer session={session} onSessionChange={patchSession} />
 
       <section className="border border-iron-accent-dim/40 bg-iron-panel p-4 rounded-sm space-y-4 min-h-[200px]">
+        <StepTransition stepKey={activeStage} className="space-y-4">
         {activeStage === "warmup" && (
           <>
             {allWarmupDone && (
@@ -500,6 +502,7 @@ export default function TrainingScreen({
             )}
           </>
         )}
+        </StepTransition>
       </section>
       </Stagger>
 

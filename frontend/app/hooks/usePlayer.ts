@@ -23,15 +23,15 @@ type PlayerData = {
 };
 
 const DEFAULT_PLAYER: PlayerData = {
-  xp: 120,
-  level: 3,
+  xp: 0,
+  level: 1,
   week: 1,
-  body: 4,
-  mind: 3,
-  work: 2,
-  totalXp: 120,
+  body: 1,
+  mind: 1,
+  work: 1,
+  totalXp: 0,
   workoutCount: 0,
-  highestLevel: 3,
+  highestLevel: 1,
 };
 
 type StoredPlayerSnapshot = {

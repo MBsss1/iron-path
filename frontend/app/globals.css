@@ -643,27 +643,16 @@ html.telegram-webapp body {
 .logo-intro-hero {
   position: relative;
   width: min(200px, 72vw);
-  color: var(--iron-text);
   contain: layout style paint;
 }
 
-.logo-intro-svg {
+.logo-intro-official {
+  display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
-}
-
-.logo-intro-mark-group--assembled {
-  filter: none;
-}
-
-.logo-intro-wordmark {
-  opacity: 0;
-  transition: opacity var(--motion-duration-normal) var(--motion-ease-out);
-}
-
-.logo-intro-wordmark--visible {
-  opacity: 1;
+  max-width: 200px;
+  object-fit: contain;
+  object-position: center;
 }
 
 .logo-intro-unified {

@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "../../animations/usePrefersReducedMotion";
 import { useTranslation } from "../../i18n/useTranslation";
-import IronPathLogoSvg from "./IronPathLogoSvg";
+
+/** Official raster logo — served from public/branding (works in dev, build, Cloudflare). */
+export const OFFICIAL_LOGO_SRC = "/branding/iron_path_logo.png";
 
 type Props = {
   onBegin: () => void;
@@ -15,7 +17,7 @@ const TAGLINE_KEYS = [
   "intro.logo.line3",
 ] as const;
 
-/** Mount-only timeline — phase state changes must not cancel pending steps. */
+/** Mount-only timeline — must not cancel on unrelated state updates. */
 const TIMELINE_MS = {
   logoReveal: 80,
   glint: 1100,
@@ -64,11 +66,22 @@ export default function LogoIntroSequence({ onBegin }: Props) {
       aria-label={t("intro.logo.ariaLabel")}
     >
       <div
-        className={`logo-intro-hero relative text-iron-text ${
+        className={`logo-intro-hero relative ${
           glint ? "logo-intro-hero--glint" : ""
         }`}
       >
-        <IronPathLogoSvg revealed={logoRevealed} />
+        {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; reliable in Telegram WebView */}
+        <img
+          src={OFFICIAL_LOGO_SRC}
+          alt=""
+          width={149}
+          height={134}
+          decoding="async"
+          draggable={false}
+          className={`logo-intro-official ${
+            logoRevealed ? "logo-intro-unified--visible" : "logo-intro-unified"
+          }`}
+        />
         <span className="logo-intro-glint" aria-hidden="true" />
       </div>
 

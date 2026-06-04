@@ -1,4 +1,5 @@
 import type { Profile } from "../hooks/useProfile";
+import { getPathModeFromProfile } from "../data/pathMode";
 import {
   assessFitness,
   type AssessmentInput,
@@ -74,12 +75,13 @@ export function profileToAssessment(profile: Profile | null): {
 }
 
 export function buildWeekPlanForProfile(profile: Profile | null): WeekPlan {
+  const pathMode = getPathModeFromProfile(profile) ?? "balance";
   const stored = loadFitnessAssessment();
   if (stored?.input && stored?.result) {
-    return generateWeekPlan(stored.input, stored.result);
+    return generateWeekPlan(stored.input, stored.result, pathMode);
   }
   const { input, result } = profileToAssessment(profile);
-  return generateWeekPlan(input, result);
+  return generateWeekPlan(input, result, pathMode);
 }
 
 export function getAssessmentForProfile(profile: Profile | null): {
@@ -166,7 +168,8 @@ export function getTodayWorkout(
 ): GeneratedWorkout {
   const { input, result } = getAssessmentForProfile(profile);
   const slot = weekPlan.days[activeDayIndex];
-  return generateWorkout(input, result, slot.dayType);
+  const pathMode = getPathModeFromProfile(profile) ?? "balance";
+  return generateWorkout(input, result, slot.dayType, pathMode);
 }
 
 export function advanceAfterWorkoutLogged(

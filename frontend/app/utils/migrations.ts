@@ -1,3 +1,4 @@
+import { normalizeProfilePath } from "../data/pathMode";
 import { safeGet, safeSet } from "./storage";
 import { STORAGE_KEYS } from "./storageKeys";
 import type { Profile } from "../hooks/useProfile";
@@ -17,13 +18,17 @@ export function migrateProfile(): Profile | null {
 
   if (!saved) return null;
 
+  let profile: Profile | null = null;
+
   if (typeof saved === "object" && "version" in saved && saved.profile) {
-    return saved.profile;
+    profile = saved.profile;
+  } else {
+    profile = saved as Profile;
   }
 
-  const legacy = saved as Profile;
-  safeSet(STORAGE_KEYS.profile, { version: CURRENT_VERSION, profile: legacy });
-  return legacy;
+  const normalized = normalizeProfilePath(profile);
+  safeSet(STORAGE_KEYS.profile, { version: CURRENT_VERSION, profile: normalized });
+  return normalized;
 }
 
 export function saveVersionedProfile(profile: Profile) {

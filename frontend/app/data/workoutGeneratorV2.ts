@@ -14,6 +14,7 @@ import {
   type FitnessLevel,
   type Limitation,
 } from "./fitnessAssessment";
+import type { PathMode } from "./pathMode";
 
 export type { AssessmentInput, AssessmentResult } from "./fitnessAssessment";
 export { assessFitness } from "./fitnessAssessment";
@@ -81,6 +82,7 @@ type GeneratorContext = {
   input: AssessmentInput;
   result: AssessmentResult;
   dayType: DayType;
+  pathMode: PathMode;
 };
 
 function hasLimitation(ctx: GeneratorContext, id: Limitation): boolean {
@@ -595,9 +597,10 @@ function estimateMinutes(workout: Omit<GeneratedWorkout, "estimatedMinutes">): n
 export function generateWorkout(
   input: AssessmentInput,
   result: AssessmentResult,
-  dayType: DayType
+  dayType: DayType,
+  pathMode: PathMode = "balance"
 ): GeneratedWorkout {
-  const ctx: GeneratorContext = { input, result, dayType };
+  const ctx: GeneratorContext = { input, result, dayType, pathMode };
 
   const warmupItems = selectWarmupExercises(ctx);
   const mainItems = selectMainExercises(ctx);
@@ -605,8 +608,8 @@ export function generateWorkout(
   const conditioningItems = selectConditioningExercises(ctx);
   const cooldownItems = selectCooldownExercises(ctx);
 
-  const base: Omit<GeneratedWorkout, "estimatedMinutes"> = {
-    id: `${input.goal}_${result.overallLevel}_${dayType}`,
+  const raw: Omit<GeneratedWorkout, "estimatedMinutes"> = {
+    id: `${input.goal}_${result.overallLevel}_${dayType}_${pathMode}`,
     title: DAY_TITLES[dayType],
     goal: input.goal,
     level: result.overallLevel,
@@ -625,7 +628,92 @@ export function generateWorkout(
     },
   };
 
+  const base = trimWorkoutForPathMode(raw, pathMode);
   return { ...base, estimatedMinutes: estimateMinutes(base) };
+}
+
+function isTrainingDayType(dayType: DayType): boolean {
+  return dayType !== "mobility";
+}
+
+function countTrainingDays(days: DayType[]): number {
+  return days.filter(isTrainingDayType).length;
+}
+
+function capTrainingDays(days: DayType[], maxTraining: number): DayType[] {
+  const result = [...days];
+  let count = countTrainingDays(result);
+  for (let i = result.length - 1; i >= 0 && count > maxTraining; i--) {
+    if (isTrainingDayType(result[i])) {
+      result[i] = "mobility";
+      count--;
+    }
+  }
+  return result;
+}
+
+function boostTrainingDays(days: DayType[], targetMin: number): DayType[] {
+  const result = [...days];
+  let count = countTrainingDays(result);
+  for (let i = 0; i < result.length && count < targetMin; i++) {
+    if (result[i] === "mobility") {
+      result[i] = "full_body";
+      count++;
+    }
+  }
+  return result;
+}
+
+/** Adjust weekly slots from path mode (sport / self_development / balance). */
+export function applyPathModeWeekTemplate(
+  template: DayType[],
+  pathMode: PathMode,
+  level: FitnessLevel
+): DayType[] {
+  const isBeginner = LEVEL_RANK[level] <= LEVEL_RANK.beginner;
+  let days = [...template];
+
+  if (pathMode === "sport") {
+    return boostTrainingDays(days, isBeginner ? 4 : 5);
+  }
+
+  if (pathMode === "self_development") {
+    return capTrainingDays(days, isBeginner ? 2 : 3);
+  }
+
+  days = capTrainingDays(days, isBeginner ? 4 : 5);
+  return boostTrainingDays(days, isBeginner ? 3 : 4);
+}
+
+function trimWorkoutForPathMode(
+  workout: Omit<GeneratedWorkout, "estimatedMinutes">,
+  pathMode: PathMode
+): Omit<GeneratedWorkout, "estimatedMinutes"> {
+  if (pathMode !== "self_development") return workout;
+
+  return {
+    ...workout,
+    blocks: {
+      ...workout.blocks,
+      mainWork: {
+        ...workout.blocks.mainWork,
+        items: workout.blocks.mainWork.items.slice(0, 2),
+      },
+      accessoryWork: {
+        ...workout.blocks.accessoryWork,
+        items: workout.blocks.accessoryWork.items.slice(0, 1),
+      },
+      conditioning:
+        workout.blocks.conditioning &&
+        workout.dayType !== "mobility" &&
+        workout.dayType !== "easy_run"
+          ? {
+              ...workout.blocks.conditioning,
+              items: workout.blocks.conditioning.items.slice(0, 1),
+            }
+          : workout.blocks.conditioning,
+    },
+  };
 }
 
 function weekTemplate(goal: FitnessGoal, level: FitnessLevel): DayType[] {
@@ -666,17 +754,21 @@ function weekTemplate(goal: FitnessGoal, level: FitnessLevel): DayType[] {
 
 export function generateWeekPlan(
   input: AssessmentInput,
-  result: AssessmentResult
+  result: AssessmentResult,
+  pathMode: PathMode = "balance"
 ): WeekPlan {
-  const types = applyCardioWeekTemplate(
-    weekTemplate(input.goal, result.overallLevel),
-    input
+  const baseWeek = weekTemplate(input.goal, result.overallLevel);
+  const withPath = applyPathModeWeekTemplate(
+    baseWeek,
+    pathMode,
+    result.overallLevel
   );
+  const types = applyCardioWeekTemplate(withPath, input);
 
   const days: WeekDaySlot[] = types.map((dayType, dayIndex) => ({
     dayIndex,
     dayType,
-    workout: generateWorkout(input, result, dayType),
+    workout: generateWorkout(input, result, dayType, pathMode),
   }));
 
   return {

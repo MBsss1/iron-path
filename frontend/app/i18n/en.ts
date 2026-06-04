@@ -24,6 +24,7 @@ const en = {
   },
   common: {
     back: "Back",
+    close: "Close",
     done: "Done",
     tap: "Tap",
     weekOf: "Week {{week}} / 24",
@@ -177,6 +178,55 @@ const en = {
       heightRange: "Height must be between 100 and 250 cm",
       weightRequired: "Enter your weight",
       weightRange: "Weight must be between 30 and 250 kg",
+    },
+  },
+  pathMode: {
+    sport: {
+      title: "Sport",
+      description:
+        "More workouts, strength, endurance, and physical progress.",
+    },
+    self_development: {
+      title: "Self-development",
+      description:
+        "Focus on discipline, tasks, routine, and breaking bad habits. Training stays, but there is less of it.",
+    },
+    balance: {
+      title: "Balance",
+      description:
+        "A steady path: training, habits, and personal progress without overload.",
+    },
+    detailsButton: "Details",
+    detailsLabel: "About this mode",
+    select: {
+      eyebrow: "Your path",
+      title: "Choose your path mode",
+      subtitle:
+        "This sets the focus of your program: training, discipline, or balance.",
+      confirm: "Confirm mode",
+    },
+    details: {
+      sport: {
+        bullet0: "More training days in the week",
+        bullet1: "Stronger focus on the Training tab",
+        bullet2: "Best if your main goal is body, strength, and endurance",
+        bullet3: "Daily tasks stay simple — workout, protein, sleep, focus",
+        bullet4: "",
+      },
+      self_development: {
+        bullet0: "Fewer training days and shorter sessions",
+        bullet1: "More focus on Today — personal tasks and habits",
+        bullet2: "Track habits you want to control",
+        bullet3: "Sleep, focus, and discipline matter as much as lifting",
+        bullet4: "Best if you want to bring life back in order",
+      },
+      balance: {
+        bullet0: "Medium training load — usually 3–4 days a week",
+        bullet1: "Training plus habits without one dominating",
+        bullet2: "Personal tasks in a compact block",
+        bullet3: "Good if you want a bit of everything, no burnout",
+        bullet4: "",
+      },
     },
   },
   classSelect: {
@@ -348,8 +398,9 @@ const en = {
   hero: {
     profileLabel: "Profile",
     levelRank: "Level {{level}} · {{rank}}",
+    pathModeLine: "Path mode: {{mode}}",
     classStats:
-      "{{className}} · {{bodyLabel}} {{body}} · {{mindLabel}} {{mind}} · {{workLabel}} {{work}}",
+      "{{bodyLabel}} {{body}} · {{mindLabel}} {{mind}} · {{workLabel}} {{work}}",
     streakWeek: "{{streak}} day streak · Week {{week}} of 24",
     firstStepTitle: "First step",
     firstStepBody:
@@ -407,6 +458,20 @@ const en = {
     workoutHabitNote: "On Training tab",
     assessmentRequired:
       "Take the assessment to unlock your workout assignments.",
+    personalTasksTitle: "Personal tasks",
+    personalTasksHint: "Your list for today — resets each day.",
+    personalTasksPlaceholder: "Add a task…",
+    personalTasksAdd: "Add",
+    personalTasksRemove: "Remove",
+    personalTasksEmpty: "No tasks yet. Add one above.",
+    habitControlTitle: "Habits under control",
+    habitControlHint: "Track a habit and mark today without a slip.",
+    habitControlPlaceholder: "Habit to control…",
+    habitControlAdd: "Add",
+    habitControlRemove: "Remove",
+    habitControlEmpty: "No habits tracked yet.",
+    habitControlMarkClean: "Clean today",
+    habitControlClean: "✓ Clean today",
   },
   exerciseLibrary: {
     details: "Details",
@@ -774,13 +839,12 @@ const en = {
     title: "Profile",
     subtitle: "Update your path and avatar",
     avatar: "Avatar",
-    class: "Class",
-    classChangeIn: "Class change available in {{days}} day",
-    classChangeInPlural: "Class change available in {{days}} days",
+    pathMode: "Path mode",
+    pathModeCurrent: "Current: {{mode}}",
+    pathModeChangeWarning:
+      "Changing mode affects future workouts and tasks. Your progress is not reset.",
+    pathModeConfirmChange: "Change mode",
     titleSection: "Title",
-    passiveTitle: "Class passive",
-    passiveActive: "Active — applies to XP from workouts and daily tasks",
-    passiveLocked: "Unlocks at level {{level}}",
     noTitles: "Clear milestones to unlock titles",
     noTitle: "No title",
     bossBadges: "Milestone badges",

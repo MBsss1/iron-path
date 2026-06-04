@@ -24,6 +24,7 @@ const ru = {
   },
   common: {
     back: "Назад",
+    close: "Закрыть",
     done: "Готово",
     tap: "Отметить",
     weekOf: "Неделя {{week}} / 24",
@@ -177,6 +178,55 @@ const ru = {
       heightRange: "Рост должен быть от 100 до 250 см",
       weightRequired: "Укажите вес",
       weightRange: "Вес должен быть от 30 до 250 кг",
+    },
+  },
+  pathMode: {
+    sport: {
+      title: "Спорт",
+      description:
+        "Больше тренировок, силы, выносливости и физического прогресса.",
+    },
+    self_development: {
+      title: "Саморазвитие",
+      description:
+        "Фокус на дисциплине, задачах, режиме и борьбе с вредными привычками. Тренировки остаются, но их меньше.",
+    },
+    balance: {
+      title: "Баланс",
+      description:
+        "Ровный путь: тренировки, привычки и личный прогресс без перекоса.",
+    },
+    detailsButton: "Подробнее",
+    detailsLabel: "О режиме",
+    select: {
+      eyebrow: "Ваш путь",
+      title: "Выберите режим пути",
+      subtitle:
+        "Это определит акцент программы: тренировки, дисциплина или баланс.",
+      confirm: "Подтвердить режим",
+    },
+    details: {
+      sport: {
+        bullet0: "Больше тренировочных дней в неделе",
+        bullet1: "Сильнее акцент на вкладке «Тренинг»",
+        bullet2: "Подходит, если главная цель — тело, сила, выносливость",
+        bullet3: "Задачи дня проще — тренировка, белок, сон, фокус",
+        bullet4: "",
+      },
+      self_development: {
+        bullet0: "Меньше тренировочной нагрузки и короче сессии",
+        bullet1: "Больше акцент на «Сегодня» — личные задачи и привычки",
+        bullet2: "Можно вести вредные привычки и отмечать день без срыва",
+        bullet3: "Сон, фокус и дисциплина наравне с тренировками",
+        bullet4: "Подходит, если цель — привести жизнь в порядок",
+      },
+      balance: {
+        bullet0: "Средняя нагрузка — обычно 3–4 тренировочных дня",
+        bullet1: "Тренировки и привычки без перекоса в одну сторону",
+        bullet2: "Личные задачи — компактным блоком",
+        bullet3: "Подходит, если нужно всё понемногу без перегруза",
+        bullet4: "",
+      },
     },
   },
   classSelect: {
@@ -348,8 +398,9 @@ const ru = {
   hero: {
     profileLabel: "Профиль",
     levelRank: "Уровень {{level}} · {{rank}}",
+    pathModeLine: "Режим пути: {{mode}}",
     classStats:
-      "{{className}} · {{bodyLabel}} {{body}} · {{mindLabel}} {{mind}} · {{workLabel}} {{work}}",
+      "{{bodyLabel}} {{body}} · {{mindLabel}} {{mind}} · {{workLabel}} {{work}}",
     streakWeek: "Серия {{streak}} дн. · Неделя {{week}} из 24",
     firstStepTitle: "Первый шаг",
     firstStepBody:
@@ -407,6 +458,20 @@ const ru = {
     workoutHabitNote: "Во вкладке Тренинг",
     assessmentRequired:
       "Пройдите оценку, чтобы получить задания тренировки.",
+    personalTasksTitle: "Личные задачи",
+    personalTasksHint: "Список на сегодня — обновляется каждый день.",
+    personalTasksPlaceholder: "Добавить задачу…",
+    personalTasksAdd: "Добавить",
+    personalTasksRemove: "Удалить",
+    personalTasksEmpty: "Задач пока нет.",
+    habitControlTitle: "Привычки под контролем",
+    habitControlHint: "Добавьте привычку и отметьте «сегодня без срыва».",
+    habitControlPlaceholder: "Привычка…",
+    habitControlAdd: "Добавить",
+    habitControlRemove: "Удалить",
+    habitControlEmpty: "Привычек пока нет.",
+    habitControlMarkClean: "Без срыва",
+    habitControlClean: "✓ Без срыва",
   },
   exerciseLibrary: {
     details: "Подробнее",
@@ -774,13 +839,12 @@ const ru = {
     title: "Профиль",
     subtitle: "Обнови путь и аватар",
     avatar: "Аватар",
-    class: "Направление",
-    classChangeIn: "Смена направления через {{days}} день",
-    classChangeInPlural: "Смена направления через {{days}} дн.",
+    pathMode: "Режим пути",
+    pathModeCurrent: "Сейчас: {{mode}}",
+    pathModeChangeWarning:
+      "Изменение режима повлияет на будущие тренировки и задачи. Прогресс не сбрасывается.",
+    pathModeConfirmChange: "Сменить режим",
     titleSection: "Звание",
-    passiveTitle: "Пассив класса",
-    passiveActive: "Активен — бонус к опыту за тренировки и задачи дня",
-    passiveLocked: "Откроется на уровне {{level}}",
     noTitles: "Пройди вехи, чтобы открыть звания",
     noTitle: "Без звания",
     bossBadges: "Знаки вех",

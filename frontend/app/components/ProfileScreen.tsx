@@ -2,23 +2,17 @@
 
 import { useState } from "react";
 import { AVATAR_OPTIONS } from "../data/avatar";
-import {
-  CLASSES,
-  getClass,
-  getSkillRequiredLevel,
-  isSkillUnlockedAtLevel,
-  type ClassId,
-} from "../data/classes";
 import { getBadgeLabel } from "../data/bosses";
-import type { Profile } from "../hooks/useProfile";
 import {
-  translateAvatarLabel,
-  translateBossRewardTitleById,
-  translateSkillPassive,
-} from "../i18n/labels";
+  PATH_MODES,
+  getPathModeFromProfile,
+  normalizeProfilePath,
+  pathModeToClassId,
+  type PathMode,
+} from "../data/pathMode";
+import type { Profile } from "../hooks/useProfile";
+import { translateAvatarLabel, translateBossRewardTitleById } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
-import { canChangeClass, daysUntilClassChange } from "../utils/classBonuses";
-import ClassCard from "./ClassCard";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
 import IronButton from "./IronButton";
@@ -56,17 +50,22 @@ export default function ProfileScreen({
   const [experience, setExperience] = useState(profile.experience);
   const [watchType, setWatchType] = useState(profile.watchType);
   const [avatarId, setAvatarId] = useState(profile.avatarId ?? "rookie");
-  const [classId, setClassId] = useState<ClassId>(profile.classId ?? "warrior");
+  const [pathMode, setPathMode] = useState<PathMode>(
+    getPathModeFromProfile(profile) ?? "balance"
+  );
+  const [pathChangeAck, setPathChangeAck] = useState(false);
 
-  const classChangeAllowed = canChangeClass(profile.classChangedAt);
-  const daysRemaining = daysUntilClassChange(profile.classChangedAt);
+  const currentPathMode = getPathModeFromProfile(profile) ?? "balance";
+  const pathModeChanging = pathMode !== currentPathMode;
 
   const handleSave = () => {
-    const finalClassId = classChangeAllowed
-      ? classId
-      : (profile.classId ?? classId);
+    if (pathModeChanging && !pathChangeAck) {
+      setPathChangeAck(true);
+      return;
+    }
 
-    const nextProfile: Profile = {
+    const nextProfile = normalizeProfilePath({
+      ...profile,
       age,
       height,
       weight,
@@ -74,13 +73,12 @@ export default function ProfileScreen({
       experience,
       watchType,
       avatarId,
-      classId: finalClassId,
-      classChangedAt: profile.classChangedAt,
-    };
-
-    if (finalClassId !== profile.classId && classChangeAllowed) {
-      nextProfile.classChangedAt = new Date().toISOString();
-    }
+      pathMode,
+      classId: pathModeToClassId(pathMode),
+      pathModeChangedAt: pathModeChanging
+        ? new Date().toISOString()
+        : profile.pathModeChangedAt,
+    });
 
     onSave(nextProfile);
     onBack();
@@ -88,24 +86,6 @@ export default function ProfileScreen({
 
   const inputClass =
     "w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] text-base";
-
-  const classChangeMessage =
-    daysRemaining === 1
-      ? t("profileScreen.classChangeIn", { days: daysRemaining })
-      : t("profileScreen.classChangeInPlural", { days: daysRemaining });
-
-  const activeClass = getClass(classId);
-  const passiveLabel = activeClass
-    ? translateSkillPassive(
-        activeClass.id,
-        activeClass.skill1Passive.label,
-        t
-      )
-    : null;
-  const passiveUnlocked = activeClass
-    ? isSkillUnlockedAtLevel(0, level)
-    : false;
-  const passiveUnlockLevel = activeClass ? getSkillRequiredLevel(0) : 0;
 
   return (
     <ScreenShell
@@ -156,37 +136,41 @@ export default function ProfileScreen({
       </IronCard>
 
       <IronCard variant="paper">
-        <p className="uppercase text-xs font-bold tracking-widest mb-3">
-          {t("profileScreen.class")}
+        <p className="uppercase text-xs font-bold tracking-widest mb-1">
+          {t("profileScreen.pathMode")}
         </p>
-        {!classChangeAllowed && (
-          <p className="iron-label mb-3">{classChangeMessage}</p>
+        <p className="text-sm text-iron-muted mb-3">
+          {t("profileScreen.pathModeCurrent", {
+            mode: t(`pathMode.${currentPathMode}.title`),
+          })}
+        </p>
+        {pathChangeAck && pathModeChanging && (
+          <p className="text-sm text-iron-accent mb-3 border border-iron-accent-dim/40 p-3 rounded-sm">
+            {t("profileScreen.pathModeChangeWarning")}
+          </p>
         )}
-        <div className="space-y-3">
-          {CLASSES.map((classDef) => (
-            <ClassCard
-              key={classDef.id}
-              classDef={classDef}
-              selected={classId === classDef.id}
-              onSelect={() => {
-                if (classChangeAllowed) setClassId(classDef.id);
+        <div className="space-y-2">
+          {PATH_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => {
+                setPathMode(mode);
+                setPathChangeAck(false);
               }}
-            />
+              className={`w-full text-left border p-3 rounded-sm iron-interactive ${
+                pathMode === mode
+                  ? "border-iron-accent bg-iron-accent-dim/20"
+                  : "border-iron-border iron-card-raised"
+              }`}
+            >
+              <p className="font-bold text-sm">{t(`pathMode.${mode}.title`)}</p>
+              <p className="text-xs text-iron-muted mt-1">
+                {t(`pathMode.${mode}.description`)}
+              </p>
+            </button>
           ))}
         </div>
-        {activeClass && passiveLabel && (
-          <div className="mt-4 border-t border-iron-border pt-3">
-            <p className="uppercase text-xs font-bold text-iron-gold">
-              {t("profileScreen.passiveTitle")}
-            </p>
-            <p className="text-sm text-iron-text mt-1">{passiveLabel}</p>
-            <p className="text-xs text-iron-muted mt-1">
-              {passiveUnlocked
-                ? t("profileScreen.passiveActive")
-                : t("profileScreen.passiveLocked", { level: passiveUnlockLevel })}
-            </p>
-          </div>
-        )}
       </IronCard>
 
       <IronCard variant="dark">
@@ -309,7 +293,11 @@ export default function ProfileScreen({
         </div>
       </IronCard>
 
-      <IronButton onClick={handleSave}>{t("profileScreen.save")}</IronButton>
+      <IronButton onClick={handleSave}>
+        {pathChangeAck && pathModeChanging
+          ? t("profileScreen.pathModeConfirmChange")
+          : t("profileScreen.save")}
+      </IronButton>
     </ScreenShell>
   );
 }

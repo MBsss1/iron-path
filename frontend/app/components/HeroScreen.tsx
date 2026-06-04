@@ -2,7 +2,7 @@
 
 import { getRank, getNextRank } from "../data/ranks";
 import { getAvatar } from "../data/avatar";
-import { getClass } from "../data/classes";
+import { getPathModeFromProfile } from "../data/pathMode";
 import type { BossDefinition } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
 import type { DailyMission } from "../hooks/useDailyMissions";
@@ -12,7 +12,6 @@ import {
   translateBossProgressLabel,
   translateBossRequirement,
   translateBossRewardTitleById,
-  translateClassName,
   translateGoal,
   translatePhase,
   translateRank,
@@ -77,7 +76,8 @@ export default function HeroScreen({
   onViewBoss,
 }: Props) {
   const { t } = useTranslation();
-  const classDef = getClass(profile.classId);
+  const pathMode = getPathModeFromProfile(profile);
+  const pathModeLabel = pathMode ? t(`pathMode.${pathMode}.title`) : "";
   const titleLabel = translateBossRewardTitleById(equippedTitle, t);
   const rank = translateRank(getRank(level), t);
   const nextRankEn = getNextRank(level);
@@ -111,11 +111,6 @@ export default function HeroScreen({
             <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
               {t("hero.levelRank", { level, rank })}
             </h2>
-            {classDef && profile.classId && (
-              <p className="text-sm text-iron-muted mt-0.5">
-                {translateClassName(profile.classId, t)}
-              </p>
-            )}
           </div>
         </section>
 
@@ -191,19 +186,21 @@ export default function HeroScreen({
           {titleLabel && (
             <p className="text-sm text-iron-accent mt-0.5 truncate">{titleLabel}</p>
           )}
-          {classDef && profile.classId && (
+          {pathMode && (
             <p className="text-sm text-iron-muted mt-0.5">
-              {t("hero.classStats", {
-                className: translateClassName(profile.classId, t),
-                bodyLabel: t("stat.body"),
-                body,
-                mindLabel: t("stat.mind"),
-                mind,
-                workLabel: t("stat.work"),
-                work,
-              })}
+              {t("hero.pathModeLine", { mode: pathModeLabel })}
             </p>
           )}
+          <p className="text-sm text-iron-muted mt-0.5">
+            {t("hero.classStats", {
+              bodyLabel: t("stat.body"),
+              body,
+              mindLabel: t("stat.mind"),
+              mind,
+              workLabel: t("stat.work"),
+              work,
+            })}
+          </p>
           <p className="text-xs text-iron-muted mt-1">
             {t("hero.streakWeek", { streak, week })}
           </p>

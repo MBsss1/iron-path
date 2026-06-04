@@ -14,9 +14,14 @@ import ProgressScreen from "./components/ProgressScreen";
 import MoreScreen from "./components/MoreScreen";
 import SettingsScreen from "./components/SettingsScreen";
 import ProfileScreen from "./components/ProfileScreen";
-import ClassSelectionScreen from "./components/ClassSelectionScreen";
+import PathModeSelectionScreen from "./components/PathModeSelectionScreen";
+import {
+  hasPathModeSelected,
+  normalizeProfilePath,
+  pathModeToClassId,
+  type PathMode,
+} from "./data/pathMode";
 import BossScreen from "./components/BossScreen";
-import type { ClassId } from "./data/classes";
 import type { BossId } from "./data/bosses";
 import { BOSSES, getBoss } from "./data/bosses";
 import {
@@ -223,7 +228,7 @@ function HomeContent() {
     bossTrialsLoaded &&
     seasonsLoaded;
 
-  const appReady = storageReady && Boolean(profile?.classId);
+  const appReady = storageReady && Boolean(profile && hasPathModeSelected(profile));
 
   const handleStartAssessment = useCallback(() => {
     setScreen("assessment");
@@ -552,14 +557,17 @@ function HomeContent() {
     setBossDefeatXp(0);
   }, [clearPendingDefeat]);
 
-  const handleConfirmClass = useCallback(
-    (selectedClassId: ClassId) => {
+  const handleConfirmPathMode = useCallback(
+    (selected: PathMode) => {
       if (!profile) return;
-      saveProfile({
-        ...profile,
-        classId: selectedClassId,
-        classChangedAt: null,
-      });
+      saveProfile(
+        normalizeProfilePath({
+          ...profile,
+          pathMode: selected,
+          classId: pathModeToClassId(selected),
+          pathModeChangedAt: null,
+        })
+      );
     },
     [profile, saveProfile]
   );
@@ -614,14 +622,14 @@ function HomeContent() {
             <OnboardingScreen onFinish={() => window.location.reload()} />
           )}
 
-          {profileLoaded && profile && !profile.classId && (
-            <ClassSelectionScreen onConfirm={handleConfirmClass} />
+          {profileLoaded && profile && !hasPathModeSelected(profile) && (
+            <PathModeSelectionScreen onConfirm={handleConfirmPathMode} />
           )}
 
           {storageReady &&
             assessmentLoaded &&
             profile &&
-            profile.classId &&
+            hasPathModeSelected(profile) &&
             screen === "assessment" && (
               <FitnessAssessmentScreen
                 profile={profile}
@@ -634,7 +642,7 @@ function HomeContent() {
             {storageReady &&
               assessmentLoaded &&
               profile &&
-              profile.classId &&
+              hasPathModeSelected(profile) &&
               screen === "hero" && (
               <HeroScreen
                 assessmentComplete={assessmentComplete}
@@ -669,7 +677,7 @@ function HomeContent() {
             {storageReady &&
               assessmentLoaded &&
               profile &&
-              profile.classId &&
+              hasPathModeSelected(profile) &&
               screen === "today" && (
               <TodayScreen
                 program={program}
@@ -687,7 +695,7 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              profile?.classId &&
+              profile && hasPathModeSelected(profile) &&
               screen === "training" && (
               <TrainingScreen
                 program={program}
@@ -705,14 +713,14 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              profile?.classId &&
+              profile && hasPathModeSelected(profile) &&
               screen === "nutrition" && (
               <NutritionScreen goal={profile?.goal} />
             )}
 
             {storageReady &&
               assessmentLoaded &&
-              profile?.classId &&
+              profile && hasPathModeSelected(profile) &&
               screen === "progress" && (
               <ProgressScreen
                 level={level}
@@ -738,7 +746,7 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              profile?.classId &&
+              profile && hasPathModeSelected(profile) &&
               screen === "more" && (
               <MoreScreen
                 onSelectBosses={() => setScreen("bosses")}
@@ -772,7 +780,7 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              profile?.classId &&
+              profile && hasPathModeSelected(profile) &&
               screen === "settings" && (
               <SettingsScreen
                 onBack={goBackToMore}
@@ -782,7 +790,7 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              profile?.classId &&
+              profile && hasPathModeSelected(profile) &&
               screen === "bosses" && (
               <BossScreen
                 ctx={bossProgressContext}
@@ -798,7 +806,7 @@ function HomeContent() {
 
           {storageReady &&
             assessmentLoaded &&
-            profile?.classId && (
+            profile && hasPathModeSelected(profile) && (
             <AppPopups
               placement="inline"
               pendingSeasonComplete={pendingSeasonComplete}
@@ -811,7 +819,7 @@ function HomeContent() {
 
         {storageReady &&
           assessmentLoaded &&
-          profile?.classId && (
+          profile && hasPathModeSelected(profile) && (
           <>
             <AppPopups
               placement="floating"

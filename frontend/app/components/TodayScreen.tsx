@@ -9,11 +9,14 @@ import { translateDayType, translatePhase } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import type { Profile } from "../hooks/useProfile";
 import { migrateProfile } from "../utils/migrations";
+import { getPathModeFromProfile } from "../data/pathMode";
 import {
   buildWeekPlanForProfile,
   getTodayWorkout,
   loadTrainingCalendarState,
 } from "../utils/trainingCalendar";
+import TodayPersonalTasksBlock from "./today/TodayPersonalTasksBlock";
+import TodayHabitControlBlock from "./today/TodayHabitControlBlock";
 
 type Props = {
   program: { phase: string; week: number };
@@ -83,6 +86,8 @@ export default function TodayScreen({
     () => getTodayWorkout(profile, weekPlan, calendarState.activeDayIndex),
     [profile, weekPlan, calendarState.activeDayIndex]
   );
+
+  const pathMode = getPathModeFromProfile(profile) ?? "balance";
 
   const todayDayType = weekPlan.days[calendarState.activeDayIndex]?.dayType;
   const dayTypeLabel = todayDayType
@@ -241,6 +246,19 @@ export default function TodayScreen({
           <span className="text-iron-gold">+{sleepXp} {t("common.xp")}</span>
         </button>
       </div>
+
+      {pathMode === "self_development" && (
+        <div className="mt-6 space-y-4">
+          <TodayPersonalTasksBlock />
+          <TodayHabitControlBlock />
+        </div>
+      )}
+
+      {pathMode === "balance" && (
+        <div className="mt-6">
+          <TodayPersonalTasksBlock compact />
+        </div>
+      )}
     </div>
   );
 }

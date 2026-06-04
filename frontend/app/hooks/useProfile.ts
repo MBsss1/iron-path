@@ -6,6 +6,7 @@ import { STORAGE_KEYS } from "../utils/storageKeys";
 import { migrateProfile, saveVersionedProfile } from "../utils/migrations";
 
 import type { ClassId } from "../data/classes";
+import type { PathMode } from "../data/pathMode";
 
 export type Profile = {
   age: string;
@@ -15,8 +16,11 @@ export type Profile = {
   experience: string;
   watchType: string;
   avatarId?: string;
+  /** Legacy; kept for XP bonuses. Synced from pathMode on save. */
   classId?: ClassId;
   classChangedAt?: string | null;
+  pathMode?: PathMode;
+  pathModeChangedAt?: string | null;
 };
 
 export function useProfile() {

@@ -202,6 +202,18 @@ const en = {
     eyebrow: "Step {{current}} of {{total}}",
     next: "Continue",
     seeResults: "See results",
+    timer: {
+      start: "Start",
+      startTest: "Start test",
+      pause: "Pause",
+      resume: "Resume",
+      reset: "Reset",
+      stop: "Stop",
+      remaining: "Remaining",
+      elapsed: "Elapsed",
+      testComplete: "Test complete. Enter your rep count.",
+      manualEntry: "Or enter the result manually:",
+    },
     equipment: {
       title: "Do you have a pull-up bar?",
       explain: "A stable bar sets how we test pulling strength and plan your week.",

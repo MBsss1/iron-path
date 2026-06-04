@@ -202,6 +202,18 @@ const ru = {
     eyebrow: "Шаг {{current}} из {{total}}",
     next: "Далее",
     seeResults: "К результатам",
+    timer: {
+      start: "Старт",
+      startTest: "Начать тест",
+      pause: "Пауза",
+      resume: "Продолжить",
+      reset: "Сброс",
+      stop: "Стоп",
+      remaining: "Осталось",
+      elapsed: "Прошло",
+      testComplete: "Тест завершён. Введите количество повторений.",
+      manualEntry: "Или введите результат вручную:",
+    },
     equipment: {
       title: "Есть ли турник?",
       explain: "От этого зависит оценка тяги и план на неделю.",

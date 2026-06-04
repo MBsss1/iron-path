@@ -63,3 +63,7 @@ export function hapticBossDefeat() {
 export function hapticTab() {
   hapticWithFallback(() => telegramHapticImpact("light"), 8);
 }
+
+export function hapticAssessmentTimerDone() {
+  hapticWithFallback(() => telegramHapticNotification("success"), [20, 30, 20]);
+}

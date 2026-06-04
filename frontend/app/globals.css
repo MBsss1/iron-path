@@ -432,7 +432,16 @@ html.telegram-webapp body {
   animation: modal-enter 0.32s ease-out both;
 }
 
+/* ——— Assessment timer ring ——— */
+.assessment-timer-ring-progress {
+  transition: stroke-dashoffset 0.35s linear, stroke 0.25s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .assessment-timer-ring-progress {
+    transition: none;
+  }
+
   *,
   *::before,
   *::after {

@@ -15,6 +15,7 @@ import {
 import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronButton from "./IronButton";
+import AssessmentTimer from "./AssessmentTimer";
 
 type Props = {
   profile: Profile;
@@ -387,36 +388,70 @@ export default function FitnessAssessmentScreen({
         );
       case "pushups":
         return (
-          <input
-            type="text"
-            inputMode="numeric"
-            value={maxPushUps}
-            onChange={(e) => setMaxPushUps(e.target.value)}
-            placeholder={t("assessment.pushups.placeholder")}
-            className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
-          />
+          <div className="space-y-4">
+            <AssessmentTimer
+              durationSeconds={120}
+              label={t("assessment.timer.startTest")}
+            />
+            <div>
+              <p className="text-xs text-iron-muted mb-2">
+                {t("assessment.timer.manualEntry")}
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={maxPushUps}
+                onChange={(e) => setMaxPushUps(e.target.value)}
+                placeholder={t("assessment.pushups.placeholder")}
+                className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
+              />
+            </div>
+          </div>
         );
       case "squats":
         return (
-          <input
-            type="text"
-            inputMode="numeric"
-            value={squatReps}
-            onChange={(e) => setSquatReps(e.target.value)}
-            placeholder={t("assessment.squats.placeholder")}
-            className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
-          />
+          <div className="space-y-4">
+            <AssessmentTimer
+              durationSeconds={120}
+              label={t("assessment.timer.startTest")}
+            />
+            <div>
+              <p className="text-xs text-iron-muted mb-2">
+                {t("assessment.timer.manualEntry")}
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={squatReps}
+                onChange={(e) => setSquatReps(e.target.value)}
+                placeholder={t("assessment.squats.placeholder")}
+                className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
+              />
+            </div>
+          </div>
         );
       case "plank":
         return (
-          <input
-            type="text"
-            inputMode="numeric"
-            value={plankSeconds}
-            onChange={(e) => setPlankSeconds(e.target.value)}
-            placeholder={t("assessment.plank.placeholder")}
-            className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
-          />
+          <div className="space-y-4">
+            <AssessmentTimer
+              countUp
+              label={t("assessment.timer.start")}
+              onStop={(elapsed) => setPlankSeconds(String(elapsed))}
+            />
+            <div>
+              <p className="text-xs text-iron-muted mb-2">
+                {t("assessment.timer.manualEntry")}
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={plankSeconds}
+                onChange={(e) => setPlankSeconds(e.target.value)}
+                placeholder={t("assessment.plank.placeholder")}
+                className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
+              />
+            </div>
+          </div>
         );
       case "limitations":
         return (

@@ -7,6 +7,8 @@ const en = {
     loadingAria: "Loading saved progress",
   },
   intro: {
+    skip: "Skip",
+    beginPath: "Begin path",
     logo: {
       ariaLabel: "Iron Path logo",
       line1: "Discipline.",

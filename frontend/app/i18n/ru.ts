@@ -7,6 +7,8 @@ const ru = {
     loadingAria: "Загрузка сохранённого прогресса",
   },
   intro: {
+    skip: "Пропустить",
+    beginPath: "Начать путь",
     logo: {
       ariaLabel: "Логотип Iron Path",
       line1: "Дисциплина.",

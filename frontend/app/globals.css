@@ -666,24 +666,23 @@ html.telegram-webapp body {
   opacity: 1;
 }
 
-.logo-intro-part {
+.logo-intro-unified {
   opacity: 0;
-  transform: translate3d(var(--logo-part-x, 0), var(--logo-part-y, 0), 0);
-  will-change: transform, opacity;
+  transform: scale(0.96);
 }
 
-.logo-intro-part--placed {
-  animation: logo-intro-part-place var(--motion-duration-slow) var(--motion-ease-out) both;
+.logo-intro-unified--visible {
+  animation: logo-intro-unified-in var(--motion-duration-slow) var(--motion-ease-out) both;
 }
 
-@keyframes logo-intro-part-place {
+@keyframes logo-intro-unified-in {
   from {
     opacity: 0;
-    transform: translate3d(var(--logo-part-x, 0), var(--logo-part-y, 0), 0);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: scale(1);
   }
 }
 
@@ -857,19 +856,16 @@ html.telegram-webapp body {
     transition: none !important;
   }
 
-  .logo-intro-part--placed,
+  .logo-intro-unified--visible,
   .logo-intro-hero--glint .logo-intro-glint,
   .logo-intro-tagline--visible {
     animation: none !important;
   }
 
-  .logo-intro-part--placed {
+  .logo-intro-unified,
+  .logo-intro-unified--visible {
     opacity: 1 !important;
     transform: none !important;
-  }
-
-  .logo-intro-wordmark--visible {
-    opacity: 1 !important;
   }
 
   .iron-anim-premium-screen,

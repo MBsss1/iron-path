@@ -14,6 +14,7 @@ import {
 } from "../data/workoutGeneratorV2";
 import { safeGet, safeSet } from "./storage";
 import { STORAGE_KEYS } from "./storageKeys";
+import { loadFitnessAssessment } from "./fitnessAssessmentStorage";
 
 export type WeekdayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -65,14 +66,31 @@ export function profileToAssessment(profile: Profile | null): {
     walkRun12MinMeters: 1600,
     equipment: ["pull_up_bar"],
     limitations: weight >= 100 ? ["overweight"] : ["none"],
+    cardioAccess: goal === "runner" ? "outdoor" : weight >= 100 ? "limited" : "limited",
+    cardioPreference: "neutral",
   };
 
   return { input, result: assessFitness(input) };
 }
 
 export function buildWeekPlanForProfile(profile: Profile | null): WeekPlan {
+  const stored = loadFitnessAssessment();
+  if (stored?.input && stored?.result) {
+    return generateWeekPlan(stored.input, stored.result);
+  }
   const { input, result } = profileToAssessment(profile);
   return generateWeekPlan(input, result);
+}
+
+export function getAssessmentForProfile(profile: Profile | null): {
+  input: AssessmentInput;
+  result: AssessmentResult;
+} {
+  const stored = loadFitnessAssessment();
+  if (stored?.input && stored?.result) {
+    return { input: stored.input, result: stored.result };
+  }
+  return profileToAssessment(profile);
 }
 
 export function isRestDayType(dayType: DayType): boolean {
@@ -146,7 +164,7 @@ export function getTodayWorkout(
   weekPlan: WeekPlan,
   activeDayIndex: WeekdayIndex
 ): GeneratedWorkout {
-  const { input, result } = profileToAssessment(profile);
+  const { input, result } = getAssessmentForProfile(profile);
   const slot = weekPlan.days[activeDayIndex];
   return generateWorkout(input, result, slot.dayType);
 }

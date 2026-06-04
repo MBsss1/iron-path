@@ -4,6 +4,10 @@ export type FitnessGoal = "mass_gain" | "fat_loss" | "runner" | "athletic";
 
 export type Limitation = "knees" | "back" | "shoulders" | "overweight" | "none";
 
+export type CardioAccess = "outdoor" | "treadmill" | "limited" | "none";
+
+export type CardioPreference = "enjoy" | "neutral" | "dislike";
+
 export type FitnessLevel =
   | "absolute_beginner"
   | "beginner"
@@ -24,6 +28,8 @@ export type AssessmentInput = {
   walkRun12MinMeters?: number;
   equipment: Equipment[];
   limitations: Limitation[];
+  cardioAccess: CardioAccess;
+  cardioPreference: CardioPreference;
 };
 
 export type PatternLevels = {
@@ -36,6 +42,9 @@ export type PatternLevels = {
 
 export type AssessmentResult = PatternLevels & {
   overallLevel: FitnessLevel;
+  cardioAccess: CardioAccess;
+  cardioPreference: CardioPreference;
+  cardioSummary: { en: string; ru: string };
   notes: { en: string[]; ru: string[] };
 };
 
@@ -121,7 +130,40 @@ export function classifyCardioLevel(input: AssessmentInput): FitnessLevel {
     return "advanced";
   }
 
+  if (input.cardioAccess === "none") return "absolute_beginner";
+  if (input.cardioAccess === "limited") return "beginner";
+  if (input.cardioPreference === "enjoy") return "novice";
+  if (input.cardioPreference === "dislike") return "beginner";
   return "beginner";
+}
+
+export function getCardioAvailabilitySummary(input: AssessmentInput): {
+  en: string;
+  ru: string;
+} {
+  switch (input.cardioAccess) {
+    case "outdoor":
+      return {
+        en: "Outdoor running is available",
+        ru: "Бег на улице доступен",
+      };
+    case "treadmill":
+      return {
+        en: "Treadmill running is available",
+        ru: "Бег на дорожке доступен",
+      };
+    case "limited":
+      return {
+        en: "Running is possible sometimes",
+        ru: "Пробежки возможны иногда",
+      };
+    case "none":
+    default:
+      return {
+        en: "Regular runs are not available",
+        ru: "Регулярные пробежки недоступны",
+      };
+  }
 }
 
 export function getOverallLevel(levels: PatternLevels): FitnessLevel {
@@ -176,6 +218,14 @@ function buildSafetyNotes(input: AssessmentInput): { en: string[]; ru: string[] 
     en.push("No bar: use rows and scapular work until a pull-up bar is available.");
     ru.push("Без турника: тяги и лопаточная работа, пока нет перекладины.");
   }
+  if (input.cardioAccess === "none") {
+    en.push("Cardio plan uses walking and low-impact conditioning instead of running.");
+    ru.push("Кардио: ходьба и щадящая кондиция вместо бега.");
+  }
+  if (input.cardioPreference === "dislike") {
+    en.push("Fewer run days; walking and circuits are preferred.");
+    ru.push("Меньше беговых дней; приоритет — ходьба и круговая кондиция.");
+  }
 
   return { en, ru };
 }
@@ -198,6 +248,9 @@ export function assessFitness(input: AssessmentInput): AssessmentResult {
   return {
     ...patternLevels,
     overallLevel: getOverallLevel(patternLevels),
+    cardioAccess: input.cardioAccess,
+    cardioPreference: input.cardioPreference,
+    cardioSummary: getCardioAvailabilitySummary(input),
     notes: buildSafetyNotes(input),
   };
 }

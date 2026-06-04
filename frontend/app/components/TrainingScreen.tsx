@@ -115,7 +115,7 @@ function TodayWorkoutView({
   );
 }
 
-function WeekTimeline({
+function PlanTimeline({
   days,
   t,
 }: {
@@ -126,7 +126,10 @@ function WeekTimeline({
     <div className="space-y-1.5">
       {days.map((day) => {
         const icon = t(`training.statusIcon.${day.status}`);
-        const weekday = t(`training.weekday.${day.dayIndex}`);
+        const slotLabel = t("training.planSlot", {
+          current: day.dayIndex + 1,
+          total: 7,
+        });
         const label = translateDayType(day.dayType, t);
 
         return (
@@ -143,7 +146,9 @@ function WeekTimeline({
             <span className="w-5 text-center shrink-0" aria-hidden="true">
               {icon}
             </span>
-            <span className="w-8 shrink-0 font-bold tracking-wide">{weekday}</span>
+            <span className="w-[7.5rem] shrink-0 font-bold tracking-wide">
+              {slotLabel}
+            </span>
             <span className="flex-1 truncate">{label}</span>
           </div>
         );
@@ -225,32 +230,29 @@ export default function TrainingScreen({
     onCompleteWeek();
   }, [onCompleteWeek]);
 
+  const activeSlot = calendarState.activeDayIndex + 1;
+
   return (
     <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24 space-y-5">
       <div className="text-center">
-        <p className="iron-label">{t("training.currentPhase")}</p>
-        <h2 className="iron-heading text-2xl sm:text-3xl mt-1">
-          {translatePhase(program.phase, t)}
-        </h2>
-        <p className="mt-1 text-sm text-iron-muted">
-          {t("training.week", { week: seasonWeek })}
+        <p className="iron-label text-iron-accent">{t("training.screenTitle")}</p>
+        <h2 className="iron-heading text-2xl sm:text-3xl mt-1">{todayTitle}</h2>
+        <p className="mt-2 text-sm text-iron-muted">
+          {t("training.planSlot", { current: activeSlot, total: 7 })}
+          {" · "}
+          {t("training.estimatedMinutes", {
+            minutes: todayWorkout.estimatedMinutes,
+          })}
+        </p>
+        <p className="mt-1 text-xs text-iron-muted">
+          {t("training.phaseContext", {
+            phase: translatePhase(program.phase, t),
+            week: seasonWeek,
+          })}
         </p>
       </div>
 
-      <section className="border border-iron-border p-4 iron-card-raised rounded-sm">
-        <h3 className="iron-heading text-lg mb-3">{t("training.weekPlanTitle")}</h3>
-        <WeekTimeline days={calendarDays} t={t} />
-      </section>
-
       <section className="border border-iron-accent-dim/50 bg-iron-panel p-4 rounded-sm space-y-4">
-        <div>
-          <p className="iron-label text-iron-accent">{t("training.todayTitle")}</p>
-          <h3 className="iron-heading text-2xl mt-1">{todayTitle}</h3>
-          <p className="text-xs text-iron-muted mt-1">
-            {t(`training.weekdayFull.${calendarState.activeDayIndex}`)}
-          </p>
-        </div>
-
         <TodayWorkoutView workout={todayWorkout} lang={lang} t={t} />
 
         {workoutLoggedToday ? (
@@ -259,6 +261,9 @@ export default function TrainingScreen({
           </p>
         ) : (
           <>
+            <p className="text-sm text-iron-muted text-center leading-relaxed">
+              {t("training.logWorkoutExplain")}
+            </p>
             <p className="text-xs text-iron-muted text-center">
               {t("training.logWorkoutReward", { xp: workoutXp })}
             </p>
@@ -271,6 +276,12 @@ export default function TrainingScreen({
             </button>
           </>
         )}
+      </section>
+
+      <section className="border border-iron-border p-4 iron-card-raised rounded-sm">
+        <h3 className="iron-heading text-lg mb-1">{t("training.planProgressTitle")}</h3>
+        <p className="text-xs text-iron-muted mb-3">{t("training.planProgressHint")}</p>
+        <PlanTimeline days={calendarDays} t={t} />
       </section>
 
       <button

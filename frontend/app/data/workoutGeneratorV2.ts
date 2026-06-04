@@ -9,6 +9,7 @@ import {
   assessFitness,
   type AssessmentInput,
   type AssessmentResult,
+  type CardioAccess,
   type FitnessGoal,
   type FitnessLevel,
   type Limitation,
@@ -102,6 +103,87 @@ function isShoulderLimited(ctx: GeneratorContext): boolean {
   return hasLimitation(ctx, "shoulders");
 }
 
+function isRunningDayType(dayType: DayType): boolean {
+  return dayType === "easy_run" || dayType === "intervals";
+}
+
+function countRunningDays(days: DayType[]): number {
+  return days.filter(isRunningDayType).length;
+}
+
+/** Adjust weekly slots from cardio access and preference (no extra physical tests). */
+export function applyCardioWeekTemplate(
+  template: DayType[],
+  input: Pick<AssessmentInput, "cardioAccess" | "cardioPreference" | "goal">
+): DayType[] {
+  let days = [...template];
+
+  if (input.cardioAccess === "none") {
+    return days.map((d) => (isRunningDayType(d) ? "full_body" : d));
+  }
+
+  if (input.cardioAccess === "limited") {
+    let cardioUsed = 0;
+    days = days.map((d) => {
+      if (!isRunningDayType(d)) return d;
+      cardioUsed += 1;
+      return cardioUsed > 1 ? "full_body" : d;
+    });
+  }
+
+  if (input.cardioPreference === "dislike") {
+    const runIndices: number[] = [];
+    days.forEach((d, i) => {
+      if (isRunningDayType(d)) runIndices.push(i);
+    });
+    if (runIndices.length > 1) {
+      const maxKeep =
+        input.cardioAccess === "limited"
+          ? 1
+          : Math.max(1, Math.floor(runIndices.length / 2));
+      const replace = new Set(runIndices.slice(maxKeep));
+      days = days.map((d, i) => (replace.has(i) ? "full_body" : d));
+    }
+  }
+
+  if (
+    input.cardioPreference === "enjoy" &&
+    (input.cardioAccess === "outdoor" || input.cardioAccess === "treadmill")
+  ) {
+    if (
+      countRunningDays(days) === 0 &&
+      (input.goal === "runner" || input.goal === "fat_loss")
+    ) {
+      const idx = days.findIndex((d) => d === "full_body");
+      if (idx >= 0) days[idx] = "easy_run";
+    }
+  }
+
+  return days;
+}
+
+function allowsRunningWorkouts(access: CardioAccess): boolean {
+  return access !== "none";
+}
+
+function pickNoRunConditioning(ctx: GeneratorContext): GeneratedExercise[] {
+  const climbers = getExercise("mountain_climbers");
+  if (
+    !isHighImpactBlocked(ctx) &&
+    climbers &&
+    canUseExercise(ctx, climbers)
+  ) {
+    return [
+      gen("walk", "10 min", "10 мин", 0),
+      gen("low_impact_conditioning", "3 rounds", "3 круга", 0),
+    ];
+  }
+  return [
+    gen("walk", "12 min", "12 мин", 0),
+    gen("brisk_walk", "5 min", "5 мин", 0),
+  ];
+}
+
 function canUseExercise(ctx: GeneratorContext, exercise: Exercise): boolean {
   if (exercise.contraindications) {
     for (const c of exercise.contraindications) {
@@ -180,7 +262,10 @@ export function selectWarmupExercises(ctx: GeneratorContext): GeneratedExercise[
   add("shoulder_rolls", "8 forward, 8 back", "8 вперёд, 8 назад");
   add("hip_circles", "8 each direction", "8 в каждую сторону");
 
-  if (ctx.dayType === "easy_run" || ctx.dayType === "intervals") {
+  if (
+    isRunningDayType(ctx.dayType) &&
+    allowsRunningWorkouts(ctx.input.cardioAccess)
+  ) {
     add("brisk_walk", "3 min", "3 мин", 0);
   } else if (!isHighImpactBlocked(ctx)) {
     add("jumping_jacks", "30 sec", "30 сек", 0);
@@ -216,7 +301,10 @@ export function selectCooldownExercises(ctx: GeneratorContext): GeneratedExercis
   add("lat_stretch", "30 sec each side", "30 сек на сторону");
   add("calf_stretch", "30 sec each leg", "30 сек на ногу");
 
-  if (ctx.dayType === "easy_run" || ctx.dayType === "intervals") {
+  if (
+    isRunningDayType(ctx.dayType) &&
+    allowsRunningWorkouts(ctx.input.cardioAccess)
+  ) {
     add("walk", "3 min easy", "3 мин спокойно");
   }
 
@@ -379,17 +467,57 @@ export function selectConditioningExercises(
 ): GeneratedExercise[] | undefined {
   if (ctx.dayType === "mobility") return undefined;
 
+  const { cardioAccess, cardioPreference } = ctx.input;
+
   if (ctx.dayType === "easy_run") {
+    if (!allowsRunningWorkouts(cardioAccess)) {
+      return pickNoRunConditioning(ctx);
+    }
+    if (cardioPreference === "dislike") {
+      return [
+        gen("brisk_walk", "12 min", "12 мин", 0),
+        gen("walk", "8 min", "8 мин", 0),
+      ];
+    }
+    if (cardioAccess === "treadmill") {
+      return [
+        gen(
+          "easy_run",
+          "15–20 min treadmill, flat",
+          "15–20 мин дорожка, ровно",
+          0
+        ),
+      ];
+    }
     return [gen("easy_run", "15–20 min", "15–20 мин", 0)];
   }
 
   if (ctx.dayType === "intervals") {
+    if (!allowsRunningWorkouts(cardioAccess)) {
+      return pickNoRunConditioning(ctx);
+    }
+    if (cardioPreference === "dislike") {
+      return [
+        gen("low_impact_conditioning", "4 rounds", "4 круга", 0),
+        gen("brisk_walk", "6 min", "6 мин", 0),
+      ];
+    }
     if (isHighImpactBlocked(ctx)) {
       return [
         gen(
           "intervals",
           "6 × (1 min brisk / 2 min walk)",
           "6 × (1 мин быстрее / 2 мин ходьба)",
+          0
+        ),
+      ];
+    }
+    if (cardioAccess === "treadmill") {
+      return [
+        gen(
+          "intervals",
+          "8 × (1 min brisk / 90 sec easy), flat treadmill",
+          "8 × (1 мин быстрее / 90 сек легко), ровная дорожка",
           0
         ),
       ];
@@ -412,7 +540,17 @@ export function selectConditioningExercises(
     return [gen("walk", "10 min", "10 мин", 0)];
   }
 
+  if (cardioPreference === "dislike") {
+    return [
+      gen("brisk_walk", "10 min", "10 мин", 0),
+      gen("low_impact_conditioning", "3 rounds", "3 круга", 0),
+    ];
+  }
+
   if (ctx.input.goal === "fat_loss") {
+    if (!allowsRunningWorkouts(cardioAccess)) {
+      return pickNoRunConditioning(ctx);
+    }
     return [gen("mountain_climbers", "4 × 30 sec", "4 × 30 сек", 60)];
   }
 
@@ -530,7 +668,10 @@ export function generateWeekPlan(
   input: AssessmentInput,
   result: AssessmentResult
 ): WeekPlan {
-  const types = weekTemplate(input.goal, result.overallLevel);
+  const types = applyCardioWeekTemplate(
+    weekTemplate(input.goal, result.overallLevel),
+    input
+  );
 
   const days: WeekDaySlot[] = types.map((dayType, dayIndex) => ({
     dayIndex,
@@ -559,6 +700,8 @@ export const exampleTallLeanIntermediateInput: AssessmentInput = {
   run1kmSeconds: 330,
   equipment: ["pull_up_bar", "backpack"],
   limitations: ["none"],
+  cardioAccess: "outdoor",
+  cardioPreference: "enjoy",
 };
 
 export const exampleTallLeanIntermediateResult: AssessmentResult = assessFitness(
@@ -577,6 +720,8 @@ export const exampleHeavyBeginnerInput: AssessmentInput = {
   walkRun12MinMeters: 1200,
   equipment: ["none"],
   limitations: ["overweight", "knees"],
+  cardioAccess: "none",
+  cardioPreference: "dislike",
 };
 
 export const exampleHeavyBeginnerResult: AssessmentResult = assessFitness(

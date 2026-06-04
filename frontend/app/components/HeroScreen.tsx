@@ -89,9 +89,49 @@ export default function HeroScreen({
     ? translateBossProgressLabel(currentBoss, bossProgressContext, t)
     : "";
 
-  const mainCta = workoutMissionCompleted
-    ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
-    : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
+  const mainCta = isNewUser
+    ? { label: t("hero.ctaStartWorkout"), action: onStartTraining }
+    : workoutMissionCompleted
+      ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
+      : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
+
+  if (isNewUser) {
+    return (
+      <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
+        <section className="flex gap-3 items-center border-b border-iron-border pb-3">
+          <img
+            src={getAvatar(level, profile.avatarId)}
+            alt=""
+            className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="iron-label">{t("hero.profileLabel")}</p>
+            <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
+              {t("hero.levelRank", { level, rank })}
+            </h2>
+          </div>
+        </section>
+
+        <section className="iron-card-accent p-4 border border-iron-accent-dim/40">
+          <p className="iron-label">{t("hero.firstStepTitle")}</p>
+          <p className="text-sm font-semibold text-iron-accent mt-2">
+            {t("hero.firstStepStepLabel")}
+          </p>
+          <p className="text-sm text-iron-text mt-2 leading-relaxed">
+            {t("hero.firstStepBodyTraining")}
+          </p>
+        </section>
+
+        <button
+          type="button"
+          onClick={mainCta.action}
+          className="iron-interactive iron-btn-primary w-full py-3 text-sm font-semibold rounded-sm"
+        >
+          {mainCta.label}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-3">
@@ -127,15 +167,6 @@ export default function HeroScreen({
           </p>
         </div>
       </section>
-
-      {isNewUser && (
-        <section className="iron-card-accent p-3 border border-iron-accent-dim/40">
-          <p className="iron-label">{t("hero.firstStepTitle")}</p>
-          <p className="text-sm text-iron-text mt-2 leading-relaxed">
-            {t("hero.firstStepBody")}
-          </p>
-        </section>
-      )}
 
       <section className="iron-card-raised p-3">
         <div className="flex justify-between items-baseline gap-2">

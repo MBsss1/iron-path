@@ -66,6 +66,10 @@ import LanguageProvider from "./i18n/LanguageProvider";
 import { translateRank } from "./i18n/labels";
 import { useTranslation } from "./i18n/useTranslation";
 import LanguageSelectionScreen from "./components/LanguageSelectionScreen";
+import FitnessAssessmentScreen from "./components/FitnessAssessmentScreen";
+import { useFitnessAssessment } from "./hooks/useFitnessAssessment";
+import type { AssessmentInput } from "./data/fitnessAssessment";
+import { STORAGE_KEYS } from "./utils/storageKeys";
 
 const MORE_SUB_SCREENS = [
   "progress",
@@ -94,6 +98,11 @@ export default function Home() {
 function HomeContent() {
   const { loaded: languageLoaded, languageChosen, setLocale, t } = useTranslation();
   const { profile, loaded: profileLoaded, saveProfile, clearProfile } = useProfile();
+  const {
+    loaded: assessmentLoaded,
+    isComplete: assessmentComplete,
+    complete: completeAssessment,
+  } = useFitnessAssessment();
   const classId = profile?.classId;
   const [screen, setScreen] = useState("hero");
   const [showPopup, setShowPopup] = useState(false);
@@ -229,7 +238,21 @@ function HomeContent() {
     bossTrialsLoaded &&
     seasonsLoaded;
 
-  const appReady = storageReady && Boolean(profile?.classId);
+  const appReady =
+    storageReady && Boolean(profile?.classId) && assessmentComplete;
+
+  const handleAssessmentComplete = useCallback(
+    (input: AssessmentInput) => {
+      completeAssessment(input);
+      try {
+        localStorage.removeItem(STORAGE_KEYS.trainingCalendar);
+      } catch {
+        // ignore
+      }
+      setScreen("hero");
+    },
+    [completeAssessment]
+  );
 
   useEffect(() => {
     const visible =
@@ -571,7 +594,7 @@ function HomeContent() {
         <div
           className="fixed inset-0 z-[99] flex items-center justify-center iron-page"
           aria-busy="true"
-          aria-label="Loading saved progress"
+          aria-label={t("app.loadingAria")}
         >
           <div className="text-center iron-shell-card py-8 px-10">
             <p className="iron-label">{t("app.loading")}</p>
@@ -603,8 +626,24 @@ function HomeContent() {
             <ClassSelectionScreen onConfirm={handleConfirmClass} />
           )}
 
+          {storageReady &&
+            assessmentLoaded &&
+            profile &&
+            profile.classId &&
+            !assessmentComplete && (
+              <FitnessAssessmentScreen
+                profile={profile}
+                onComplete={handleAssessmentComplete}
+              />
+            )}
+
           <ScreenTransition screen={screen}>
-            {storageReady && profile && profile.classId && screen === "hero" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile &&
+              profile.classId &&
+              screen === "hero" && (
               <HeroScreen
                 profile={profile}
                 level={level}
@@ -633,7 +672,12 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile && profile.classId && screen === "today" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile &&
+              profile.classId &&
+              screen === "today" && (
               <TodayScreen
                 program={program}
                 classId={classId}
@@ -646,7 +690,11 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile?.classId && screen === "training" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "training" && (
               <TrainingScreen
                 program={program}
                 classId={classId}
@@ -659,11 +707,19 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile?.classId && screen === "nutrition" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "nutrition" && (
               <NutritionScreen goal={profile?.goal} />
             )}
 
-            {storageReady && profile?.classId && screen === "progress" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "progress" && (
               <ProgressScreen
                 level={level}
                 rank={rank}
@@ -678,7 +734,11 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile?.classId && screen === "achievements" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "achievements" && (
               <AchievementsScreen
                 achievementsUnlocked={achievementsUnlocked}
                 progressInput={achievementProgressInput}
@@ -686,7 +746,11 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile?.classId && screen === "more" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "more" && (
               <MoreScreen
                 onSelectBosses={() => setScreen("bosses")}
                 onSelectProgress={() => setScreen("progress")}
@@ -722,7 +786,11 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile?.classId && screen === "stats" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "stats" && (
               <StatsScreen
                 totalXp={totalXp}
                 level={level}
@@ -743,11 +811,19 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile?.classId && screen === "strength" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "strength" && (
               <StrengthTrackerScreen onBack={goBackToMore} />
             )}
 
-            {storageReady && profile?.classId && screen === "legacy" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "legacy" && (
               <LegacyScreen
                 seasons={completedSeasons}
                 onBack={goBackToMore}
@@ -762,14 +838,22 @@ function HomeContent() {
               />
             )}
 
-            {storageReady && profile?.classId && screen === "settings" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "settings" && (
               <SettingsScreen
                 onBack={goBackToMore}
                 onReset={handleResetProgress}
               />
             )}
 
-            {storageReady && profile?.classId && screen === "bosses" && (
+            {storageReady &&
+              assessmentLoaded &&
+              assessmentComplete &&
+              profile?.classId &&
+              screen === "bosses" && (
               <BossScreen
                 ctx={bossProgressContext}
                 currentBoss={currentBoss}
@@ -782,7 +866,10 @@ function HomeContent() {
             )}
           </ScreenTransition>
 
-          {storageReady && profile?.classId && (
+          {storageReady &&
+            assessmentLoaded &&
+            assessmentComplete &&
+            profile?.classId && (
             <AppPopups
               placement="inline"
               pendingSeasonComplete={pendingSeasonComplete}
@@ -793,7 +880,10 @@ function HomeContent() {
           )}
         </div>
 
-        {storageReady && profile?.classId && (
+        {storageReady &&
+          assessmentLoaded &&
+          assessmentComplete &&
+          profile?.classId && (
           <>
             <AppPopups
               placement="floating"

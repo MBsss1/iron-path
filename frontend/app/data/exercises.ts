@@ -1045,6 +1045,32 @@ export const EXERCISES: Exercise[] = [
     regressions: ["walk"],
   }),
   ex({
+    id: "low_impact_conditioning",
+    category: "cardio",
+    level: "beginner",
+    muscles: ["cardio", "legs"],
+    name: { en: "Low-impact conditioning", ru: "Щадящая кондиция" },
+    instructions: {
+      en: [
+        "March in place 30 sec, brisk walk 2 min.",
+        "Repeat 3–4 rounds.",
+        "Stay tall, breathe steadily.",
+      ],
+      ru: [
+        "Марш на месте 30 сек, быстрая ходьба 2 мин.",
+        "3–4 круга.",
+        "Осанка ровная, дыхание спокойное.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Rushing the march", "Holding breath"],
+      ru: ["Слишком быстрый марш", "Задержка дыхания"],
+    },
+    contraindications: ["knees"],
+    regressions: ["walk"],
+    progressions: ["brisk_walk"],
+  }),
+  ex({
     id: "mountain_climbers",
     category: "cardio",
     level: "novice",

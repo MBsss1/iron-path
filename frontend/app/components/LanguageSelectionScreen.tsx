@@ -15,14 +15,9 @@ export default function LanguageSelectionScreen({ onSelect }: Props) {
       <div className="w-full max-w-sm iron-shell-card p-6 text-center">
         <p className="iron-label">{t("app.title")}</p>
         <p className="mt-2 text-sm text-iron-muted">{t("app.tagline")}</p>
-        <p className="mt-1 text-sm text-iron-muted opacity-80">
-          Дисциплина 1950-х. Современный прогресс.
-        </p>
 
         <h1 className="iron-heading text-xl mt-6">{t("lang.selectTitle")}</h1>
         <p className="mt-1 text-sm text-iron-muted">{t("lang.selectSubtitle")}</p>
-        <p className="mt-2 text-sm text-iron-muted">{t("lang.selectTitleRu")}</p>
-        <p className="text-xs text-iron-muted">{t("lang.selectSubtitleRu")}</p>
 
         <div className="mt-8 space-y-3">
           <button

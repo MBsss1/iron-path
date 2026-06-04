@@ -179,6 +179,10 @@ export function getTelegramBackButtonTarget(
   screen: string,
   moreSubScreens: readonly string[]
 ): "more" | "hero" | null {
+  if (screen === "assessment") {
+    return "hero";
+  }
+
   if (moreSubScreens.includes(screen)) {
     return "more";
   }

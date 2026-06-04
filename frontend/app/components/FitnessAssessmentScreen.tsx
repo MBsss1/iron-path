@@ -19,6 +19,7 @@ import IronButton from "./IronButton";
 type Props = {
   profile: Profile;
   onComplete: (input: AssessmentInput, result: AssessmentResult) => void;
+  onCancel: () => void;
 };
 
 type StepId =
@@ -58,9 +59,13 @@ function parseProfileNumbers(profile: Profile) {
   return { age, height, weight };
 }
 
-export default function FitnessAssessmentScreen({ profile, onComplete }: Props) {
+export default function FitnessAssessmentScreen({
+  profile,
+  onComplete,
+  onCancel,
+}: Props) {
   const { t, locale } = useTranslation();
-  const [phase, setPhase] = useState<"wizard" | "results">("wizard");
+  const [phase, setPhase] = useState<"intro" | "wizard" | "results">("intro");
   const [stepIndex, setStepIndex] = useState(0);
   const [hasBar, setHasBar] = useState<boolean | null>(null);
   const [cardioAccess, setCardioAccess] = useState<CardioAccess | null>(null);
@@ -198,7 +203,13 @@ export default function FitnessAssessmentScreen({ profile, onComplete }: Props) 
       setPhase("wizard");
       return;
     }
-    if (stepIndex > 0) setStepIndex((i) => i - 1);
+    if (phase === "wizard") {
+      if (stepIndex > 0) {
+        setStepIndex((i) => i - 1);
+        return;
+      }
+      setPhase("intro");
+    }
   };
 
   const handleFinish = () => {
@@ -221,6 +232,31 @@ export default function FitnessAssessmentScreen({ profile, onComplete }: Props) 
       <span className="text-iron-accent font-semibold">{levelLabel(level)}</span>
     </div>
   );
+
+  if (phase === "intro") {
+    return (
+      <ScreenShell
+        eyebrow={t("assessment.intro.eyebrow")}
+        title={t("assessment.intro.title")}
+        subtitle={t("assessment.intro.duration")}
+        onBack={onCancel}
+      >
+        <p className="text-sm text-iron-text">{t("assessment.intro.checkTitle")}</p>
+        <ul className="mt-3 space-y-2 text-sm text-iron-muted list-disc pl-5">
+          <li>{t("assessment.intro.checkPull")}</li>
+          <li>{t("assessment.intro.checkPush")}</li>
+          <li>{t("assessment.intro.checkLegs")}</li>
+          <li>{t("assessment.intro.checkCore")}</li>
+        </ul>
+        <p className="mt-4 text-sm text-iron-text leading-relaxed">
+          {t("assessment.intro.outro")}
+        </p>
+        <IronButton className="mt-6" onClick={() => setPhase("wizard")}>
+          {t("assessment.intro.start")}
+        </IronButton>
+      </ScreenShell>
+    );
+  }
 
   if (phase === "results" && previewResult) {
     const lang = locale === "ru" ? "ru" : "en";
@@ -415,7 +451,7 @@ export default function FitnessAssessmentScreen({ profile, onComplete }: Props) 
       })}
       title={t(stepTitleKey)}
       subtitle={t(stepExplainKey)}
-      onBack={stepIndex > 0 || phase === "results" ? goBack : undefined}
+      onBack={goBack}
     >
       {renderStepContent()}
 

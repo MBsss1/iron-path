@@ -22,6 +22,8 @@ import {
 } from "../utils/trainingCalendar";
 import { safeGet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
+import { getExerciseInfo } from "../data/exerciseLibrary";
+import ExerciseDetailModal from "./ExerciseDetailModal";
 
 type Props = {
   onCompleteWorkout: () => void;
@@ -29,6 +31,8 @@ type Props = {
   program: { phase: string; week: number; goal?: string };
   classId?: ClassId | string | null;
   level: number;
+  assessmentComplete: boolean;
+  onStartAssessment: () => void;
 };
 
 function isWorkoutMissionCompletedToday(): boolean {
@@ -51,10 +55,14 @@ function WorkoutBlockView({
   block,
   lang,
   blockTitle,
+  onOpenExercise,
+  detailsLabel,
 }: {
   block: { title: { en: string; ru: string }; items: GeneratedExercise[] };
   lang: Lang;
   blockTitle?: string;
+  onOpenExercise: (exerciseId: string) => void;
+  detailsLabel: string;
 }) {
   if (block.items.length === 0) return null;
 
@@ -64,17 +72,32 @@ function WorkoutBlockView({
         {blockTitle ?? block.title[lang]}
       </p>
       <ul className="mt-3 space-y-3">
-        {block.items.map((item) => (
-          <li
-            key={item.exerciseId}
-            className="flex justify-between gap-3 text-sm border-b border-iron-border pb-2 last:border-0 last:pb-0"
-          >
-            <span className="text-iron-text font-medium">{item.name[lang]}</span>
-            <span className="text-iron-muted shrink-0 text-right">
-              {item.prescription[lang]}
-            </span>
-          </li>
-        ))}
+        {block.items.map((item) => {
+          const hasDetails = Boolean(getExerciseInfo(item.exerciseId));
+
+          return (
+            <li
+              key={item.exerciseId}
+              className="border-b border-iron-border pb-3 last:border-0 last:pb-0"
+            >
+              <div className="flex justify-between gap-3 text-sm">
+                <span className="text-iron-text font-medium">{item.name[lang]}</span>
+                <span className="text-iron-muted shrink-0 text-right">
+                  {item.prescription[lang]}
+                </span>
+              </div>
+              {hasDetails && (
+                <button
+                  type="button"
+                  onClick={() => onOpenExercise(item.exerciseId)}
+                  className="mt-1.5 text-xs font-semibold text-iron-accent hover:text-iron-text iron-interactive"
+                >
+                  {detailsLabel}
+                </button>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -84,23 +107,39 @@ function TodayWorkoutView({
   workout,
   lang,
   t,
+  onOpenExercise,
 }: {
   workout: GeneratedWorkout;
   lang: Lang;
   t: (key: string, params?: Record<string, string | number>) => string;
+  onOpenExercise: (exerciseId: string) => void;
 }) {
+  const detailsLabel = t("exerciseLibrary.details");
+
   return (
     <div className="space-y-3">
       <p className="text-xs text-iron-muted text-center">
         {t("training.estimatedMinutes", { minutes: workout.estimatedMinutes })}
       </p>
-      <WorkoutBlockView block={workout.blocks.warmup} lang={lang} />
-      <WorkoutBlockView block={workout.blocks.mainWork} lang={lang} />
+      <WorkoutBlockView
+        block={workout.blocks.warmup}
+        lang={lang}
+        onOpenExercise={onOpenExercise}
+        detailsLabel={detailsLabel}
+      />
+      <WorkoutBlockView
+        block={workout.blocks.mainWork}
+        lang={lang}
+        onOpenExercise={onOpenExercise}
+        detailsLabel={detailsLabel}
+      />
       {workout.blocks.accessoryWork.items.length > 0 && (
         <WorkoutBlockView
           block={workout.blocks.accessoryWork}
           lang={lang}
           blockTitle={t("training.accessory")}
+          onOpenExercise={onOpenExercise}
+          detailsLabel={detailsLabel}
         />
       )}
       {workout.blocks.conditioning && workout.blocks.conditioning.items.length > 0 && (
@@ -108,9 +147,16 @@ function TodayWorkoutView({
           block={workout.blocks.conditioning}
           lang={lang}
           blockTitle={t("training.conditioning")}
+          onOpenExercise={onOpenExercise}
+          detailsLabel={detailsLabel}
         />
       )}
-      <WorkoutBlockView block={workout.blocks.cooldown} lang={lang} />
+      <WorkoutBlockView
+        block={workout.blocks.cooldown}
+        lang={lang}
+        onOpenExercise={onOpenExercise}
+        detailsLabel={detailsLabel}
+      />
     </div>
   );
 }
@@ -163,10 +209,17 @@ export default function TrainingScreen({
   program,
   classId,
   level,
+  assessmentComplete,
+  onStartAssessment,
 }: Props) {
   const { t, locale } = useTranslation();
   const lang = pickLang(locale);
   const seasonWeek = program.week;
+
+  const [detailExerciseId, setDetailExerciseId] = useState<string | null>(null);
+  const detailExercise = detailExerciseId
+    ? getExerciseInfo(detailExerciseId) ?? null
+    : null;
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [calendarState, setCalendarState] = useState<TrainingCalendarState>(() =>
@@ -232,6 +285,24 @@ export default function TrainingScreen({
 
   const activeSlot = calendarState.activeDayIndex + 1;
 
+  if (!assessmentComplete) {
+    return (
+      <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24 text-center space-y-5">
+        <h2 className="iron-heading text-2xl sm:text-3xl">{t("training.screenTitle")}</h2>
+        <p className="text-sm text-iron-muted leading-relaxed max-w-sm mx-auto">
+          {t("training.lockedUntilAssessment")}
+        </p>
+        <button
+          type="button"
+          onClick={onStartAssessment}
+          className="iron-interactive iron-btn-primary w-full max-w-sm mx-auto py-4 text-base font-semibold min-h-[56px] rounded-sm"
+        >
+          {t("training.startAssessment")}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24 space-y-5">
       <div className="text-center">
@@ -253,7 +324,18 @@ export default function TrainingScreen({
       </div>
 
       <section className="border border-iron-accent-dim/50 bg-iron-panel p-4 rounded-sm space-y-4">
-        <TodayWorkoutView workout={todayWorkout} lang={lang} t={t} />
+        <TodayWorkoutView
+          workout={todayWorkout}
+          lang={lang}
+          t={t}
+          onOpenExercise={setDetailExerciseId}
+        />
+
+        <ExerciseDetailModal
+          exercise={detailExercise}
+          isOpen={detailExercise !== null}
+          onClose={() => setDetailExerciseId(null)}
+        />
 
         {workoutLoggedToday ? (
           <p className="text-center text-sm font-semibold text-iron-accent py-3 border border-iron-border rounded-sm bg-iron-raised">

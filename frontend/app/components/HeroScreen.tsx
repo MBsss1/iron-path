@@ -41,6 +41,8 @@ type Props = {
   bossProgressPercent: number;
   bossProgressContext: BossProgressContext;
   allBossesDefeated: boolean;
+  assessmentComplete: boolean;
+  onStartAssessment: () => void;
   onStartTraining: () => void;
   onOpenToday: () => void;
   onViewBoss: () => void;
@@ -68,6 +70,8 @@ export default function HeroScreen({
   bossProgressPercent,
   bossProgressContext,
   allBossesDefeated,
+  assessmentComplete,
+  onStartAssessment,
   onStartTraining,
   onOpenToday,
   onViewBoss,
@@ -89,11 +93,49 @@ export default function HeroScreen({
     ? translateBossProgressLabel(currentBoss, bossProgressContext, t)
     : "";
 
-  const mainCta = isNewUser
-    ? { label: t("hero.ctaStartWorkout"), action: onStartTraining }
-    : workoutMissionCompleted
-      ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
-      : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
+  const mainCta = workoutMissionCompleted
+    ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
+    : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
+
+  if (!assessmentComplete) {
+    return (
+      <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
+        <section className="flex gap-3 items-center border-b border-iron-border pb-3">
+          <img
+            src={getAvatar(level, profile.avatarId)}
+            alt=""
+            className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="iron-label">{t("hero.profileLabel")}</p>
+            <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
+              {t("hero.levelRank", { level, rank })}
+            </h2>
+            {classDef && profile.classId && (
+              <p className="text-sm text-iron-muted mt-0.5">
+                {translateClassName(profile.classId, t)}
+              </p>
+            )}
+          </div>
+        </section>
+
+        <section className="iron-card-accent p-4 border border-iron-accent-dim/40">
+          <h3 className="iron-heading text-lg">{t("hero.pathNotFormedTitle")}</h3>
+          <p className="text-sm text-iron-text mt-2 leading-relaxed whitespace-pre-line">
+            {t("hero.pathNotFormedBody")}
+          </p>
+        </section>
+
+        <button
+          type="button"
+          onClick={onStartAssessment}
+          className="iron-interactive iron-btn-primary w-full py-3 text-sm font-semibold rounded-sm"
+        >
+          {t("hero.startAssessment")}
+        </button>
+      </div>
+    );
+  }
 
   if (isNewUser) {
     return (

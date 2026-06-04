@@ -23,6 +23,8 @@ type Props = {
   onCompleteDeepWork: () => void;
   onCompleteProtein: () => void;
   onCompleteSleep: () => void;
+  assessmentComplete: boolean;
+  onStartAssessment: () => void;
   onGoToTraining: () => void;
 };
 
@@ -34,6 +36,8 @@ export default function TodayScreen({
   onCompleteDeepWork,
   onCompleteProtein,
   onCompleteSleep,
+  assessmentComplete,
+  onStartAssessment,
   onGoToTraining,
 }: Props) {
   const { t, locale } = useTranslation();
@@ -113,80 +117,97 @@ export default function TodayScreen({
         <p>{t("today.week", { week: program.week })}</p>
       </div>
 
-      <div className="mt-6 border border-iron-border p-4 iron-card-raised rounded-sm space-y-3">
-        <div className="flex justify-between items-baseline gap-2">
-          <p className="iron-label">{t("today.todayWorkoutTitle")}</p>
-          <span className="text-xs text-iron-gold">
-            +{workoutXp} {t("common.xp")}
-          </span>
-        </div>
+      {assessmentComplete ? (
+        <div className="mt-6 border border-iron-border p-4 iron-card-raised rounded-sm space-y-3">
+          <div className="flex justify-between items-baseline gap-2">
+            <p className="iron-label">{t("today.todayWorkoutTitle")}</p>
+            <span className="text-xs text-iron-gold">
+              +{workoutXp} {t("common.xp")}
+            </span>
+          </div>
 
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between gap-3 border-b border-iron-border pb-2">
-            <span className="text-iron-muted">{t("today.dayTypeLabel")}</span>
-            <span className="text-iron-text font-semibold text-right">
-              {dayTypeLabel}
-            </span>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between gap-3 border-b border-iron-border pb-2">
+              <span className="text-iron-muted">{t("today.dayTypeLabel")}</span>
+              <span className="text-iron-text font-semibold text-right">
+                {dayTypeLabel}
+              </span>
+            </div>
+            <div className="flex justify-between gap-3 border-b border-iron-border pb-2">
+              <span className="text-iron-muted">{t("today.durationLabel")}</span>
+              <span className="text-iron-text font-semibold">
+                {t("training.estimatedMinutes", {
+                  minutes: todayWorkout.estimatedMinutes,
+                })}
+              </span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-iron-muted">{t("today.statusLabel")}</span>
+              <span
+                className={
+                  workoutDone
+                    ? "text-iron-accent font-semibold"
+                    : "text-iron-text font-semibold"
+                }
+              >
+                {workoutDone
+                  ? t("today.statusDone")
+                  : t("today.statusNotDone")}
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between gap-3 border-b border-iron-border pb-2">
-            <span className="text-iron-muted">{t("today.durationLabel")}</span>
-            <span className="text-iron-text font-semibold">
-              {t("training.estimatedMinutes", {
-                minutes: todayWorkout.estimatedMinutes,
-              })}
-            </span>
-          </div>
-          <div className="flex justify-between gap-3">
-            <span className="text-iron-muted">{t("today.statusLabel")}</span>
-            <span
-              className={
-                workoutDone
-                  ? "text-iron-accent font-semibold"
-                  : "text-iron-text font-semibold"
-              }
+
+          {!workoutDone && (
+            <button
+              type="button"
+              onClick={onGoToTraining}
+              className="iron-interactive iron-btn-primary w-full mt-1 py-2.5 text-sm font-semibold rounded-sm"
             >
-              {workoutDone
-                ? t("today.statusDone")
-                : t("today.statusNotDone")}
-            </span>
-          </div>
+              {t("today.goToTraining")}
+            </button>
+          )}
         </div>
-
-        {!workoutDone && (
+      ) : (
+        <div className="mt-6 border border-iron-accent-dim/60 bg-iron-panel p-4 rounded-sm">
+          <p className="text-sm text-iron-text leading-relaxed">
+            {t("today.assessmentRequired")}
+          </p>
           <button
             type="button"
-            onClick={onGoToTraining}
-            className="iron-interactive iron-btn-primary w-full mt-1 py-2.5 text-sm font-semibold rounded-sm"
+            onClick={onStartAssessment}
+            className="iron-interactive iron-btn-primary w-full mt-3 py-2.5 text-sm font-semibold rounded-sm"
           >
-            {t("today.goToTraining")}
+            {t("hero.startAssessment")}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <p className="mt-4 iron-label text-center">{t("today.habitsTitle")}</p>
 
       <div className="mt-3 space-y-3">
-        <div
-          className={`w-full border border-iron-border p-4 sm:p-5 flex justify-between font-semibold min-h-[52px] rounded-sm ${
-            workoutDone
-              ? "bg-iron-raised text-iron-muted opacity-60"
-              : "iron-card-panel"
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <span className={workoutDone ? "text-iron-accent" : "text-iron-border-strong"}>
-              {workoutDone ? "✓" : "□"}
+        {assessmentComplete && (
+          <div
+            className={`w-full border border-iron-border p-4 sm:p-5 flex justify-between font-semibold min-h-[52px] rounded-sm ${
+              workoutDone
+                ? "bg-iron-raised text-iron-muted opacity-60"
+                : "iron-card-panel"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <span className={workoutDone ? "text-iron-accent" : "text-iron-border-strong"}>
+                {workoutDone ? "✓" : "□"}
+              </span>
+              <span>
+                {workoutDone
+                  ? t("today.workoutHabitDone")
+                  : t("today.workoutHabit")}
+              </span>
             </span>
-            <span>
-              {workoutDone
-                ? t("today.workoutHabitDone")
-                : t("today.workoutHabit")}
+            <span className="text-iron-gold text-xs">
+              {t("today.workoutHabitNote")}
             </span>
-          </span>
-          <span className="text-iron-gold text-xs">
-            {t("today.workoutHabitNote")}
-          </span>
-        </div>
+          </div>
+        )}
 
         <button
           type="button"

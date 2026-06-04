@@ -238,8 +238,11 @@ function HomeContent() {
     bossTrialsLoaded &&
     seasonsLoaded;
 
-  const appReady =
-    storageReady && Boolean(profile?.classId) && assessmentComplete;
+  const appReady = storageReady && Boolean(profile?.classId);
+
+  const handleStartAssessment = useCallback(() => {
+    setScreen("assessment");
+  }, []);
 
   const handleAssessmentComplete = useCallback(
     (input: AssessmentInput) => {
@@ -253,6 +256,10 @@ function HomeContent() {
     },
     [completeAssessment]
   );
+
+  const handleAssessmentCancel = useCallback(() => {
+    setScreen("hero");
+  }, []);
 
   useEffect(() => {
     const visible =
@@ -630,21 +637,23 @@ function HomeContent() {
             assessmentLoaded &&
             profile &&
             profile.classId &&
-            !assessmentComplete && (
+            screen === "assessment" && (
               <FitnessAssessmentScreen
                 profile={profile}
                 onComplete={handleAssessmentComplete}
+                onCancel={handleAssessmentCancel}
               />
             )}
 
           <ScreenTransition screen={screen}>
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile &&
               profile.classId &&
               screen === "hero" && (
               <HeroScreen
+                assessmentComplete={assessmentComplete}
+                onStartAssessment={handleStartAssessment}
                 profile={profile}
                 level={level}
                 xp={xp}
@@ -674,7 +683,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile &&
               profile.classId &&
               screen === "today" && (
@@ -683,6 +691,8 @@ function HomeContent() {
                 classId={classId}
                 level={level}
                 missions={missions}
+                assessmentComplete={assessmentComplete}
+                onStartAssessment={handleStartAssessment}
                 onCompleteDeepWork={completeDeepWork}
                 onCompleteProtein={completeProtein}
                 onCompleteSleep={completeSleep}
@@ -692,13 +702,14 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "training" && (
               <TrainingScreen
                 program={program}
                 classId={classId}
                 level={level}
+                assessmentComplete={assessmentComplete}
+                onStartAssessment={handleStartAssessment}
                 onCompleteWorkout={completeWorkout}
                 onCompleteWeek={() => {
                   nextWeek();
@@ -709,7 +720,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "nutrition" && (
               <NutritionScreen goal={profile?.goal} />
@@ -717,7 +727,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "progress" && (
               <ProgressScreen
@@ -736,7 +745,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "achievements" && (
               <AchievementsScreen
@@ -748,7 +756,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "more" && (
               <MoreScreen
@@ -788,7 +795,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "stats" && (
               <StatsScreen
@@ -813,7 +819,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "strength" && (
               <StrengthTrackerScreen onBack={goBackToMore} />
@@ -821,7 +826,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "legacy" && (
               <LegacyScreen
@@ -840,7 +844,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "settings" && (
               <SettingsScreen
@@ -851,7 +854,6 @@ function HomeContent() {
 
             {storageReady &&
               assessmentLoaded &&
-              assessmentComplete &&
               profile?.classId &&
               screen === "bosses" && (
               <BossScreen
@@ -868,7 +870,6 @@ function HomeContent() {
 
           {storageReady &&
             assessmentLoaded &&
-            assessmentComplete &&
             profile?.classId && (
             <AppPopups
               placement="inline"
@@ -882,7 +883,6 @@ function HomeContent() {
 
         {storageReady &&
           assessmentLoaded &&
-          assessmentComplete &&
           profile?.classId && (
           <>
             <AppPopups

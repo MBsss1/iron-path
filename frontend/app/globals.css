@@ -442,18 +442,63 @@ html.telegram-webapp body {
   transition: stroke-dashoffset 0.35s linear, stroke 0.25s ease;
 }
 
-.training-timer-digits {
-  animation: training-digit-fade 0.22s ease-out both;
+.timer-digit-wheel {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.15em;
+  vertical-align: bottom;
+  min-width: 0.62em;
+  text-align: center;
 }
 
-@keyframes training-digit-fade {
+.timer-digit-wheel-inner {
+  display: block;
+  position: relative;
+  height: 1.15em;
+}
+
+.timer-digit-current,
+.timer-digit-incoming,
+.timer-digit-outgoing {
+  display: block;
+  line-height: 1.15em;
+}
+
+.timer-digit-outgoing {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  animation: timer-digit-exit 0.32s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+.timer-digit-incoming {
+  animation: timer-digit-enter 0.32s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+.timer-digit-separator {
+  line-height: 1.15em;
+}
+
+@keyframes timer-digit-enter {
   from {
-    opacity: 0.35;
-    transform: translateY(2px);
+    transform: translateY(100%);
+    opacity: 0.5;
   }
   to {
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes timer-digit-exit {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0.35;
   }
 }
 
@@ -479,7 +524,8 @@ html.telegram-webapp body {
     transition: none;
   }
 
-  .training-timer-digits {
+  .timer-digit-incoming,
+  .timer-digit-outgoing {
     animation: none !important;
   }
 

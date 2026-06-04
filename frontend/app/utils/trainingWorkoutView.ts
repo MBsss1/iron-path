@@ -1,4 +1,7 @@
 import type { GeneratedExercise, GeneratedWorkout } from "../data/workoutGeneratorV2";
+import { exerciseItemKey } from "./activeTrainingSession";
+
+export { exerciseItemKey };
 
 /** Main session items in generator order (main → accessory → conditioning). */
 export function getWorkoutMainItems(workout: GeneratedWorkout): GeneratedExercise[] {

@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { formatTimerDisplay } from "../hooks/useTimerEngine";
+import AnimatedTimerDigits from "./AnimatedTimerDigits";
 
 const RING_RADIUS = 54;
 export const TIMER_RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -10,10 +11,11 @@ type Props = {
   displaySeconds: number;
   progress: number;
   showHours: boolean;
-  size?: "large" | "compact";
+  size?: "large" | "compact" | "mini";
   dangerPhase?: boolean;
   finished?: boolean;
   sublabel?: string;
+  hideRing?: boolean;
 };
 
 export default function TimerRing({
@@ -24,14 +26,37 @@ export default function TimerRing({
   dangerPhase = false,
   finished = false,
   sublabel,
+  hideRing = false,
 }: Props) {
   const ringGradientId = useId();
   const ringOffset = TIMER_RING_CIRCUMFERENCE * (1 - progress);
-  const dim = size === "large" ? "w-44 h-44 sm:w-48 sm:h-48" : "w-36 h-36";
+  const dim =
+    size === "large"
+      ? "w-44 h-44 sm:w-48 sm:h-48"
+      : size === "compact"
+        ? "w-36 h-36"
+        : "w-0 h-0";
   const digitClass =
     size === "large"
       ? "text-4xl sm:text-5xl font-semibold tracking-tight"
-      : "text-3xl font-semibold tracking-tight";
+      : size === "compact"
+        ? "text-3xl font-semibold tracking-tight"
+        : "text-2xl font-semibold tracking-tight";
+
+  const formatted = formatTimerDisplay(displaySeconds, showHours);
+
+  if (hideRing) {
+    return (
+      <div className="flex flex-col items-center" role="timer" aria-live="polite">
+        <AnimatedTimerDigits formatted={formatted} className={digitClass} />
+        {sublabel && (
+          <span className="text-[10px] uppercase tracking-wider text-iron-muted mt-1">
+            {sublabel}
+          </span>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={`relative ${dim} training-timer-ring-wrap`}>
@@ -76,12 +101,7 @@ export default function TimerRing({
         role="timer"
         aria-live="polite"
       >
-        <span
-          key={displaySeconds}
-          className={`tabular-nums training-timer-digits ${digitClass}`}
-        >
-          {formatTimerDisplay(displaySeconds, showHours)}
-        </span>
+        <AnimatedTimerDigits formatted={formatted} className={digitClass} />
         {sublabel && (
           <span className="text-[10px] uppercase tracking-wider text-iron-muted mt-1.5">
             {sublabel}

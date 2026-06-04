@@ -380,17 +380,53 @@ function variantLabel(exerciseId: string | undefined): LocalizedText | null {
 
 
 
+const CATEGORY_DESCRIPTION_FALLBACK: Record<ExerciseCategory, LocalizedText> = {
+  warmup: {
+    en: "Prepares your body for training so you can move safely.",
+    ru: "Упражнение помогает подготовить тело к нагрузке и выполнить тренировку безопаснее.",
+  },
+  pull: {
+    en: "Builds pulling strength for your back and arms.",
+    ru: "Развивает силу тяги для спины и рук.",
+  },
+  push: {
+    en: "Builds pushing strength for chest, shoulders, and triceps.",
+    ru: "Развивает силу жима для груди, плеч и трицепсов.",
+  },
+  legs: {
+    en: "Strengthens legs and supports stable movement patterns.",
+    ru: "Укрепляет ноги и поддерживает устойчивые паттерны движения.",
+  },
+  core: {
+    en: "Strengthens the core for stability during lifts and runs.",
+    ru: "Укрепляет корпус для стабильности в силовых и беге.",
+  },
+  cardio: {
+    en: "Improves endurance and cardiovascular capacity.",
+    ru: "Развивает выносливость и сердечно-сосудистую форму.",
+  },
+  mobility: {
+    en: "Improves joint range of motion and movement quality.",
+    ru: "Улучшает подвижность суставов и качество движений.",
+  },
+  cooldown: {
+    en: "Helps your body recover after training.",
+    ru: "Помогает телу восстановиться после нагрузки.",
+  },
+};
+
+function descriptionForExercise(exercise: Exercise): LocalizedText {
+  if (DESCRIPTIONS[exercise.id]) {
+    return DESCRIPTIONS[exercise.id];
+  }
+  return (
+    CATEGORY_DESCRIPTION_FALLBACK[exercise.category] ??
+    CATEGORY_DESCRIPTION_FALLBACK.warmup
+  );
+}
+
 function toExerciseInfo(exercise: Exercise): ExerciseInfo {
-
-  const description =
-
-    DESCRIPTIONS[exercise.id] ?? {
-
-      en: `Training focus: ${exercise.category}.`,
-
-      ru: `Фокус: ${exercise.category}.`,
-
-    };
+  const description = descriptionForExercise(exercise);
 
 
 

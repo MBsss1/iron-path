@@ -459,17 +459,34 @@ export default function FitnessAssessmentScreen({
         );
       case "limitations":
         return (
-          <div className="grid grid-cols-1 gap-2">
-            {LIMITATIONS.map((id) => (
-              <button
-                key={id}
-                type="button"
-                className={optionClass(limitations.includes(id))}
-                onClick={() => toggleLimitation(id)}
-              >
-                {t(`assessment.limitations.${id}`)}
-              </button>
-            ))}
+          <div className="space-y-3">
+            <p className="text-sm text-iron-muted leading-relaxed">
+              {t("assessment.limitations.subtitle")}
+            </p>
+            <div className="grid grid-cols-1 gap-2">
+              {LIMITATIONS.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`w-full text-left border p-3 rounded-sm iron-interactive ${
+                    limitations.includes(id)
+                      ? "border-iron-accent bg-iron-accent-dim/20"
+                      : "border-iron-border iron-card-raised"
+                  }`}
+                  onClick={() => toggleLimitation(id)}
+                >
+                  <p className="font-semibold text-sm text-iron-text">
+                    {t(`assessment.limitations.${id}.title`)}
+                  </p>
+                  <p className="text-xs text-iron-muted mt-1 leading-relaxed">
+                    {t(`assessment.limitations.${id}.description`)}
+                  </p>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-iron-muted leading-relaxed border border-iron-border/60 rounded-sm p-3">
+              {t("assessment.limitations.disclaimer")}
+            </p>
           </div>
         );
       default:
@@ -481,6 +498,7 @@ export default function FitnessAssessmentScreen({
   const stepExplainKey = `assessment.${currentStep}.explain` as const;
   const stepTipKey = `assessment.${currentStep}.tip` as const;
   const stepWarnKey = `assessment.${currentStep}.warn` as const;
+  const isLimitationsStep = currentStep === "limitations";
 
   return (
     <ScreenShell
@@ -488,17 +506,27 @@ export default function FitnessAssessmentScreen({
         current: stepIndex + 1,
         total: totalSteps,
       })}
-      title={t(stepTitleKey)}
-      subtitle={t(stepExplainKey)}
+      title={
+        isLimitationsStep
+          ? t("assessment.limitations.title")
+          : t(stepTitleKey)
+      }
+      subtitle={
+        isLimitationsStep ? undefined : t(stepExplainKey)
+      }
       onBack={goBack}
     >
       {renderStepContent()}
 
-      <p className="mt-4 text-sm text-iron-muted">
-        <span className="text-iron-accent font-semibold">ⓘ </span>
-        {t(stepTipKey)}
-      </p>
-      <p className="mt-2 text-sm text-iron-danger/90">{t(stepWarnKey)}</p>
+      {!isLimitationsStep && (
+        <>
+          <p className="mt-4 text-sm text-iron-muted">
+            <span className="text-iron-accent font-semibold">ⓘ </span>
+            {t(stepTipKey)}
+          </p>
+          <p className="mt-2 text-sm text-iron-danger/90">{t(stepWarnKey)}</p>
+        </>
+      )}
 
       <IronButton
         className="mt-6"

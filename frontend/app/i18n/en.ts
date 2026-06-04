@@ -438,15 +438,37 @@ const en = {
       placeholder: "Seconds",
     },
     limitations: {
-      title: "Any limitations?",
-      explain: "We adjust volume and exercise choice — not your discipline.",
+      title: "Any injuries or issues?",
+      subtitle: "Select everything we should account for in your training.",
+      explain: "Select everything we should account for in your training.",
       tip: "You can retest later; honesty beats a high score.",
-      warn: "Limits do not remove cardio — they steer safer options.",
-      knees: "Knees",
-      back: "Back",
-      shoulders: "Shoulders",
-      overweight: "Extra weight",
-      none: "No limitations",
+      warn: "",
+      disclaimer:
+        "This is not a diagnosis. We only use this to make training safer.",
+      knees: {
+        title: "Knees",
+        description:
+          "Pain or discomfort when running, squatting, or jumping.",
+      },
+      back: {
+        title: "Back",
+        description:
+          "Lower or mid-back pain, or trouble with bending patterns.",
+      },
+      shoulders: {
+        title: "Shoulders",
+        description:
+          "Pain, instability, or discomfort when pressing or pulling.",
+      },
+      overweight: {
+        title: "Extra weight",
+        description:
+          "Weight makes running, jumping, or intense moves harder.",
+      },
+      none: {
+        title: "No issues",
+        description: "Nothing from the list above.",
+      },
     },
     level: {
       absolute_beginner: "Start",
@@ -671,8 +693,22 @@ const en = {
       exercises: "{{count}} exercises",
       minutes: "About {{minutes}} min",
     },
+    flow: {
+      stageWarmup: "Warm-up",
+      stageWorkout: "Workout",
+      progress: "Completed {{done}} of {{total}}",
+      remaining: "{{count}} exercises left",
+      goToWorkout: "Go to workout",
+      warmupCompleteHint:
+        "Warm-up complete. Move on to the main workout.",
+      workoutCompleteHint:
+        "Workout complete. Log your session to update progress.",
+      finishAnyway: "Finish anyway",
+    },
+    coachingExpand: "Training notes",
     timer: {
       title: "Workout timer",
+      workoutTime: "Workout time",
       start: "Start",
       pause: "Pause",
       resume: "Resume",
@@ -682,6 +718,7 @@ const en = {
     },
     restTimer: {
       button: "Rest timer",
+      open: "Open rest timer",
       title: "Rest",
       start: "Start",
       pause: "Pause",
@@ -693,6 +730,8 @@ const en = {
     },
     exercise: {
       rest: "Rest: {{seconds}} sec",
+      restInline: "Rest: {{seconds}} sec",
+      done: "Done",
     },
     accessory: "Accessory",
     conditioning: "Conditioning",

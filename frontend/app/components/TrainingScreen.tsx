@@ -19,9 +19,15 @@ import {
   type TrainingCalendarState,
 } from "../utils/trainingCalendar";
 import {
-  countSessionExercises,
-  getWorkoutMainItems,
-} from "../utils/trainingWorkoutView";
+  clearActiveTrainingSession,
+  exerciseItemKey,
+  loadActiveTrainingSession,
+  saveActiveTrainingSession,
+  type ActiveTrainingSession,
+  type SessionScope,
+  type TrainingStage,
+} from "../utils/activeTrainingSession";
+import { getWorkoutMainItems } from "../utils/trainingWorkoutView";
 import { safeGet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 import { getExerciseInfo } from "../data/exerciseLibrary";
@@ -33,7 +39,7 @@ import { getPathModeFromProfile } from "../data/pathMode";
 import ExerciseDetailModal from "./ExerciseDetailModal";
 import TrainingTimer from "./TrainingTimer";
 import TrainingExerciseCard from "./TrainingExerciseCard";
-import RestTimerModal from "./RestTimerModal";
+import RestTimerPanel from "./RestTimerPanel";
 
 type Props = {
   onCompleteWorkout: () => void;
@@ -66,89 +72,61 @@ function pickLang(locale: string): Lang {
   return locale === "ru" ? "ru" : "en";
 }
 
-function TrainingSection({
+function countCompleted(items: GeneratedExercise[], completedIds: string[]): number {
+  return items.filter((item) => completedIds.includes(exerciseItemKey(item))).length;
+}
+
+function TrainingStageBlock({
+  stage,
   title,
   description,
   items,
+  completedIds,
   lang,
+  onToggleComplete,
   onOpenExercise,
-  onRestTimer,
+  onOpenRest,
+  t,
 }: {
+  stage: TrainingStage;
   title: string;
   description: string;
   items: GeneratedExercise[];
+  completedIds: string[];
   lang: Lang;
-  onOpenExercise: (exerciseId: string) => void;
-  onRestTimer: (exerciseId: string, restSeconds: number) => void;
+  onToggleComplete: (key: string) => void;
+  onOpenExercise: (id: string) => void;
+  onOpenRest: (key: string, seconds: number, name: string) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }) {
-  if (items.length === 0) return null;
+  const done = countCompleted(items, completedIds);
+  const total = items.length;
 
   return (
-    <section className="border border-iron-border rounded-sm p-4 iron-card-panel space-y-4">
+    <div className="space-y-3">
       <div>
-        <h3 className="iron-heading text-lg">{title}</h3>
+        <h3 className="iron-heading text-xl">{title}</h3>
         <p className="text-sm text-iron-muted mt-1 leading-relaxed">{description}</p>
+        {total > 0 && (
+          <p className="text-xs font-semibold text-iron-accent mt-2">
+            {t("training.flow.progress", { done, total })}
+          </p>
+        )}
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {items.map((item) => (
           <TrainingExerciseCard
-            key={`${item.exerciseId}-${item.prescription.en}`}
+            key={exerciseItemKey(item)}
             item={item}
             lang={lang}
+            variant={stage === "warmup" ? "warmup" : "workout"}
+            completed={completedIds.includes(exerciseItemKey(item))}
+            onToggleComplete={onToggleComplete}
             onDetails={onOpenExercise}
-            onRestTimer={onRestTimer}
+            onOpenRest={onOpenRest}
           />
         ))}
       </div>
-    </section>
-  );
-}
-
-function AfterWorkoutNote({ t }: { t: (key: string) => string }) {
-  return (
-    <div className="border border-iron-border/80 rounded-sm p-4 bg-iron-panel/80">
-      <p className="text-sm font-semibold text-iron-text">{t("training.afterWorkout.title")}</p>
-      <p className="text-sm text-iron-muted mt-2 leading-relaxed">
-        {t("training.afterWorkout.body")}
-      </p>
-    </div>
-  );
-}
-
-function TodayWorkoutView({
-  workout,
-  lang,
-  t,
-  onOpenExercise,
-  onRestTimer,
-}: {
-  workout: GeneratedWorkout;
-  lang: Lang;
-  t: (key: string, params?: Record<string, string | number>) => string;
-  onOpenExercise: (exerciseId: string) => void;
-  onRestTimer: (exerciseId: string, restSeconds: number) => void;
-}) {
-  const mainItems = getWorkoutMainItems(workout);
-
-  return (
-    <div className="space-y-4">
-      <TrainingSection
-        title={t("training.block.warmupTitle")}
-        description={t("training.block.warmupDescription")}
-        items={workout.blocks.warmup.items}
-        lang={lang}
-        onOpenExercise={onOpenExercise}
-        onRestTimer={onRestTimer}
-      />
-      <TrainingSection
-        title={t("training.block.workoutTitle")}
-        description={t("training.block.workoutDescription")}
-        items={mainItems}
-        lang={lang}
-        onOpenExercise={onOpenExercise}
-        onRestTimer={onRestTimer}
-      />
-      <AfterWorkoutNote t={t} />
     </div>
   );
 }
@@ -212,23 +190,19 @@ export default function TrainingScreen({
   const { t, locale } = useTranslation();
   const lang = pickLang(locale);
   const seasonWeek = program.week;
+  const todayDate = new Date().toDateString();
 
   const [detailExerciseId, setDetailExerciseId] = useState<string | null>(null);
   const detailExercise = detailExerciseId
     ? getExerciseInfo(detailExerciseId) ?? null
     : null;
 
-  const [restTimer, setRestTimer] = useState<{
-    exerciseId: string;
-    seconds: number;
-    name: string;
-  } | null>(null);
-
   const [profile, setProfile] = useState<Profile | null>(null);
   const [calendarState, setCalendarState] = useState<TrainingCalendarState>(() =>
     loadTrainingCalendarState(seasonWeek)
   );
   const [workoutLoggedToday, setWorkoutLoggedToday] = useState(false);
+  const [session, setSession] = useState<ActiveTrainingSession | null>(null);
 
   useEffect(() => {
     setProfile(migrateProfile());
@@ -260,40 +234,108 @@ export default function TrainingScreen({
     [profile, weekPlan, calendarState.activeDayIndex]
   );
 
-  const pathMode = getPathModeFromProfile(profile);
+  const sessionScope = useMemo<SessionScope>(
+    () => ({
+      date: todayDate,
+      week: seasonWeek,
+      dayIndex: calendarState.activeDayIndex,
+      workoutId: todayWorkout.id,
+    }),
+    [todayDate, seasonWeek, calendarState.activeDayIndex, todayWorkout.id]
+  );
 
+  useEffect(() => {
+    setSession(loadActiveTrainingSession(sessionScope));
+  }, [sessionScope]);
+
+  const patchSession = useCallback(
+    (patch: Partial<ActiveTrainingSession>) => {
+      setSession((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, ...patch };
+        saveActiveTrainingSession(next);
+        return next;
+      });
+    },
+    []
+  );
+
+  const warmupItems = todayWorkout.blocks.warmup.items;
+  const workoutItems = useMemo(
+    () => getWorkoutMainItems(todayWorkout),
+    [todayWorkout]
+  );
+
+  const pathMode = getPathModeFromProfile(profile);
   const todayDayType = weekPlan.days[calendarState.activeDayIndex]?.dayType;
   const todayTitle = todayDayType
     ? translateDayType(todayDayType, t)
     : todayWorkout.title[lang];
 
-  const exerciseCount = useMemo(
-    () => countSessionExercises(todayWorkout),
-    [todayWorkout]
+  const activeStage = session?.activeStage ?? "warmup";
+  const completedWarmup = session?.completedWarmupExerciseIds ?? [];
+  const completedWorkout = session?.completedWorkoutExerciseIds ?? [];
+
+  const warmupDoneCount = countCompleted(warmupItems, completedWarmup);
+  const workoutDoneCount = countCompleted(workoutItems, completedWorkout);
+  const allWarmupDone =
+    warmupItems.length === 0 || warmupDoneCount >= warmupItems.length;
+  const allWorkoutDone =
+    workoutItems.length === 0 || workoutDoneCount >= workoutItems.length;
+  const workoutRemaining = workoutItems.length - workoutDoneCount;
+
+  const toggleWarmup = useCallback(
+    (key: string) => {
+      if (!session) return;
+      const set = new Set(session.completedWarmupExerciseIds);
+      if (set.has(key)) set.delete(key);
+      else set.add(key);
+      patchSession({ completedWarmupExerciseIds: [...set] });
+    },
+    [session, patchSession]
   );
 
-  const handleOpenRestTimer = useCallback(
-    (exerciseId: string, restSeconds: number) => {
-      const item =
-        todayWorkout.blocks.warmup.items.find((i) => i.exerciseId === exerciseId) ??
-        getWorkoutMainItems(todayWorkout).find((i) => i.exerciseId === exerciseId);
-      setRestTimer({
-        exerciseId,
-        seconds: restSeconds,
-        name: item?.name[lang] ?? exerciseId,
+  const toggleWorkout = useCallback(
+    (key: string) => {
+      if (!session) return;
+      const set = new Set(session.completedWorkoutExerciseIds);
+      if (set.has(key)) set.delete(key);
+      else set.add(key);
+      patchSession({ completedWorkoutExerciseIds: [...set] });
+    },
+    [session, patchSession]
+  );
+
+  const handleGoToWorkout = () => {
+    patchSession({ activeStage: "workout" });
+  };
+
+  const handleOpenRest = useCallback(
+    (key: string, seconds: number, name: string) => {
+      patchSession({
+        restTimerState: {
+          exerciseKey: key,
+          exerciseName: name,
+          durationSeconds: seconds,
+          elapsedSeconds: 0,
+          startedAt: null,
+          isRunning: false,
+          isFinished: false,
+        },
       });
     },
-    [todayWorkout, lang]
+    [patchSession]
   );
 
   const handleLogWorkout = useCallback(() => {
     if (workoutLoggedToday) return;
-
     onCompleteWorkout();
     const next = advanceAfterWorkoutLogged(calendarState);
     saveTrainingCalendarState(next);
     setCalendarState(next);
     setWorkoutLoggedToday(true);
+    clearActiveTrainingSession();
+    setSession(null);
   }, [workoutLoggedToday, onCompleteWorkout, calendarState]);
 
   const handleCompleteWeek = useCallback(() => {
@@ -320,38 +362,166 @@ export default function TrainingScreen({
     );
   }
 
+  if (!session) {
+    return (
+      <div className="mt-8 sm:mt-10 iron-shell-card p-6 mb-24 text-center text-iron-muted text-sm">
+        {t("training.screenTitle")}
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24 space-y-5">
+    <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-28 space-y-4">
       <div className="text-center">
         <p className="iron-label text-iron-accent">{t("training.screenTitle")}</p>
         <h2 className="iron-heading text-2xl sm:text-3xl mt-1">{todayTitle}</h2>
         <p className="mt-2 text-sm text-iron-muted">
           {t("training.planSlot", { current: activeSlot, total: 7 })}
-        </p>
-        <p className="mt-1 text-xs text-iron-muted">
-          {t("training.phaseContext", {
-            phase: translatePhase(program.phase, t),
-            week: seasonWeek,
-          })}
+          {" · "}
+          {activeStage === "warmup"
+            ? t("training.flow.stageWarmup")
+            : t("training.flow.stageWorkout")}
         </p>
       </div>
 
-      <TrainingTimer />
+      <TrainingTimer session={session} onSessionChange={patchSession} />
+
+      <section className="border border-iron-accent-dim/40 bg-iron-panel p-4 rounded-sm space-y-4 min-h-[200px]">
+        {activeStage === "warmup" && (
+          <>
+            <TrainingStageBlock
+              stage="warmup"
+              title={t("training.block.warmupTitle")}
+              description={t("training.block.warmupDescription")}
+              items={warmupItems}
+              completedIds={completedWarmup}
+              lang={lang}
+              onToggleComplete={toggleWarmup}
+              onOpenExercise={setDetailExerciseId}
+              onOpenRest={handleOpenRest}
+              t={t}
+            />
+            {allWarmupDone ? (
+              <div className="space-y-3 pt-2 border-t border-iron-border">
+                <p className="text-sm text-iron-muted leading-relaxed">
+                  {t("training.flow.warmupCompleteHint")}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleGoToWorkout}
+                  className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[52px] rounded-sm"
+                >
+                  {t("training.flow.goToWorkout")}
+                </button>
+              </div>
+            ) : (
+              warmupItems.length > 0 && (
+                <p className="text-xs text-iron-muted">
+                  {t("training.flow.remaining", {
+                    count: warmupItems.length - warmupDoneCount,
+                  })}
+                </p>
+              )
+            )}
+          </>
+        )}
+
+        {activeStage === "workout" && (
+          <>
+            <TrainingStageBlock
+              stage="workout"
+              title={t("training.block.workoutTitle")}
+              description={t("training.block.workoutDescription")}
+              items={workoutItems}
+              completedIds={completedWorkout}
+              lang={lang}
+              onToggleComplete={toggleWorkout}
+              onOpenExercise={setDetailExerciseId}
+              onOpenRest={handleOpenRest}
+              t={t}
+            />
+
+            <div className="border border-iron-border/80 rounded-sm p-3 bg-iron-panel/80">
+              <p className="text-sm font-semibold text-iron-text">
+                {t("training.afterWorkout.title")}
+              </p>
+              <p className="text-xs text-iron-muted mt-1 leading-relaxed">
+                {t("training.afterWorkout.body")}
+              </p>
+            </div>
+
+            {!workoutLoggedToday && (
+              <div className="space-y-3 pt-2 border-t border-iron-border">
+                {allWorkoutDone ? (
+                  <p className="text-sm text-iron-muted leading-relaxed">
+                    {t("training.flow.workoutCompleteHint")}
+                  </p>
+                ) : (
+                  <p className="text-sm text-iron-muted">
+                    {t("training.flow.remaining", { count: workoutRemaining })}
+                  </p>
+                )}
+
+                {allWorkoutDone && (
+                  <button
+                    type="button"
+                    onClick={handleLogWorkout}
+                    className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[52px] rounded-sm"
+                  >
+                    {t("training.logWorkout")}
+                  </button>
+                )}
+
+                {!allWorkoutDone && (
+                  <button
+                    type="button"
+                    onClick={handleLogWorkout}
+                    className="iron-interactive w-full py-3 text-sm font-semibold border border-iron-border rounded-sm text-iron-muted"
+                  >
+                    {t("training.flow.finishAnyway")}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {workoutLoggedToday && (
+              <p className="text-center text-sm font-semibold text-iron-accent py-3 border border-iron-border rounded-sm bg-iron-raised">
+                {t("training.logWorkoutDone")}
+              </p>
+            )}
+          </>
+        )}
+      </section>
+
+      <ExerciseDetailModal
+        exercise={detailExercise}
+        isOpen={detailExercise !== null}
+        onClose={() => setDetailExerciseId(null)}
+      />
+
+      <RestTimerPanel
+        state={session.restTimerState}
+        onStateChange={(restTimerState) => patchSession({ restTimerState })}
+      />
 
       {assessmentInput && assessmentResult && (
-        <TrainingReasoningBlock
-          input={assessmentInput}
-          result={assessmentResult}
-          dayType={todayDayType}
-        />
-      )}
-
-      {assessmentInput && (
-        <NextMilestoneBlock
-          input={assessmentInput}
-          pathMode={pathMode}
-          emphasis={pathMode === "sport" ? "physical" : "balanced"}
-        />
+        <details className="border border-iron-border rounded-sm p-3 text-sm">
+          <summary className="cursor-pointer text-iron-muted font-medium">
+            {t("training.coachingExpand")}
+          </summary>
+          <div className="mt-3 space-y-3">
+            <TrainingReasoningBlock
+              input={assessmentInput}
+              result={assessmentResult}
+              dayType={todayDayType}
+            />
+            <NextMilestoneBlock
+              input={assessmentInput}
+              pathMode={pathMode}
+              emphasis={pathMode === "sport" ? "physical" : "balanced"}
+            />
+          </div>
+        </details>
       )}
 
       {showReassessmentPrompt && onRetakeAssessment && onDismissReassessment && (
@@ -360,57 +530,6 @@ export default function TrainingScreen({
           onDismiss={onDismissReassessment}
         />
       )}
-
-      <section className="border border-iron-accent-dim/50 bg-iron-panel p-4 rounded-sm space-y-4">
-        <TodayWorkoutView
-          workout={todayWorkout}
-          lang={lang}
-          t={t}
-          onOpenExercise={setDetailExerciseId}
-          onRestTimer={handleOpenRestTimer}
-        />
-
-        <ExerciseDetailModal
-          exercise={detailExercise}
-          isOpen={detailExercise !== null}
-          onClose={() => setDetailExerciseId(null)}
-        />
-
-        <RestTimerModal
-          isOpen={restTimer !== null}
-          durationSeconds={restTimer?.seconds ?? 60}
-          exerciseName={restTimer?.name ?? ""}
-          onClose={() => setRestTimer(null)}
-        />
-
-        {workoutLoggedToday ? (
-          <p className="text-center text-sm font-semibold text-iron-accent py-3 border border-iron-border rounded-sm bg-iron-raised">
-            {t("training.logWorkoutDone")}
-          </p>
-        ) : (
-          <>
-            <div className="border border-iron-border rounded-sm p-4 bg-iron-raised/40 text-sm text-iron-muted space-y-1">
-              <p className="font-semibold text-iron-text">{t("training.summary.title")}</p>
-              <p>{t("training.summary.exercises", { count: exerciseCount })}</p>
-              <p>
-                {t("training.summary.minutes", {
-                  minutes: todayWorkout.estimatedMinutes,
-                })}
-              </p>
-            </div>
-            <p className="text-sm text-iron-muted text-center leading-relaxed">
-              {t("training.logWorkoutExplain")}
-            </p>
-            <button
-              type="button"
-              onClick={handleLogWorkout}
-              className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[56px] rounded-sm"
-            >
-              {t("training.logWorkout")}
-            </button>
-          </>
-        )}
-      </section>
 
       <section className="border border-iron-border p-4 iron-card-raised rounded-sm">
         <h3 className="iron-heading text-lg mb-1">{t("training.planProgressTitle")}</h3>

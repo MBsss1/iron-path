@@ -231,6 +231,81 @@ const en = {
       },
     },
   },
+  coaching: {
+    debrief: {
+      eyebrow: "Your program",
+      title: "Your starting breakdown",
+      intro: "Based on your assessment, here is how we built your first weeks.",
+      reassessmentTitle: "Assessment updated",
+      reassessmentIntro:
+        "Your numbers changed — your training plan will adapt to match.",
+      resultsTitle: "Your results",
+      metricPullups: "Pull-ups",
+      metricPushups: "Push-ups",
+      metricSquats: "Squats (2 min)",
+      metricPlank: "Plank",
+      levelLine: "Current level: {{level}}.",
+      focusTitle: "The first weeks focus on",
+      focusShouldersBack: "Strengthening shoulders and back",
+      focusBaseStrength: "Building basic strength",
+      focusEndurance: "Improving endurance safely",
+      focusJoints: "Preparing joints and connective tissue",
+      focusConsistency: "Building consistency and technique",
+      foundation:
+        "The main goal now is to build a solid foundation — not to rush intensity.",
+      continue: "Go to training",
+      continueReassessment: "Continue",
+    },
+    reason: {
+      title: "Why this workout?",
+      pullLow:
+        "The plan emphasizes pulling muscles and preparation for full pull-ups.",
+      pushLow:
+        "Easier push-up variations build strength without overload.",
+      overweight:
+        "Volume is reduced to limit stress on your joints.",
+      knees: "Leg work avoids jumps and deep knee stress.",
+      back: "Back-friendly choices limit heavy flexion and loaded rows.",
+      beginner:
+        "Regularity and technique matter more than intensity right now.",
+      noBar: "Rows and floor pulls replace bar work until a bar is available.",
+      cardioLimited: "Cardio uses walking and low-impact work where needed.",
+      mobilityDay: "This day restores mobility and recovery.",
+      cardioDay: "Light cardio supports endurance without heavy lifting.",
+      balanced: "The session balances push, pull, and legs for your level.",
+    },
+    nextGoal: {
+      title: "Next goal",
+      line: "{{metric}}: {{value}} {{unit}}",
+      progress: "{{percent}}% toward this goal",
+      maxed: "You hit the top step on this track — we will set a new target after reassessment.",
+      habitsNote: "Daily tasks and habits stay in focus alongside training.",
+      balanceNote: "Training and daily habits progress together.",
+    },
+    milestone: {
+      pullups: "Pull-ups",
+      pushups: "Push-ups",
+      plank: "Plank",
+      squats: "Squats (2 min)",
+      unitReps: "reps",
+      unitSeconds: "sec",
+    },
+    milestones: {
+      subtitle: "Real strength markers — not game XP.",
+      needAssessment: "Complete the fitness assessment to see physical milestones.",
+      nextTarget: "Next: {{value}} {{unit}}",
+      percentToGoal: "{{percent}}% to next step",
+      stageComplete: "Top step reached on this track",
+    },
+    reassessment: {
+      title: "Time to reassess",
+      body:
+        "It has been about four weeks (or you finished a training block). Update your pull-ups, push-ups, squats, and plank — your program will rebuild from the new numbers.",
+      hint: "You will keep all progress, level, and history.",
+      cta: "Retake assessment",
+      later: "Later",
+    },
+  },
   classSelect: {
     eyebrow: "Path",
     title: "Choose Your Class",
@@ -778,6 +853,7 @@ const en = {
     tabWeight: "Weight",
     tabAchievements: "Achievements",
     tabHistory: "History",
+    tabPhysical: "Physical",
     summaryWorkouts: "Workouts",
     summaryStreak: "Streak",
     historyEmpty:

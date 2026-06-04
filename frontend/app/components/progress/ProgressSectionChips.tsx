@@ -4,6 +4,7 @@ import { useTranslation } from "../../i18n/useTranslation";
 
 export type ProgressSectionId =
   | "overview"
+  | "physical"
   | "strength"
   | "weight"
   | "achievements"
@@ -16,6 +17,7 @@ type Props = {
 
 const SECTIONS: ProgressSectionId[] = [
   "overview",
+  "physical",
   "strength",
   "weight",
   "achievements",
@@ -29,6 +31,8 @@ export default function ProgressSectionChips({ active, onChange }: Props) {
     switch (id) {
       case "overview":
         return t("progressScreen.tabOverview");
+      case "physical":
+        return t("progressScreen.tabPhysical");
       case "strength":
         return t("progressScreen.tabStrength");
       case "weight":

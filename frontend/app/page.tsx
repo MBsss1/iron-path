@@ -66,7 +66,10 @@ import { translateRank } from "./i18n/labels";
 import { useTranslation } from "./i18n/useTranslation";
 import LanguageSelectionScreen from "./components/LanguageSelectionScreen";
 import FitnessAssessmentScreen from "./components/FitnessAssessmentScreen";
+import TrainingStartDebriefScreen from "./components/coaching/TrainingStartDebriefScreen";
 import { useFitnessAssessment } from "./hooks/useFitnessAssessment";
+import { useCoachingState } from "./hooks/useCoachingState";
+import { shouldSuggestReassessment } from "./data/trainingCoaching";
 import type { AssessmentInput } from "./data/fitnessAssessment";
 import { STORAGE_KEYS } from "./utils/storageKeys";
 
@@ -91,9 +94,22 @@ function HomeContent() {
     loaded: assessmentLoaded,
     isComplete: assessmentComplete,
     complete: completeAssessment,
+    input: assessmentInput,
+    result: assessmentResult,
+    record: assessmentRecord,
   } = useFitnessAssessment();
+  const {
+    loaded: coachingLoaded,
+    state: coachingState,
+    markDebriefSeen,
+    onAssessmentCompleted,
+    dismissReassessment,
+  } = useCoachingState();
   const classId = profile?.classId;
   const [screen, setScreen] = useState("hero");
+  const [debriefVariant, setDebriefVariant] = useState<"initial" | "reassessment">(
+    "initial"
+  );
   const [showPopup, setShowPopup] = useState(false);
   const [lastXpReward, setLastXpReward] = useState(0);
   const [showWeekPopup, setShowWeekPopup] = useState(false);
@@ -235,16 +251,26 @@ function HomeContent() {
 
   const handleAssessmentComplete = useCallback(
     (input: AssessmentInput) => {
+      const prevCount = coachingState?.assessmentCompletionCount ?? 0;
       completeAssessment(input);
+      onAssessmentCompleted();
+      setDebriefVariant(prevCount >= 1 ? "reassessment" : "initial");
       try {
         localStorage.removeItem(STORAGE_KEYS.trainingCalendar);
       } catch {
         // ignore
       }
-      setScreen("hero");
+      setScreen("training-debrief");
     },
-    [completeAssessment]
+    [completeAssessment, onAssessmentCompleted, coachingState?.assessmentCompletionCount]
   );
+
+  const handleDebriefContinue = useCallback(() => {
+    if (debriefVariant === "initial") {
+      markDebriefSeen();
+    }
+    setScreen("hero");
+  }, [debriefVariant, markDebriefSeen]);
 
   const handleAssessmentCancel = useCallback(() => {
     setScreen("hero");
@@ -471,6 +497,31 @@ function HomeContent() {
   }, [resetPlayer, clearProfile]);
 
   const weekNumber = Number(week);
+
+  const showReassessmentPrompt = useMemo(() => {
+    if (!assessmentComplete || !assessmentRecord?.completedAt || !coachingLoaded) {
+      return false;
+    }
+    if (weekNumber === (coachingState?.lastReassessmentPromptDismissWeek ?? 0)) {
+      return false;
+    }
+    return shouldSuggestReassessment(
+      assessmentRecord.completedAt,
+      weekNumber,
+      coachingState?.lastReassessmentPromptDismissWeek ?? 0
+    );
+  }, [
+    assessmentComplete,
+    assessmentRecord?.completedAt,
+    coachingLoaded,
+    coachingState?.lastReassessmentPromptDismissWeek,
+    weekNumber,
+  ]);
+
+  const handleDismissReassessment = useCallback(() => {
+    dismissReassessment(weekNumber);
+  }, [dismissReassessment, weekNumber]);
+
   const navScreen = getNavActiveScreen(screen);
   const rank = useMemo(() => translateRank(getRank(level), t), [level, t]);
   const loginStreak = stats.currentLoginStreak;
@@ -642,6 +693,20 @@ function HomeContent() {
               />
             )}
 
+          {storageReady &&
+            profile &&
+            hasPathModeSelected(profile) &&
+            screen === "training-debrief" &&
+            assessmentInput &&
+            assessmentResult && (
+            <TrainingStartDebriefScreen
+              input={assessmentInput}
+              result={assessmentResult}
+              variant={debriefVariant}
+              onContinue={handleDebriefContinue}
+            />
+          )}
+
           <ScreenTransition screen={screen}>
             {storageReady &&
               assessmentLoaded &&
@@ -675,6 +740,10 @@ function HomeContent() {
                 onStartTraining={handleStartTraining}
                 onOpenToday={handleOpenToday}
                 onViewBoss={handleViewBoss}
+                assessmentInput={assessmentInput}
+                showReassessmentPrompt={showReassessmentPrompt}
+                onRetakeAssessment={handleStartAssessment}
+                onDismissReassessment={handleDismissReassessment}
               />
             )}
 
@@ -712,6 +781,11 @@ function HomeContent() {
                   nextWeek();
                   setShowWeekPopup(true);
                 }}
+                assessmentInput={assessmentInput}
+                assessmentResult={assessmentResult}
+                showReassessmentPrompt={showReassessmentPrompt}
+                onRetakeAssessment={handleStartAssessment}
+                onDismissReassessment={handleDismissReassessment}
               />
             )}
 

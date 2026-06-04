@@ -105,6 +105,50 @@ function isShoulderLimited(ctx: GeneratorContext): boolean {
   return hasLimitation(ctx, "shoulders");
 }
 
+function isSoftCardioLevel(level: FitnessLevel): boolean {
+  return LEVEL_RANK[level] <= LEVEL_RANK.novice;
+}
+
+type MainByCategory = {
+  push: GeneratedExercise[];
+  pull: GeneratedExercise[];
+  legs: GeneratedExercise[];
+  other: GeneratedExercise[];
+};
+
+function splitMainByCategory(items: GeneratedExercise[]): MainByCategory {
+  const out: MainByCategory = { push: [], pull: [], legs: [], other: [] };
+  for (const item of items) {
+    const cat = getExercise(item.exerciseId)?.category;
+    if (cat === "push") out.push.push(item);
+    else if (cat === "pull") out.pull.push(item);
+    else if (cat === "legs") out.legs.push(item);
+    else out.other.push(item);
+  }
+  return out;
+}
+
+function pickOnePerPattern(by: MainByCategory): GeneratedExercise[] {
+  const picked: GeneratedExercise[] = [];
+  if (by.push[0]) picked.push(by.push[0]);
+  if (by.pull[0]) picked.push(by.pull[0]);
+  if (by.legs[0]) picked.push(by.legs[0]);
+  if (picked.length === 0 && by.other[0]) picked.push(by.other[0]);
+  return picked;
+}
+
+function maybeAddPullNegativeAccessory(
+  ctx: GeneratorContext,
+  items: GeneratedExercise[]
+): GeneratedExercise[] {
+  if (ctx.input.maxPullUps > 2) return items;
+  if (!hasEquipment(ctx, "pull_up_bar") || isShoulderLimited(ctx)) return items;
+  if (ctx.dayType !== "pull" && ctx.dayType !== "full_body") return items;
+  const ex = getExercise("negative_pullups");
+  if (!ex || !canUseExercise(ctx, ex)) return items;
+  return [...items, gen("negative_pullups", "2 × 2–3", "2 × 2–3", 90)];
+}
+
 function isRunningDayType(dayType: DayType): boolean {
   return dayType === "easy_run" || dayType === "intervals";
 }
@@ -314,10 +358,10 @@ export function selectCooldownExercises(ctx: GeneratorContext): GeneratedExercis
 }
 
 function pickPullMain(ctx: GeneratorContext): GeneratedExercise[] {
-  const level = ctx.result.upperPullLevel;
+  const reps = ctx.input.maxPullUps;
   const items: GeneratedExercise[] = [];
 
-  if (level === "absolute_beginner") {
+  if (reps <= 2) {
     if (hasEquipment(ctx, "pull_up_bar")) {
       items.push(gen("dead_hang", "3 × 20–30 sec", "3 × 20–30 сек", 60));
       items.push(gen("scapular_pullups", "3 × 8", "3 × 8", 60));
@@ -329,7 +373,7 @@ function pickPullMain(ctx: GeneratorContext): GeneratedExercise[] {
     return items;
   }
 
-  if (level === "beginner") {
+  if (reps <= 5) {
     if (hasEquipment(ctx, "pull_up_bar")) {
       items.push(gen("negative_pullups", "3 × 4", "3 × 4", 90));
     }
@@ -338,7 +382,7 @@ function pickPullMain(ctx: GeneratorContext): GeneratedExercise[] {
   }
 
   if (hasEquipment(ctx, "pull_up_bar")) {
-    if (LEVEL_RANK[level] >= LEVEL_RANK.intermediate) {
+    if (LEVEL_RANK[ctx.result.upperPullLevel] >= LEVEL_RANK.intermediate) {
       items.push(gen("pullups", "4 × 6–8", "4 × 6–8", 90));
     } else {
       items.push(gen("pullups", "3 × 5–8", "3 × 5–8", 90));
@@ -461,7 +505,7 @@ export function selectAccessoryExercises(ctx: GeneratorContext): GeneratedExerci
     items.push(gen("side_plank", "2 × 25 sec/side", "2 × 25 сек/сторона", 30));
   }
 
-  return items.slice(0, 3);
+  return maybeAddPullNegativeAccessory(ctx, items.slice(0, 3));
 }
 
 export function selectConditioningExercises(
@@ -481,12 +525,32 @@ export function selectConditioningExercises(
         gen("walk", "8 min", "8 мин", 0),
       ];
     }
+    if (cardioAccess === "limited") {
+      return [
+        gen("brisk_walk", "3 min", "3 мин", 0),
+        gen(
+          "easy_run",
+          "10–12 min walk-run (easy)",
+          "10–12 мин шаг-бег (легко)",
+          0
+        ),
+      ];
+    }
     if (cardioAccess === "treadmill") {
+      const duration = isSoftCardioLevel(ctx.result.cardioLevel)
+        ? "12–15 min treadmill, flat"
+        : "15–20 min treadmill, flat";
+      const durationRu = isSoftCardioLevel(ctx.result.cardioLevel)
+        ? "12–15 мин дорожка, ровно"
+        : "15–20 мин дорожка, ровно";
+      return [gen("easy_run", duration, durationRu, 0)];
+    }
+    if (isSoftCardioLevel(ctx.result.cardioLevel)) {
       return [
         gen(
           "easy_run",
-          "15–20 min treadmill, flat",
-          "15–20 мин дорожка, ровно",
+          "12–15 min walk-run (easy)",
+          "12–15 мин шаг-бег (легко)",
           0
         ),
       ];
@@ -500,16 +564,17 @@ export function selectConditioningExercises(
     }
     if (cardioPreference === "dislike") {
       return [
-        gen("low_impact_conditioning", "4 rounds", "4 круга", 0),
-        gen("brisk_walk", "6 min", "6 мин", 0),
+        gen("low_impact_conditioning", "3 rounds", "3 круга", 0),
+        gen("brisk_walk", "10 min", "10 мин", 0),
       ];
     }
-    if (isHighImpactBlocked(ctx)) {
+    const softIntervals = isSoftCardioLevel(ctx.result.cardioLevel);
+    if (isHighImpactBlocked(ctx) || softIntervals) {
       return [
         gen(
           "intervals",
-          "6 × (1 min brisk / 2 min walk)",
-          "6 × (1 мин быстрее / 2 мин ходьба)",
+          "6 × (30 sec brisk / 90 sec walk)",
+          "6 × (30 сек быстрее / 90 сек ходьба)",
           0
         ),
       ];
@@ -518,8 +583,8 @@ export function selectConditioningExercises(
       return [
         gen(
           "intervals",
-          "8 × (1 min brisk / 90 sec easy), flat treadmill",
-          "8 × (1 мин быстрее / 90 сек легко), ровная дорожка",
+          "6 × (30 sec brisk / 90 sec easy), flat treadmill",
+          "6 × (30 сек быстрее / 90 сек легко), ровная дорожка",
           0
         ),
       ];
@@ -527,8 +592,8 @@ export function selectConditioningExercises(
     return [
       gen(
         "intervals",
-        "8 × (1 min hard / 90 sec easy)",
-        "8 × (1 мин быстрее / 90 сек легко)",
+        "6 × (1 min brisk / 90 sec easy)",
+        "6 × (1 мин быстрее / 90 сек легко)",
         0
       ),
     ];
@@ -674,7 +739,10 @@ export function applyPathModeWeekTemplate(
   let days = [...template];
 
   if (pathMode === "sport") {
-    return boostTrainingDays(days, isBeginner ? 4 : 5);
+    if (isBeginner) {
+      return applySportBeginnerWeek(days);
+    }
+    return boostTrainingDays(days, 5);
   }
 
   if (pathMode === "self_development") {
@@ -685,11 +753,68 @@ export function applyPathModeWeekTemplate(
   return boostTrainingDays(days, isBeginner ? 3 : 4);
 }
 
+/** Sport + beginner: max 4 training days; rotate duplicate full_body into push/pull/legs. */
+function applySportBeginnerWeek(days: DayType[]): DayType[] {
+  const rotations: DayType[] = ["push", "pull", "legs"];
+  let rotationIdx = 0;
+  let keptFullBody = false;
+
+  const diversified = days.map((day) => {
+    if (day !== "full_body") return day;
+    if (!keptFullBody) {
+      keptFullBody = true;
+      return "full_body";
+    }
+    const next = rotations[rotationIdx % rotations.length];
+    rotationIdx += 1;
+    return next;
+  });
+
+  return capTrainingDays(diversified, 4);
+}
+
+function trimAccessoryForSelfDev(items: GeneratedExercise[]): GeneratedExercise[] {
+  const core = items.filter(
+    (item) => getExercise(item.exerciseId)?.category === "core"
+  );
+  const pool = core.length > 0 ? core : items;
+  return pool.slice(0, 1);
+}
+
 function trimWorkoutForPathMode(
   workout: Omit<GeneratedWorkout, "estimatedMinutes">,
   pathMode: PathMode
 ): Omit<GeneratedWorkout, "estimatedMinutes"> {
   if (pathMode !== "self_development") return workout;
+
+  const trimConditioning =
+    workout.blocks.conditioning &&
+    workout.dayType !== "mobility" &&
+    workout.dayType !== "easy_run"
+      ? {
+          ...workout.blocks.conditioning,
+          items: workout.blocks.conditioning.items.slice(0, 1),
+        }
+      : workout.blocks.conditioning;
+
+  if (workout.dayType === "full_body") {
+    const byCat = splitMainByCategory(workout.blocks.mainWork.items);
+    return {
+      ...workout,
+      blocks: {
+        ...workout.blocks,
+        mainWork: {
+          ...workout.blocks.mainWork,
+          items: pickOnePerPattern(byCat),
+        },
+        accessoryWork: {
+          ...workout.blocks.accessoryWork,
+          items: trimAccessoryForSelfDev(workout.blocks.accessoryWork.items),
+        },
+        conditioning: trimConditioning,
+      },
+    };
+  }
 
   return {
     ...workout,
@@ -701,17 +826,9 @@ function trimWorkoutForPathMode(
       },
       accessoryWork: {
         ...workout.blocks.accessoryWork,
-        items: workout.blocks.accessoryWork.items.slice(0, 1),
+        items: trimAccessoryForSelfDev(workout.blocks.accessoryWork.items),
       },
-      conditioning:
-        workout.blocks.conditioning &&
-        workout.dayType !== "mobility" &&
-        workout.dayType !== "easy_run"
-          ? {
-              ...workout.blocks.conditioning,
-              items: workout.blocks.conditioning.items.slice(0, 1),
-            }
-          : workout.blocks.conditioning,
+      conditioning: trimConditioning,
     },
   };
 }

@@ -3,8 +3,11 @@
 import { getRank, getNextRank } from "../data/ranks";
 import { getAvatar } from "../data/avatar";
 import { getPathModeFromProfile } from "../data/pathMode";
+import type { AssessmentInput } from "../data/fitnessAssessment";
 import type { BossDefinition } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
+import NextMilestoneBlock from "./coaching/NextMilestoneBlock";
+import ReassessmentPromptBlock from "./coaching/ReassessmentPromptBlock";
 import type { DailyMission } from "../hooks/useDailyMissions";
 import type { BossProgressContext } from "../utils/bossProgress";
 import {
@@ -45,6 +48,10 @@ type Props = {
   onStartTraining: () => void;
   onOpenToday: () => void;
   onViewBoss: () => void;
+  assessmentInput?: AssessmentInput | null;
+  showReassessmentPrompt?: boolean;
+  onRetakeAssessment?: () => void;
+  onDismissReassessment?: () => void;
 };
 
 export default function HeroScreen({
@@ -74,6 +81,10 @@ export default function HeroScreen({
   onStartTraining,
   onOpenToday,
   onViewBoss,
+  assessmentInput = null,
+  showReassessmentPrompt = false,
+  onRetakeAssessment,
+  onDismissReassessment,
 }: Props) {
   const { t } = useTranslation();
   const pathMode = getPathModeFromProfile(profile);
@@ -166,6 +177,14 @@ export default function HeroScreen({
         >
           {mainCta.label}
         </button>
+
+        {assessmentInput && (
+          <NextMilestoneBlock
+            input={assessmentInput}
+            pathMode={pathMode}
+            emphasis={pathMode === "sport" ? "physical" : "balanced"}
+          />
+        )}
       </div>
     );
   }
@@ -245,6 +264,27 @@ export default function HeroScreen({
           {mainCta.label}
         </button>
       </section>
+
+      {assessmentInput && (
+        <NextMilestoneBlock
+          input={assessmentInput}
+          pathMode={pathMode}
+          emphasis={
+            pathMode === "sport"
+              ? "physical"
+              : pathMode === "self_development"
+                ? "habits"
+                : "balanced"
+          }
+        />
+      )}
+
+      {showReassessmentPrompt && onRetakeAssessment && onDismissReassessment && (
+        <ReassessmentPromptBlock
+          onRetake={onRetakeAssessment}
+          onDismiss={onDismissReassessment}
+        />
+      )}
 
       {showNextReward && (
         <section className="iron-card-surface p-3">

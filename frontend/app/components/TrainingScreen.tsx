@@ -23,6 +23,11 @@ import {
 import { safeGet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 import { getExerciseInfo } from "../data/exerciseLibrary";
+import type { AssessmentInput, AssessmentResult } from "../data/fitnessAssessment";
+import TrainingReasoningBlock from "./coaching/TrainingReasoningBlock";
+import NextMilestoneBlock from "./coaching/NextMilestoneBlock";
+import ReassessmentPromptBlock from "./coaching/ReassessmentPromptBlock";
+import { getPathModeFromProfile } from "../data/pathMode";
 import ExerciseDetailModal from "./ExerciseDetailModal";
 
 type Props = {
@@ -33,6 +38,11 @@ type Props = {
   level: number;
   assessmentComplete: boolean;
   onStartAssessment: () => void;
+  assessmentInput?: AssessmentInput | null;
+  assessmentResult?: AssessmentResult | null;
+  showReassessmentPrompt?: boolean;
+  onRetakeAssessment?: () => void;
+  onDismissReassessment?: () => void;
 };
 
 function isWorkoutMissionCompletedToday(): boolean {
@@ -211,6 +221,11 @@ export default function TrainingScreen({
   level,
   assessmentComplete,
   onStartAssessment,
+  assessmentInput = null,
+  assessmentResult = null,
+  showReassessmentPrompt = false,
+  onRetakeAssessment,
+  onDismissReassessment,
 }: Props) {
   const { t, locale } = useTranslation();
   const lang = pickLang(locale);
@@ -256,6 +271,8 @@ export default function TrainingScreen({
     () => getTodayWorkout(profile, weekPlan, calendarState.activeDayIndex),
     [profile, weekPlan, calendarState.activeDayIndex]
   );
+
+  const pathMode = getPathModeFromProfile(profile);
 
   const todayDayType = weekPlan.days[calendarState.activeDayIndex]?.dayType;
   const todayTitle = todayDayType
@@ -322,6 +339,29 @@ export default function TrainingScreen({
           })}
         </p>
       </div>
+
+      {assessmentInput && assessmentResult && (
+        <TrainingReasoningBlock
+          input={assessmentInput}
+          result={assessmentResult}
+          dayType={todayDayType}
+        />
+      )}
+
+      {assessmentInput && (
+        <NextMilestoneBlock
+          input={assessmentInput}
+          pathMode={pathMode}
+          emphasis={pathMode === "sport" ? "physical" : "balanced"}
+        />
+      )}
+
+      {showReassessmentPrompt && onRetakeAssessment && onDismissReassessment && (
+        <ReassessmentPromptBlock
+          onRetake={onRetakeAssessment}
+          onDismiss={onDismissReassessment}
+        />
+      )}
 
       <section className="border border-iron-accent-dim/50 bg-iron-panel p-4 rounded-sm space-y-4">
         <TodayWorkoutView

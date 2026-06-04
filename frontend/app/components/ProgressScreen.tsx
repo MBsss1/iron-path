@@ -14,6 +14,7 @@ import ProgressOverviewSection from "./progress/ProgressOverviewSection";
 import ProgressStrengthSection from "./progress/ProgressStrengthSection";
 import ProgressAchievementsDashboard from "./progress/ProgressAchievementsDashboard";
 import ProgressSeasonsSection from "./progress/ProgressSeasonsSection";
+import ProgressPhysicalMilestonesSection from "./progress/ProgressPhysicalMilestonesSection";
 
 type Props = {
   level: number;
@@ -107,6 +108,8 @@ export default function ProgressScreen({
       </div>
 
       <div className="mt-4">
+        {activeSection === "physical" && <ProgressPhysicalMilestonesSection />}
+
         {activeSection === "overview" && (
           <ProgressOverviewSection
             level={level}

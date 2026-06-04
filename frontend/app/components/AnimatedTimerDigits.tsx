@@ -1,10 +1,17 @@
 "use client";
 
 import { usePrefersReducedMotion } from "../animations/usePrefersReducedMotion";
+import {
+  formatTimerDisplay,
+  getTimeSlots,
+} from "../hooks/useTimerEngine";
 
 type Props = {
-  formatted: string;
+  displaySeconds: number;
+  showHours?: boolean;
   className?: string;
+  /** Accessible label; defaults to formatted time. */
+  ariaLabel?: string;
 };
 
 const DIGIT_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
@@ -39,34 +46,35 @@ function DigitWheel({
   );
 }
 
-export default function AnimatedTimerDigits({ formatted, className = "" }: Props) {
+export default function AnimatedTimerDigits({
+  displaySeconds,
+  showHours = false,
+  className = "",
+  ariaLabel,
+}: Props) {
   const reduced = usePrefersReducedMotion();
-  let wheelIndex = 0;
+  const slots = getTimeSlots(displaySeconds, showHours);
+  const label =
+    ariaLabel ?? formatTimerDisplay(displaySeconds, showHours || displaySeconds >= 3600);
 
   return (
     <span
       className={`inline-flex items-center justify-center tabular-nums ${className}`}
-      aria-hidden="true"
+      role="timer"
+      aria-live="polite"
+      aria-label={label}
     >
-      {formatted.split("").map((char, index) => {
-        if (char === ":") {
+      {slots.map((slot) => {
+        if (slot.kind === "sep") {
           return (
-            <span key={`sep-${index}`} className="digit-wheel-separator">
+            <span key={slot.id} className="digit-wheel-separator">
               :
             </span>
           );
         }
-        const parsed = parseInt(char, 10);
-        if (Number.isNaN(parsed)) {
-          return (
-            <span key={`raw-${index}`} className="digit-wheel-cell">
-              {char}
-            </span>
-          );
-        }
-        const key = `wheel-${wheelIndex}`;
-        wheelIndex += 1;
-        return <DigitWheel key={key} digit={parsed} reduced={reduced} />;
+        return (
+          <DigitWheel key={slot.id} digit={slot.value} reduced={reduced} />
+        );
       })}
     </span>
   );

@@ -13,6 +13,51 @@ type Options = {
   onComplete?: () => void;
 };
 
+export type TimeDigitSlot = {
+  kind: "digit";
+  id: string;
+  value: number;
+};
+
+export type TimeSeparatorSlot = {
+  kind: "sep";
+  id: string;
+};
+
+export type TimeSlot = TimeDigitSlot | TimeSeparatorSlot;
+
+/** Stable digit positions so each wheel animates independently (MM:SS or HH:MM:SS). */
+export function getTimeSlots(
+  totalSeconds: number,
+  includeHours: boolean
+): TimeSlot[] {
+  const clamped = Math.max(0, Math.floor(totalSeconds));
+  const hours = Math.floor(clamped / 3600);
+  const minutes = Math.floor((clamped % 3600) / 60);
+  const seconds = clamped % 60;
+  const showHours = includeHours || hours > 0;
+
+  const slots: TimeSlot[] = [];
+
+  if (showHours) {
+    slots.push(
+      { kind: "digit", id: "h10", value: Math.floor(hours / 10) % 10 },
+      { kind: "digit", id: "h1", value: hours % 10 },
+      { kind: "sep", id: "sep-h" }
+    );
+  }
+
+  slots.push(
+    { kind: "digit", id: "m10", value: Math.floor(minutes / 10) % 10 },
+    { kind: "digit", id: "m1", value: minutes % 10 },
+    { kind: "sep", id: "sep-m" },
+    { kind: "digit", id: "s10", value: Math.floor(seconds / 10) % 10 },
+    { kind: "digit", id: "s1", value: seconds % 10 }
+  );
+
+  return slots;
+}
+
 export function formatTimerDisplay(totalSeconds: number, includeHours: boolean): string {
   const clamped = Math.max(0, Math.floor(totalSeconds));
   const hours = Math.floor(clamped / 3600);

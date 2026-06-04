@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "../i18n/useTranslation";
 import { hapticAssessmentTimerDone } from "../utils/haptics";
+import TimerRing from "./TimerRing";
 
 type TimerStatus = "idle" | "running" | "paused" | "finished";
 
@@ -16,16 +17,7 @@ export type AssessmentTimerProps = {
   label?: string;
 };
 
-const RING_RADIUS = 54;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const COUNT_UP_RING_CAP = 300;
-
-function formatMmSs(totalSeconds: number): string {
-  const clamped = Math.max(0, Math.floor(totalSeconds));
-  const minutes = Math.floor(clamped / 60);
-  const seconds = clamped % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
 
 function resolveTimerMode(
   countUp: boolean,
@@ -48,7 +40,6 @@ export default function AssessmentTimer({
   label,
 }: AssessmentTimerProps) {
   const { t } = useTranslation();
-  const ringGradientId = useId();
 
   const { isCountUp, totalDuration, initialDisplay } = resolveTimerMode(
     countUp,
@@ -165,7 +156,7 @@ export default function AssessmentTimer({
       ? displaySeconds / totalDuration
       : 0;
 
-  const ringOffset = RING_CIRCUMFERENCE * (1 - progress);
+  const showHours = displaySeconds >= 3600;
   const dangerPhase =
     !isCountUp && status === "running" && displaySeconds > 0 && displaySeconds <= 10;
   const finishedCountdown = !isCountUp && status === "finished";
@@ -175,61 +166,22 @@ export default function AssessmentTimer({
   const btnClass =
     "iron-interactive border border-iron-border px-3 py-2 text-xs font-semibold rounded-sm min-h-[40px]";
 
+  const sublabel = isCountUp
+    ? t("assessment.timer.elapsed")
+    : t("assessment.timer.remaining");
+
   return (
     <div className="border border-iron-border rounded-sm iron-card-panel p-4 assessment-timer">
       <div className="flex flex-col items-center">
-        <div className="relative w-40 h-40">
-          <svg
-            className="w-full h-full -rotate-90 assessment-timer-ring"
-            viewBox="0 0 120 120"
-            aria-hidden="true"
-          >
-            <defs>
-              <linearGradient id={ringGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="var(--iron-accent-dim)" />
-                <stop offset="100%" stopColor="var(--iron-accent)" />
-              </linearGradient>
-            </defs>
-            <circle
-              cx="60"
-              cy="60"
-              r={RING_RADIUS}
-              fill="none"
-              stroke="var(--iron-border)"
-              strokeWidth="6"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r={RING_RADIUS}
-              fill="none"
-              stroke={
-                dangerPhase || finishedCountdown
-                  ? "var(--iron-danger-muted)"
-                  : `url(#${ringGradientId})`
-              }
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeDasharray={RING_CIRCUMFERENCE}
-              strokeDashoffset={ringOffset}
-              className="assessment-timer-ring-progress"
-            />
-          </svg>
-          <div
-            className={`absolute inset-0 flex flex-col items-center justify-center ${
-              dangerPhase ? "text-iron-danger" : "text-iron-text"
-            }`}
-            role="timer"
-            aria-live="polite"
-          >
-            <span className="text-3xl font-bold tracking-widest tabular-nums">
-              {formatMmSs(displaySeconds)}
-            </span>
-            <span className="text-[10px] uppercase tracking-wider text-iron-muted mt-1">
-              {isCountUp ? t("assessment.timer.elapsed") : t("assessment.timer.remaining")}
-            </span>
-          </div>
-        </div>
+        <TimerRing
+          displaySeconds={displaySeconds}
+          progress={progress}
+          showHours={showHours}
+          size="large"
+          dangerPhase={dangerPhase}
+          finished={finishedCountdown}
+          sublabel={sublabel}
+        />
       </div>
 
       {finishedCountdown && (

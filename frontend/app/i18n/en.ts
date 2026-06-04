@@ -1,7 +1,7 @@
 const en = {
   app: {
     title: "Iron Path",
-    tagline: "1950s Discipline. Modern Progress.",
+    tagline: "Discipline. Strength. Progress.",
     loading: "Loading",
     loadingJournal: "Loading your journal…",
     loadingAria: "Loading saved progress",
@@ -17,6 +17,7 @@ const en = {
       line3: "Your path to real progress.",
     },
     scene3: {
+      step: "Step {{step}}",
       assessment: "Assessment",
       plan: "Workout plan",
       progress: "Strength progress",
@@ -342,7 +343,7 @@ const en = {
       balanced: "The session balances push, pull, and legs for your level.",
     },
     nextGoal: {
-      title: "Next goal",
+      title: "Next Goal",
       line: "{{metric}}: {{value}} {{unit}}",
       progress: "{{percent}}% toward this goal",
       maxed: "You hit the top step on this track — we will set a new target after reassessment.",
@@ -1015,7 +1016,7 @@ const en = {
     tabWeight: "Weight",
     tabAchievements: "Achievements",
     tabHistory: "History",
-    tabPhysical: "Physical",
+    tabPhysical: "Physical progress",
     summaryWorkouts: "Workouts",
     summaryStreak: "Streak",
     historyEmpty:
@@ -1026,7 +1027,7 @@ const en = {
     achievementsNoneRecent: "No achievements unlocked yet.",
     achievementsNoneUpNext: "All achievements unlocked.",
     achievementsViewAll: "Full list",
-    sectionGeneral: "Overview",
+    sectionGeneral: "Your result",
     sectionStrength: "Strength",
     sectionStrengthHint: "Assessment baseline and personal records",
     sectionWeight: "Weight",

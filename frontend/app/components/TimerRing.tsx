@@ -1,7 +1,6 @@
 "use client";
 
 import { useId } from "react";
-import { formatTimerDisplay } from "../hooks/useTimerEngine";
 import AnimatedTimerDigits from "./AnimatedTimerDigits";
 
 const RING_RADIUS = 54;
@@ -43,12 +42,16 @@ export default function TimerRing({
         ? "text-3xl font-semibold tracking-tight"
         : "text-2xl font-semibold tracking-tight";
 
-  const formatted = formatTimerDisplay(displaySeconds, showHours);
+  const includeHours = showHours || displaySeconds >= 3600;
 
   if (hideRing) {
     return (
-      <div className="flex flex-col items-center" role="timer" aria-live="polite">
-        <AnimatedTimerDigits formatted={formatted} className={digitClass} />
+      <div className="flex flex-col items-center">
+        <AnimatedTimerDigits
+          displaySeconds={displaySeconds}
+          showHours={includeHours}
+          className={digitClass}
+        />
         {sublabel && (
           <span className="text-[10px] uppercase tracking-wider text-iron-muted mt-1">
             {sublabel}
@@ -85,9 +88,11 @@ export default function TimerRing({
           r={RING_RADIUS}
           fill="none"
           stroke={
-            dangerPhase || finished
-              ? "var(--iron-accent)"
-              : `url(#${ringGradientId})`
+            dangerPhase
+              ? "var(--iron-danger-muted)"
+              : finished
+                ? "var(--iron-accent)"
+                : `url(#${ringGradientId})`
           }
           strokeWidth="5"
           strokeLinecap="round"
@@ -97,11 +102,15 @@ export default function TimerRing({
         />
       </svg>
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center text-iron-text"
-        role="timer"
-        aria-live="polite"
+        className={`absolute inset-0 flex flex-col items-center justify-center ${
+          dangerPhase ? "text-iron-danger" : "text-iron-text"
+        }`}
       >
-        <AnimatedTimerDigits formatted={formatted} className={digitClass} />
+        <AnimatedTimerDigits
+          displaySeconds={displaySeconds}
+          showHours={includeHours}
+          className={digitClass}
+        />
         {sublabel && (
           <span className="text-[10px] uppercase tracking-wider text-iron-muted mt-1.5">
             {sublabel}

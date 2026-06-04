@@ -6,7 +6,6 @@ import {
   getWorkoutTimerDisplaySeconds,
   type ActiveTrainingSession,
 } from "../utils/activeTrainingSession";
-import { formatTimerDisplay } from "../hooks/useTimerEngine";
 import AnimatedTimerDigits from "./AnimatedTimerDigits";
 
 type Props = {
@@ -22,7 +21,6 @@ export default function TrainingTimer({ session, onSessionChange }: Props) {
 
   const displaySeconds = getWorkoutTimerDisplaySeconds(session);
   const showHours = displaySeconds >= 3600;
-  const formatted = formatTimerDisplay(displaySeconds, showHours);
   const progress = Math.min(1, displaySeconds / COUNT_UP_CAP);
 
   const isRunning = session.workoutTimerIsRunning;
@@ -88,14 +86,10 @@ export default function TrainingTimer({ session, onSessionChange }: Props) {
           <p className="text-[10px] uppercase tracking-wider text-iron-muted">
             {t("training.timer.workoutTime")}
           </p>
-          <div
-            className="mt-0.5 text-iron-text"
-            role="timer"
-            aria-live="polite"
-            aria-label={formatted}
-          >
+          <div className="mt-0.5 text-iron-text">
             <AnimatedTimerDigits
-              formatted={formatted}
+              displaySeconds={displaySeconds}
+              showHours={showHours}
               className="text-2xl sm:text-3xl font-semibold tracking-tight"
             />
           </div>

@@ -1,7 +1,7 @@
 const ru = {
   app: {
     title: "Iron Path",
-    tagline: "Дисциплина 1950-х. Современный прогресс.",
+    tagline: "Дисциплина. Сила. Прогресс.",
     loading: "Загрузка",
     loadingJournal: "Открываем ваш журнал…",
     loadingAria: "Загрузка сохранённого прогресса",
@@ -17,6 +17,7 @@ const ru = {
       line3: "Ваш путь к реальному прогрессу.",
     },
     scene3: {
+      step: "Шаг {{step}}",
       assessment: "Оценка формы",
       plan: "План тренировок",
       progress: "Прогресс силы",
@@ -43,7 +44,7 @@ const ru = {
   nav: {
     ariaLabel: "Главная навигация",
     home: "Главная",
-    today: "День",
+    today: "Сегодня",
     train: "Тренинг",
     food: "Питание",
     more: "Ещё",
@@ -578,7 +579,7 @@ const ru = {
     pathNotFormedBody:
       "Пройдите оценку подготовки,\nчтобы получить персональную программу.",
     startAssessment: "Пройти оценку",
-    todayTitle: "День",
+    todayTitle: "Сегодня",
     ctaStartWorkout: "Начать тренировку",
     ctaOpenDay: "Открыть день",
     nextReward: "До следующего ранга",
@@ -603,7 +604,7 @@ const ru = {
     sleep: "Сон",
   },
   today: {
-    title: "День",
+    title: "Сегодня",
     week: "Неделя {{week}} / 24",
     deepWork: "Фокус 2 часа",
     deepWorkDone: "✓ Фокус 2 часа",
@@ -1015,7 +1016,7 @@ const ru = {
     tabWeight: "Вес",
     tabAchievements: "Достижения",
     tabHistory: "История",
-    tabPhysical: "Физика",
+    tabPhysical: "Физический прогресс",
     summaryWorkouts: "Тренировок",
     summaryStreak: "Серия",
     historyEmpty:
@@ -1026,7 +1027,7 @@ const ru = {
     achievementsNoneRecent: "Достижений пока нет.",
     achievementsNoneUpNext: "Все достижения открыты.",
     achievementsViewAll: "Полный список",
-    sectionGeneral: "Общий прогресс",
+    sectionGeneral: "Ваш результат",
     sectionStrength: "Сила",
     sectionStrengthHint: "Результаты оценки и личные рекорды",
     sectionWeight: "Вес",

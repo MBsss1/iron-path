@@ -59,6 +59,10 @@ export default function PathModeSelectionScreen({ onConfirm, onClose }: Props) {
           })}
         </div>
 
+        <p className="text-sm text-iron-muted leading-relaxed mt-4">
+          {t("pathMode.select.changeLaterNote")}
+        </p>
+
         <IronButton onClick={() => onConfirm(selected)}>
           {t("pathMode.select.confirm")}
         </IronButton>

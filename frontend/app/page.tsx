@@ -2,7 +2,7 @@
 
 import OnboardingScreen from "./components/OnboardingScreen";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useProfile } from "./hooks/useProfile";
+import { useProfile, type Profile } from "./hooks/useProfile";
 import { generateProgram } from "./data/programGenerator";
 import { usePlayer } from "./hooks/usePlayer";
 import { getRank } from "./data/ranks";
@@ -16,9 +16,8 @@ import SettingsScreen from "./components/SettingsScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import PathModeSelectionScreen from "./components/PathModeSelectionScreen";
 import {
+  applyPathModeToProfile,
   hasPathModeSelected,
-  normalizeProfilePath,
-  pathModeToClassId,
   type PathMode,
 } from "./data/pathMode";
 import BossScreen from "./components/BossScreen";
@@ -557,17 +556,20 @@ function HomeContent() {
     setBossDefeatXp(0);
   }, [clearPendingDefeat]);
 
+  const handleOnboardingFinish = useCallback(
+    (data: Profile) => {
+      saveProfile(data);
+    },
+    [saveProfile]
+  );
+
   const handleConfirmPathMode = useCallback(
     (selected: PathMode) => {
       if (!profile) return;
       saveProfile(
-        normalizeProfilePath({
-          ...profile,
-          pathMode: selected,
-          classId: pathModeToClassId(selected),
-          pathModeChangedAt: null,
-        })
+        applyPathModeToProfile(profile, selected, new Date().toISOString())
       );
+      setScreen("hero");
     },
     [profile, saveProfile]
   );
@@ -619,10 +621,12 @@ function HomeContent() {
           </div>
 
           {profileLoaded && !profile && (
-            <OnboardingScreen onFinish={() => window.location.reload()} />
+            <OnboardingScreen onFinish={handleOnboardingFinish} />
           )}
 
-          {profileLoaded && profile && !hasPathModeSelected(profile) && (
+          {profileLoaded &&
+            profile &&
+            !hasPathModeSelected(profile) && (
             <PathModeSelectionScreen onConfirm={handleConfirmPathMode} />
           )}
 

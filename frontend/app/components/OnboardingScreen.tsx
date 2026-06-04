@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { STORAGE_KEYS } from "../utils/storageKeys";
 import type { TranslationParams } from "../i18n";
 import { useTranslation } from "../i18n/useTranslation";
+import type { Profile } from "../hooks/useProfile";
 
 type TFn = (key: string, params?: TranslationParams) => string;
 
 type Props = {
-  onFinish: () => void;
+  onFinish: (profile: Profile) => void;
 };
 
 type FieldErrors = {
@@ -109,18 +109,15 @@ export default function OnboardingScreen({ onFinish }: Props) {
     setErrors(nextErrors);
     if (hasErrors(nextErrors)) return;
 
-    localStorage.setItem(
-      STORAGE_KEYS.profile,
-      JSON.stringify({
-        age: age.trim(),
-        height: height.trim(),
-        weight: weight.trim(),
-        goal,
-        experience,
-        watchType,
-      })
-    );
-    onFinish();
+    onFinish({
+      age: age.trim(),
+      height: height.trim(),
+      weight: weight.trim(),
+      goal,
+      experience,
+      watchType,
+      avatarId: "rookie",
+    });
   };
 
   const optionClass = (selected: boolean) =>

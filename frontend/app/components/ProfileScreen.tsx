@@ -5,9 +5,8 @@ import { AVATAR_OPTIONS } from "../data/avatar";
 import { getBadgeLabel } from "../data/bosses";
 import {
   PATH_MODES,
+  applyPathModeToProfile,
   getPathModeFromProfile,
-  normalizeProfilePath,
-  pathModeToClassId,
   type PathMode,
 } from "../data/pathMode";
 import type { Profile } from "../hooks/useProfile";
@@ -53,35 +52,43 @@ export default function ProfileScreen({
   const [pathMode, setPathMode] = useState<PathMode>(
     getPathModeFromProfile(profile) ?? "balance"
   );
-  const [pathChangeAck, setPathChangeAck] = useState(false);
+  const [showPathChangeDialog, setShowPathChangeDialog] = useState(false);
 
   const currentPathMode = getPathModeFromProfile(profile) ?? "balance";
   const pathModeChanging = pathMode !== currentPathMode;
 
+  const buildProfileFields = () => ({
+    ...profile,
+    age,
+    height,
+    weight,
+    goal,
+    experience,
+    watchType,
+    avatarId,
+  });
+
   const handleSave = () => {
-    if (pathModeChanging && !pathChangeAck) {
-      setPathChangeAck(true);
+    if (pathModeChanging) {
+      setShowPathChangeDialog(true);
       return;
     }
 
-    const nextProfile = normalizeProfilePath({
-      ...profile,
-      age,
-      height,
-      weight,
-      goal,
-      experience,
-      watchType,
-      avatarId,
-      pathMode,
-      classId: pathModeToClassId(pathMode),
-      pathModeChangedAt: pathModeChanging
-        ? new Date().toISOString()
-        : profile.pathModeChangedAt,
-    });
-
-    onSave(nextProfile);
+    onSave(buildProfileFields());
     onBack();
+  };
+
+  const handleConfirmPathChange = () => {
+    onSave(
+      applyPathModeToProfile(buildProfileFields(), pathMode, new Date().toISOString())
+    );
+    setShowPathChangeDialog(false);
+    onBack();
+  };
+
+  const handleCancelPathChange = () => {
+    setPathMode(currentPathMode);
+    setShowPathChangeDialog(false);
   };
 
   const inputClass =
@@ -144,20 +151,12 @@ export default function ProfileScreen({
             mode: t(`pathMode.${currentPathMode}.title`),
           })}
         </p>
-        {pathChangeAck && pathModeChanging && (
-          <p className="text-sm text-iron-accent mb-3 border border-iron-accent-dim/40 p-3 rounded-sm">
-            {t("profileScreen.pathModeChangeWarning")}
-          </p>
-        )}
         <div className="space-y-2">
           {PATH_MODES.map((mode) => (
             <button
               key={mode}
               type="button"
-              onClick={() => {
-                setPathMode(mode);
-                setPathChangeAck(false);
-              }}
+              onClick={() => setPathMode(mode)}
               className={`w-full text-left border p-3 rounded-sm iron-interactive ${
                 pathMode === mode
                   ? "border-iron-accent bg-iron-accent-dim/20"
@@ -293,11 +292,40 @@ export default function ProfileScreen({
         </div>
       </IronCard>
 
-      <IronButton onClick={handleSave}>
-        {pathChangeAck && pathModeChanging
-          ? t("profileScreen.pathModeConfirmChange")
-          : t("profileScreen.save")}
-      </IronButton>
+      <IronButton onClick={handleSave}>{t("profileScreen.save")}</IronButton>
+
+      {showPathChangeDialog && (
+        <div
+          className="fixed inset-0 iron-modal-overlay flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="iron-modal iron-card-panel p-5 w-full max-w-sm">
+            <p className="text-sm text-iron-text leading-relaxed">
+              {t("profileScreen.pathModeChangeWarning")}
+            </p>
+            <p className="text-sm text-iron-muted leading-relaxed mt-3">
+              {t("profileScreen.pathModeChangeWarningPlan")}
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleCancelPathChange}
+                className="iron-interactive py-3 text-sm font-semibold border border-iron-border rounded-sm"
+              >
+                {t("profileScreen.pathModeChangeCancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmPathChange}
+                className="iron-interactive iron-btn-primary py-3 text-sm font-semibold rounded-sm"
+              >
+                {t("profileScreen.pathModeConfirmChange")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ScreenShell>
   );
 }

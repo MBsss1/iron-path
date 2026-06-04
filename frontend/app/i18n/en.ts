@@ -204,6 +204,8 @@ const en = {
       subtitle:
         "This sets the focus of your program: training, discipline, or balance.",
       confirm: "Confirm mode",
+      changeLaterNote:
+        "You can change your path mode later in Profile. It affects future workouts and tasks but does not erase your progress.",
     },
     details: {
       sport: {
@@ -842,8 +844,11 @@ const en = {
     pathMode: "Path mode",
     pathModeCurrent: "Current: {{mode}}",
     pathModeChangeWarning:
-      "Changing mode affects future workouts and tasks. Your progress is not reset.",
+      "Changing your path mode will affect future workouts and daily tasks. Your progress, level and history will stay.",
+    pathModeChangeWarningPlan:
+      "The new mode will apply after your weekly plan is rebuilt.",
     pathModeConfirmChange: "Change mode",
+    pathModeChangeCancel: "Cancel",
     titleSection: "Title",
     noTitles: "Clear milestones to unlock titles",
     noTitle: "No title",

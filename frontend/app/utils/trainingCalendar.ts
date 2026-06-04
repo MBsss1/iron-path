@@ -4,8 +4,12 @@ import {
   assessFitness,
   type AssessmentInput,
   type AssessmentResult,
-  type FitnessGoal,
 } from "../data/fitnessAssessment";
+import {
+  normalizeFitnessGoal,
+  parseProfileGoal,
+  type FitnessGoal,
+} from "../data/fitnessGoals";
 import {
   generateWeekPlan,
   generateWorkout,
@@ -36,13 +40,8 @@ export type TrainingCalendarState = {
 
 const CALENDAR_KEY = STORAGE_KEYS.trainingCalendar;
 
-const GOALS: FitnessGoal[] = ["mass_gain", "fat_loss", "runner", "athletic"];
-
 function parseGoal(goal: string | undefined): FitnessGoal {
-  if (goal && GOALS.includes(goal as FitnessGoal)) {
-    return goal as FitnessGoal;
-  }
-  return "mass_gain";
+  return parseProfileGoal(goal);
 }
 
 /** Conservative defaults until Fitness Assessment UI ships. */
@@ -54,20 +53,22 @@ export function profileToAssessment(profile: Profile | null): {
   const height = Math.min(250, Math.max(100, parseInt(profile?.height ?? "175", 10) || 175));
   const weight = Math.min(250, Math.max(30, parseInt(profile?.weight ?? "75", 10) || 75));
   const goal = parseGoal(profile?.goal);
+  const normalized = normalizeFitnessGoal(goal);
 
   const input: AssessmentInput = {
     age,
     height,
     weight,
     goal,
-    maxPullUps: goal === "runner" ? 2 : 3,
+    maxPullUps: normalized === "running" ? 2 : 3,
     maxPushUps: 15,
     squatReps2Min: 45,
     plankSeconds: 60,
     walkRun12MinMeters: 1600,
     equipment: ["pull_up_bar"],
     limitations: weight >= 100 ? ["overweight"] : ["none"],
-    cardioAccess: goal === "runner" ? "outdoor" : weight >= 100 ? "limited" : "limited",
+    cardioAccess:
+      normalized === "running" ? "outdoor" : weight >= 100 ? "limited" : "limited",
     cardioPreference: "neutral",
   };
 

@@ -24,7 +24,7 @@ const RANK_KEY_BY_EN: Record<string, string> = {
   "MAX RANK": "rank.max",
 };
 
-const GOAL_IDS = ["mass_gain", "athletic", "runner", "fat_loss"] as const;
+import { goalDisplayI18nKey, normalizeFitnessGoal } from "../data/fitnessGoals";
 
 const PHASE_KEY_BY_EN: Record<string, string> = {
   Foundation: "phase.foundation",
@@ -51,11 +51,7 @@ export function translateRank(rankEn: string, t: TranslateFn): string {
 }
 
 export function translateGoal(goal: string | undefined, t: TranslateFn): string {
-  if (!goal) return t("goal.general");
-  if (GOAL_IDS.includes(goal as (typeof GOAL_IDS)[number])) {
-    return t(`goal.${goal}`);
-  }
-  return goal.replace(/_/g, " ");
+  return t(goalDisplayI18nKey(goal));
 }
 
 export function translateExperience(value: string, t: TranslateFn): string {
@@ -93,10 +89,7 @@ export function getTranslatedNutritionTips(
   goal: string | undefined,
   t: TranslateFn
 ): string[] {
-  const tipGoal =
-    goal && GOAL_IDS.includes(goal as (typeof GOAL_IDS)[number])
-      ? goal
-      : "default";
+  const tipGoal = goal ? normalizeFitnessGoal(goal) : "default";
 
   return ["0", "1", "2", "3"].map((index) =>
     t(`nutrition.tip.${tipGoal}.${index}`)

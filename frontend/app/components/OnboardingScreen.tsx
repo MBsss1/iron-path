@@ -3,7 +3,9 @@
 import { useState } from "react";
 import type { TranslationParams } from "../i18n";
 import { useTranslation } from "../i18n/useTranslation";
+import type { ActiveFitnessGoal } from "../data/fitnessGoals";
 import type { Profile } from "../hooks/useProfile";
+import GoalSelectionCards from "./GoalSelectionCards";
 
 type TFn = (key: string, params?: TranslationParams) => string;
 
@@ -17,7 +19,6 @@ type FieldErrors = {
   weight?: string;
 };
 
-const GOAL_OPTIONS = ["mass_gain", "athletic", "runner", "fat_loss"] as const;
 const EXPERIENCE_OPTIONS = ["beginner", "returning", "trained"] as const;
 const WATCH_OPTIONS = ["apple_watch", "android_watch", "none"] as const;
 
@@ -73,7 +74,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [goal, setGoal] = useState<string>("mass_gain");
+  const [goal, setGoal] = useState<ActiveFitnessGoal>("mass_gain");
   const [experience, setExperience] = useState<string>("returning");
   const [watchType, setWatchType] = useState<string>("none");
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -169,17 +170,8 @@ export default function OnboardingScreen({ onFinish }: Props) {
 
       <div className="mt-6">
         <h3 className="iron-heading text-lg">{t("onboarding.goal")}</h3>
-        <div className="grid grid-cols-2 gap-3 mt-3">
-          {GOAL_OPTIONS.map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setGoal(value)}
-              className={optionClass(goal === value)}
-            >
-              {t(`goal.${value}`)}
-            </button>
-          ))}
+        <div className="mt-3">
+          <GoalSelectionCards selected={goal} onSelect={setGoal} />
         </div>
       </div>
 

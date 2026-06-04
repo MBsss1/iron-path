@@ -8,10 +8,10 @@ import {
   type AssessmentResult,
   type CardioAccess,
   type CardioPreference,
-  type FitnessGoal,
   type FitnessLevel,
   type Limitation,
 } from "../data/fitnessAssessment";
+import { parseProfileGoal, type FitnessGoal } from "../data/fitnessGoals";
 import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronButton from "./IronButton";
@@ -32,7 +32,6 @@ type StepId =
   | "plank"
   | "limitations";
 
-const GOALS: FitnessGoal[] = ["mass_gain", "fat_loss", "runner", "athletic"];
 const CARDIO_ACCESS: CardioAccess[] = [
   "outdoor",
   "treadmill",
@@ -49,8 +48,7 @@ const LIMITATIONS: Limitation[] = [
 ];
 
 function parseGoal(goal: string | undefined): FitnessGoal {
-  if (goal && GOALS.includes(goal as FitnessGoal)) return goal as FitnessGoal;
-  return "mass_gain";
+  return parseProfileGoal(goal);
 }
 
 function parseProfileNumbers(profile: Profile) {

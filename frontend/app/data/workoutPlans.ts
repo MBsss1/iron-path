@@ -1,5 +1,9 @@
+import { normalizeFitnessGoal } from "./fitnessGoals";
+
 export function getNextMission(goal: string, phase: string) {
-  if (goal === "runner") {
+  const normalized = normalizeFitnessGoal(goal);
+
+  if (normalized === "running") {
     if (phase === "Foundation") {
       return {
         title: "Runner Foundation",
@@ -35,7 +39,7 @@ export function getNextMission(goal: string, phase: string) {
     };
   }
 
-  if (goal === "fat_loss") {
+  if (normalized === "weight_loss") {
     return {
       title: "Conditioning Day",
       exercises: [
@@ -47,7 +51,7 @@ export function getNextMission(goal: string, phase: string) {
     };
   }
 
-  if (goal === "athletic") {
+  if (normalized === "mass_gain" && goal === "athletic") {
     if (phase === "Foundation") {
       return {
         title: "Hybrid Foundation",

@@ -1,6 +1,7 @@
 import type { Equipment } from "./exercises";
+import type { FitnessGoal } from "./fitnessGoals";
 
-export type FitnessGoal = "mass_gain" | "fat_loss" | "runner" | "athletic";
+export type { FitnessGoal } from "./fitnessGoals";
 
 export type Limitation = "knees" | "back" | "shoulders" | "overweight" | "none";
 

@@ -1,4 +1,5 @@
 import { getPhaseByWeek } from "./phases";
+import { normalizeFitnessGoal } from "./fitnessGoals";
 
 type Profile = {
   age: string;
@@ -24,7 +25,9 @@ export function generateProgram(profile: Profile | null, week: number) {
     };
   }
 
-  if (profile.goal === "runner") {
+  const goal = normalizeFitnessGoal(profile.goal);
+
+  if (goal === "running") {
     return {
       goal: profile.goal,
       phase: phase.name,
@@ -36,7 +39,7 @@ export function generateProgram(profile: Profile | null, week: number) {
     };
   }
 
-  if (profile.goal === "fat_loss") {
+  if (goal === "weight_loss") {
     return {
       goal: profile.goal,
       phase: phase.name,
@@ -45,18 +48,6 @@ export function generateProgram(profile: Profile | null, week: number) {
       runDays: 3,
       focus: phase.focus,
       workouts: ["Full Body", "Run", "Walk", "Intervals"],
-    };
-  }
-
-  if (profile.goal === "athletic") {
-    return {
-      goal: profile.goal,
-      phase: phase.name,
-      week,
-      strengthDays: 4,
-      runDays: 2,
-      focus: phase.focus,
-      workouts: ["Push", "Pull", "Run", "Full Body"],
     };
   }
 

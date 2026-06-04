@@ -10,11 +10,15 @@ import {
   type AssessmentInput,
   type AssessmentResult,
   type CardioAccess,
-  type FitnessGoal,
   type FitnessLevel,
   type Limitation,
 } from "./fitnessAssessment";
 import type { PathMode } from "./pathMode";
+import {
+  normalizeFitnessGoal,
+  type ActiveFitnessGoal,
+  type FitnessGoal,
+} from "./fitnessGoals";
 
 export type { AssessmentInput, AssessmentResult } from "./fitnessAssessment";
 export { assessFitness } from "./fitnessAssessment";
@@ -198,7 +202,10 @@ export function applyCardioWeekTemplate(
   ) {
     if (
       countRunningDays(days) === 0 &&
-      (input.goal === "runner" || input.goal === "fat_loss")
+      (() => {
+        const g = normalizeFitnessGoal(input.goal);
+        return g === "running" || g === "weight_loss";
+      })()
     ) {
       const idx = days.findIndex((d) => d === "full_body");
       if (idx >= 0) days[idx] = "easy_run";
@@ -614,7 +621,7 @@ export function selectConditioningExercises(
     ];
   }
 
-  if (ctx.input.goal === "fat_loss") {
+  if (normalizeFitnessGoal(ctx.input.goal) === "weight_loss") {
     if (!allowsRunningWorkouts(cardioAccess)) {
       return pickNoRunConditioning(ctx);
     }
@@ -833,40 +840,53 @@ function trimWorkoutForPathMode(
   };
 }
 
-function weekTemplate(goal: FitnessGoal, level: FitnessLevel): DayType[] {
+function weekTemplate(rawGoal: FitnessGoal, level: FitnessLevel): DayType[] {
+  const goal: ActiveFitnessGoal = normalizeFitnessGoal(rawGoal);
   const L = LEVEL_RANK[level];
 
   if (goal === "mass_gain") {
     if (L <= LEVEL_RANK.beginner) {
-      return ["full_body", "mobility", "full_body", "easy_run", "full_body", "mobility", "full_body"];
+      return [
+        "full_body",
+        "mobility",
+        "full_body",
+        "full_body",
+        "mobility",
+        "full_body",
+        "mobility",
+      ];
     }
     if (L === LEVEL_RANK.novice || L === LEVEL_RANK.intermediate) {
-      return ["push", "pull", "legs", "mobility", "full_body", "easy_run", "mobility"];
+      return ["push", "pull", "legs", "mobility", "full_body", "mobility", "full_body"];
     }
-    return ["push", "pull", "legs", "push", "pull", "easy_run", "mobility"];
+    return ["push", "pull", "legs", "push", "pull", "mobility", "full_body"];
   }
 
-  if (goal === "fat_loss") {
+  if (goal === "weight_loss") {
     return [
       "full_body",
       "easy_run",
       "full_body",
-      "intervals",
       "mobility",
       "full_body",
       "easy_run",
+      "mobility",
     ];
   }
 
-  if (goal === "runner") {
-    return ["easy_run", "mobility", "full_body", "easy_run", "intervals", "full_body", "mobility"];
+  if (goal === "running") {
+    return [
+      "easy_run",
+      "mobility",
+      "full_body",
+      "easy_run",
+      "intervals",
+      "full_body",
+      "mobility",
+    ];
   }
 
-  // athletic
-  if (L <= LEVEL_RANK.beginner) {
-    return ["full_body", "easy_run", "full_body", "intervals", "mobility", "full_body", "mobility"];
-  }
-  return ["pull", "push", "legs", "full_body", "intervals", "easy_run", "mobility"];
+  return ["full_body", "mobility", "full_body", "mobility", "full_body", "mobility", "full_body"];
 }
 
 export function generateWeekPlan(

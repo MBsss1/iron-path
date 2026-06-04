@@ -4,19 +4,29 @@ import { useState } from "react";
 import { AVATAR_OPTIONS } from "../data/avatar";
 import { getBadgeLabel } from "../data/bosses";
 import {
+  type ActiveFitnessGoal,
+  coerceToActiveGoal,
+  isLegacyFitnessGoal,
+  normalizeFitnessGoal,
+} from "../data/fitnessGoals";
+import {
   PATH_MODES,
   applyPathModeToProfile,
   getPathModeFromProfile,
   type PathMode,
 } from "../data/pathMode";
 import type { Profile } from "../hooks/useProfile";
-import { translateAvatarLabel, translateBossRewardTitleById } from "../i18n/labels";
+import {
+  translateAvatarLabel,
+  translateBossRewardTitleById,
+  translateGoal,
+} from "../i18n/labels";
+import GoalSelectionCards from "./GoalSelectionCards";
 import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
 import IronButton from "./IronButton";
 
-const GOAL_OPTIONS = ["mass_gain", "athletic", "runner", "fat_loss"] as const;
 const EXPERIENCE_OPTIONS = ["beginner", "returning", "trained"] as const;
 const WATCH_OPTIONS = ["apple_watch", "android_watch", "none"] as const;
 
@@ -45,7 +55,9 @@ export default function ProfileScreen({
   const [age, setAge] = useState(profile.age);
   const [height, setHeight] = useState(profile.height);
   const [weight, setWeight] = useState(profile.weight);
-  const [goal, setGoal] = useState(profile.goal);
+  const [goal, setGoal] = useState<ActiveFitnessGoal>(
+    coerceToActiveGoal(profile.goal)
+  );
   const [experience, setExperience] = useState(profile.experience);
   const [watchType, setWatchType] = useState(profile.watchType);
   const [avatarId, setAvatarId] = useState(profile.avatarId ?? "rookie");
@@ -53,9 +65,13 @@ export default function ProfileScreen({
     getPathModeFromProfile(profile) ?? "balance"
   );
   const [showPathChangeDialog, setShowPathChangeDialog] = useState(false);
+  const [showGoalChangeDialog, setShowGoalChangeDialog] = useState(false);
 
   const currentPathMode = getPathModeFromProfile(profile) ?? "balance";
   const pathModeChanging = pathMode !== currentPathMode;
+  const goalChanging =
+    goal !== normalizeFitnessGoal(profile.goal) ||
+    isLegacyFitnessGoal(profile.goal);
 
   const buildProfileFields = () => ({
     ...profile,
@@ -73,9 +89,24 @@ export default function ProfileScreen({
       setShowPathChangeDialog(true);
       return;
     }
+    if (goalChanging) {
+      setShowGoalChangeDialog(true);
+      return;
+    }
 
     onSave(buildProfileFields());
     onBack();
+  };
+
+  const handleConfirmGoalChange = () => {
+    onSave(buildProfileFields());
+    setShowGoalChangeDialog(false);
+    onBack();
+  };
+
+  const handleCancelGoalChange = () => {
+    setGoal(coerceToActiveGoal(profile.goal));
+    setShowGoalChangeDialog(false);
   };
 
   const handleConfirmPathChange = () => {
@@ -172,6 +203,23 @@ export default function ProfileScreen({
         </div>
       </IronCard>
 
+      <IronCard variant="paper">
+        <p className="uppercase text-xs font-bold tracking-widest mb-1">
+          {t("profileScreen.goal")}
+        </p>
+        <p className="text-sm text-iron-muted mb-3">
+          {t("profileScreen.goalCurrent", {
+            goal: translateGoal(profile.goal, t),
+          })}
+        </p>
+        {profile.goal === "athletic" && (
+          <p className="text-xs text-iron-muted mb-3 leading-relaxed">
+            {t("profileScreen.goalLegacyNote")}
+          </p>
+        )}
+        <GoalSelectionCards selected={goal} onSelect={setGoal} />
+      </IronCard>
+
       <IronCard variant="dark">
         <p className="uppercase text-xs font-bold tracking-widest mb-3">
           {t("profileScreen.titleSection")}
@@ -255,18 +303,6 @@ export default function ProfileScreen({
           />
 
           <select
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-            className={inputClass}
-          >
-            {GOAL_OPTIONS.map((value) => (
-              <option key={value} value={value}>
-                {t(`goal.${value}`)}
-              </option>
-            ))}
-          </select>
-
-          <select
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
             className={inputClass}
@@ -321,6 +357,36 @@ export default function ProfileScreen({
                 className="iron-interactive iron-btn-primary py-3 text-sm font-semibold rounded-sm"
               >
                 {t("profileScreen.pathModeConfirmChange")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showGoalChangeDialog && (
+        <div
+          className="fixed inset-0 iron-modal-overlay flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="iron-modal iron-card-panel p-5 w-full max-w-sm">
+            <p className="text-sm text-iron-text leading-relaxed">
+              {t("profileScreen.goalChangeWarning")}
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleCancelGoalChange}
+                className="iron-interactive py-3 text-sm font-semibold border border-iron-border rounded-sm"
+              >
+                {t("profileScreen.goalChangeCancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmGoalChange}
+                className="iron-interactive iron-btn-primary py-3 text-sm font-semibold rounded-sm"
+              >
+                {t("profileScreen.goalConfirmChange")}
               </button>
             </div>
           </div>

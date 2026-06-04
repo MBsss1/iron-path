@@ -5,14 +5,9 @@ import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   onSelectProgress: () => void;
-  onSelectAchievements: () => void;
   onSelectBosses?: () => void;
-  onSelectStrength?: () => void;
-  onSelectLegacy?: () => void;
   onSelectSettings?: () => void;
   onSelectProfile?: () => void;
-  onSelectStats?: () => void;
-  onSelectSkillTree?: () => void;
   level: number;
   rank: string;
   week: number;
@@ -29,14 +24,9 @@ const menuBtn =
 
 export default function MoreScreen({
   onSelectProgress,
-  onSelectAchievements,
   onSelectBosses,
-  onSelectStrength,
-  onSelectLegacy,
   onSelectSettings,
   onSelectProfile,
-  onSelectStats,
-  onSelectSkillTree,
   level,
   rank,
   week,
@@ -58,21 +48,6 @@ export default function MoreScreen({
       desc: t("more.profile.desc"),
     },
     {
-      onClick: onSelectStats,
-      className: "iron-card-surface border-iron-border text-iron-text",
-      label: t("more.stats.label"),
-      title: t("more.stats.title"),
-      desc: t("more.stats.desc"),
-    },
-    {
-      onClick: onSelectBosses,
-      className: "iron-dossier text-iron-text",
-      label: t("more.bosses.label"),
-      title: t("more.bosses.title"),
-      desc: t("more.bosses.desc"),
-      danger: true,
-    },
-    {
       onClick: onSelectProgress,
       className: "iron-card-panel border-iron-border-strong text-iron-text",
       label: t("more.progress.label"),
@@ -80,32 +55,11 @@ export default function MoreScreen({
       desc: t("more.progress.desc"),
     },
     {
-      onClick: onSelectLegacy,
-      className: "iron-card-surface border-iron-border text-iron-text",
-      label: t("more.legacy.label"),
-      title: t("more.legacy.title"),
-      desc: t("more.legacy.desc"),
-    },
-    {
-      onClick: onSelectAchievements,
-      className: "iron-card-raised border-iron-border text-iron-text",
-      label: t("more.achievements.label"),
-      title: t("more.achievements.title"),
-      desc: t("more.achievements.desc"),
-    },
-    {
-      onClick: onSelectStrength,
-      className: "iron-card-surface border-iron-border text-iron-text",
-      label: t("more.strength.label"),
-      title: t("more.strength.title"),
-      desc: t("more.strength.desc"),
-    },
-    {
-      onClick: onSelectSkillTree,
-      className: "iron-card-raised border-iron-border text-iron-text",
-      label: t("more.skilltree.label"),
-      title: t("more.skilltree.title"),
-      desc: t("more.skilltree.desc"),
+      onClick: onSelectBosses,
+      className: "iron-dossier text-iron-text",
+      label: t("more.milestones.label"),
+      title: t("more.milestones.title"),
+      desc: t("more.milestones.desc"),
     },
     {
       onClick: onSelectSettings,
@@ -146,15 +100,7 @@ export default function MoreScreen({
             onClick={card.onClick}
             className={`${menuBtn} ${card.className}`}
           >
-            <p
-              className={`text-sm font-bold ${
-                "danger" in card && card.danger
-                  ? "iron-label text-iron-danger"
-                  : "text-iron-accent-dim"
-              }`}
-            >
-              {card.label}
-            </p>
+            <p className="text-sm font-bold text-iron-accent-dim">{card.label}</p>
             <h3 className="iron-heading text-xl mt-2">{card.title}</h3>
             <p className="mt-2 text-sm text-iron-muted">{card.desc}</p>
           </button>

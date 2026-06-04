@@ -2,10 +2,16 @@
 
 import { useState } from "react";
 import { AVATAR_OPTIONS } from "../data/avatar";
-import { CLASSES, type ClassId } from "../data/classes";
+import {
+  CLASSES,
+  getClass,
+  getSkillRequiredLevel,
+  isSkillUnlockedAtLevel,
+  type ClassId,
+} from "../data/classes";
 import { getBadgeLabel, getTitleLabel } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
-import { translateAvatarLabel } from "../i18n/labels";
+import { translateAvatarLabel, translateSkillPassive } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import { canChangeClass, daysUntilClassChange } from "../utils/classBonuses";
 import ClassCard from "./ClassCard";
@@ -84,6 +90,19 @@ export default function ProfileScreen({
       ? t("profileScreen.classChangeIn", { days: daysRemaining })
       : t("profileScreen.classChangeInPlural", { days: daysRemaining });
 
+  const activeClass = getClass(classId);
+  const passiveLabel = activeClass
+    ? translateSkillPassive(
+        activeClass.id,
+        activeClass.skill1Passive.label,
+        t
+      )
+    : null;
+  const passiveUnlocked = activeClass
+    ? isSkillUnlockedAtLevel(0, level)
+    : false;
+  const passiveUnlockLevel = activeClass ? getSkillRequiredLevel(0) : 0;
+
   return (
     <ScreenShell
       eyebrow={t("profileScreen.eyebrow")}
@@ -151,6 +170,19 @@ export default function ProfileScreen({
             />
           ))}
         </div>
+        {activeClass && passiveLabel && (
+          <div className="mt-4 border-t border-iron-border pt-3">
+            <p className="uppercase text-xs font-bold text-iron-gold">
+              {t("profileScreen.passiveTitle")}
+            </p>
+            <p className="text-sm text-iron-text mt-1">{passiveLabel}</p>
+            <p className="text-xs text-iron-muted mt-1">
+              {passiveUnlocked
+                ? t("profileScreen.passiveActive")
+                : t("profileScreen.passiveLocked", { level: passiveUnlockLevel })}
+            </p>
+          </div>
+        )}
       </IronCard>
 
       <IronCard variant="dark">

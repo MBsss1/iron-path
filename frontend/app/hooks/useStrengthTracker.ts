@@ -7,21 +7,27 @@ import { STORAGE_KEYS } from "../utils/storageKeys";
 export type StrengthData = {
   pushUps: number;
   prevPushUps?: number;
-  dips: number;
-  prevDips?: number;
   pullUps: number;
   prevPullUps?: number;
-  runDistance: number; // kilometers
+  squatReps: number;
+  prevSquatReps?: number;
+  plankSeconds: number;
+  prevPlankSeconds?: number;
+  dips: number;
+  prevDips?: number;
+  runDistance: number;
   prevRunDistance?: number;
-  weight: number; // kg
+  weight: number;
   prevWeight?: number;
   updatedAt?: string;
 };
 
 const DEFAULT: StrengthData = {
   pushUps: 0,
-  dips: 0,
   pullUps: 0,
+  squatReps: 0,
+  plankSeconds: 0,
+  dips: 0,
   runDistance: 0,
   weight: 0,
 };
@@ -31,9 +37,9 @@ export function useStrengthTracker() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = safeGet(STORAGE_KEYS.strength, DEFAULT);
+    const stored = safeGet<Partial<StrengthData> | null>(STORAGE_KEYS.strength, null);
     queueMicrotask(() => {
-      setData(stored);
+      setData({ ...DEFAULT, ...stored });
       setLoaded(true);
     });
   }, []);
@@ -60,6 +66,14 @@ export function useStrengthTracker() {
         case "pullUps":
           next.prevPullUps = cur.pullUps;
           next.pullUps = value;
+          break;
+        case "squatReps":
+          next.prevSquatReps = cur.squatReps;
+          next.squatReps = value;
+          break;
+        case "plankSeconds":
+          next.prevPlankSeconds = cur.plankSeconds;
+          next.plankSeconds = value;
           break;
         case "runDistance":
           next.prevRunDistance = cur.runDistance;

@@ -11,14 +11,10 @@ import TodayScreen from "./components/TodayScreen";
 import TrainingScreen from "./components/TrainingScreen";
 import NutritionScreen from "./components/NutritionScreen";
 import ProgressScreen from "./components/ProgressScreen";
-import AchievementsScreen from "./components/AchievementsScreen";
 import MoreScreen from "./components/MoreScreen";
 import SettingsScreen from "./components/SettingsScreen";
 import ProfileScreen from "./components/ProfileScreen";
-import StatsScreen from "./components/StatsScreen";
 import ClassSelectionScreen from "./components/ClassSelectionScreen";
-import SkillTreeScreen from "./components/SkillTreeScreen";
-import StrengthTrackerScreen from "./components/StrengthTrackerScreen";
 import BossScreen from "./components/BossScreen";
 import type { ClassId } from "./data/classes";
 import type { BossId } from "./data/bosses";
@@ -35,7 +31,6 @@ import { getBossTrialByWeek } from "./data/bossTrials";
 import { useSeasons } from "./hooks/useSeasons";
 import { useDailyRewards } from "./hooks/useDailyRewards";
 import { useStats } from "./hooks/useStats";
-import LegacyScreen from "./components/LegacyScreen";
 import HeroScreen from "./components/HeroScreen";
 import AppPopups from "./components/AppPopups";
 import SplashScreen from "./components/SplashScreen";
@@ -71,17 +66,7 @@ import { useFitnessAssessment } from "./hooks/useFitnessAssessment";
 import type { AssessmentInput } from "./data/fitnessAssessment";
 import { STORAGE_KEYS } from "./utils/storageKeys";
 
-const MORE_SUB_SCREENS = [
-  "progress",
-  "achievements",
-  "strength",
-  "legacy",
-  "settings",
-  "profile",
-  "stats",
-  "skilltree",
-  "bosses",
-];
+const MORE_SUB_SCREENS = ["progress", "settings", "profile", "bosses"];
 
 function getNavActiveScreen(screen: string) {
   return MORE_SUB_SCREENS.includes(screen) ? "more" : screen;
@@ -736,20 +721,17 @@ function HomeContent() {
                 phase={program.phase}
                 xp={xp}
                 maxXp={MAX_XP_PER_LEVEL}
-                weight={profile?.weight ?? "0"}
                 goal={profile?.goal ?? "unknown"}
-                avatarId={profile.avatarId}
-                onBack={goBackToMore}
-              />
-            )}
-
-            {storageReady &&
-              assessmentLoaded &&
-              profile?.classId &&
-              screen === "achievements" && (
-              <AchievementsScreen
+                currentStreak={stats.currentLoginStreak}
+                longestStreak={stats.longestLoginStreak}
+                totalXp={totalXp}
+                highestLevel={Math.max(highestLevel, stats.highestLevel)}
+                workoutCount={workoutCount}
+                missionsCompleted={stats.totalMissionsCompleted}
+                daysSinceStart={daysSinceStart}
                 achievementsUnlocked={achievementsUnlocked}
                 progressInput={achievementProgressInput}
+                seasons={completedSeasons}
                 onBack={goBackToMore}
               />
             )}
@@ -761,13 +743,8 @@ function HomeContent() {
               <MoreScreen
                 onSelectBosses={() => setScreen("bosses")}
                 onSelectProgress={() => setScreen("progress")}
-                onSelectAchievements={() => setScreen("achievements")}
-                onSelectStrength={() => setScreen("strength")}
-                onSelectLegacy={() => setScreen("legacy")}
                 onSelectSettings={() => setScreen("settings")}
                 onSelectProfile={() => setScreen("profile")}
-                onSelectStats={() => setScreen("stats")}
-                onSelectSkillTree={() => setScreen("skilltree")}
                 level={level}
                 rank={rank}
                 week={weekNumber}
@@ -790,55 +767,6 @@ function HomeContent() {
                 unlockedTitleIds={unlockedTitleIds}
                 defeatedBadges={defeatedBadges}
                 onEquipTitle={equipTitle}
-              />
-            )}
-
-            {storageReady &&
-              assessmentLoaded &&
-              profile?.classId &&
-              screen === "stats" && (
-              <StatsScreen
-                totalXp={totalXp}
-                level={level}
-                highestLevel={Math.max(highestLevel, stats.highestLevel)}
-                workoutCount={workoutCount}
-                missionsCompleted={stats.totalMissionsCompleted}
-                achievementsUnlocked={achievementsUnlocked.length}
-                achievementsTotal={ACHIEVEMENTS.length}
-                seasonsCompleted={completedSeasons.length}
-                currentStreak={stats.currentLoginStreak}
-                longestStreak={stats.longestLoginStreak}
-                daysSinceStart={daysSinceStart}
-                equippedTitle={equippedTitle}
-                bossesDefeated={defeatedBosses.length}
-                bossesTotal={BOSSES.length}
-                bossCompletionPercent={bossCompletionPercent}
-                onBack={goBackToMore}
-              />
-            )}
-
-            {storageReady &&
-              assessmentLoaded &&
-              profile?.classId &&
-              screen === "strength" && (
-              <StrengthTrackerScreen onBack={goBackToMore} />
-            )}
-
-            {storageReady &&
-              assessmentLoaded &&
-              profile?.classId &&
-              screen === "legacy" && (
-              <LegacyScreen
-                seasons={completedSeasons}
-                onBack={goBackToMore}
-              />
-            )}
-
-            {storageReady && screen === "skilltree" && profile?.classId && (
-              <SkillTreeScreen
-                classId={profile.classId}
-                level={level}
-                onBack={goBackToMore}
               />
             )}
 

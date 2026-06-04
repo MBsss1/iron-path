@@ -1,36 +1,31 @@
 "use client";
 
-import { SeasonRecord } from "../hooks/useSeasons";
-import { useTranslation } from "../i18n/useTranslation";
-import ScreenShell from "./ScreenShell";
+import type { SeasonRecord } from "../../hooks/useSeasons";
+import { useTranslation } from "../../i18n/useTranslation";
 
 type Props = {
   seasons: SeasonRecord[];
-  onBack: () => void;
 };
 
-export default function LegacyScreen({ seasons, onBack }: Props) {
+export default function ProgressSeasonsSection({ seasons }: Props) {
   const { t, locale } = useTranslation();
   const dateLocale = locale === "ru" ? "ru-RU" : "en-US";
 
-  return (
-    <ScreenShell
-      eyebrow={t("legacyScreen.eyebrow")}
-      title={t("legacyScreen.title")}
-      subtitle={t("legacyScreen.subtitle")}
-      onBack={onBack}
-    >
-      {seasons.length === 0 && (
-        <div className="border border-iron-border p-4 iron-card-raised text-center">
-          <p className="uppercase font-black text-iron-text">
-            {t("legacyScreen.empty")}
-          </p>
-        </div>
-      )}
+  if (seasons.length === 0) {
+    return (
+      <div className="border border-iron-border p-4 iron-card-raised text-center">
+        <p className="uppercase font-black text-iron-text text-sm">
+          {t("legacyScreen.empty")}
+        </p>
+      </div>
+    );
+  }
 
+  return (
+    <div className="space-y-3">
       {seasons.map((s) => (
         <div key={s.id} className="border border-iron-border p-4 iron-card-panel">
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-4">
             <div>
               <p className="uppercase text-xs text-iron-gold">
                 {t("legacyScreen.season", { id: s.id })}
@@ -57,6 +52,6 @@ export default function LegacyScreen({ seasons, onBack }: Props) {
           </div>
         </div>
       ))}
-    </ScreenShell>
+    </div>
   );
 }

@@ -390,6 +390,8 @@ export default function FitnessAssessmentScreen({
         return (
           <div className="space-y-4">
             <AssessmentTimer
+              key="pushups"
+              timerKey="pushups"
               durationSeconds={120}
               label={t("assessment.timer.startTest")}
             />
@@ -412,6 +414,8 @@ export default function FitnessAssessmentScreen({
         return (
           <div className="space-y-4">
             <AssessmentTimer
+              key="squats"
+              timerKey="squats"
               durationSeconds={120}
               label={t("assessment.timer.startTest")}
             />
@@ -434,6 +438,8 @@ export default function FitnessAssessmentScreen({
         return (
           <div className="space-y-4">
             <AssessmentTimer
+              key="plank"
+              timerKey="plank"
               countUp
               label={t("assessment.timer.start")}
               onStop={(elapsed) => setPlankSeconds(String(elapsed))}

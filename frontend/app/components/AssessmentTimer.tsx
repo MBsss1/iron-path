@@ -7,6 +7,8 @@ import { hapticAssessmentTimerDone } from "../utils/haptics";
 type TimerStatus = "idle" | "running" | "paused" | "finished";
 
 export type AssessmentTimerProps = {
+  /** Changes reset timer state (e.g. pushups, squats, plank). */
+  timerKey?: string;
   durationSeconds?: number;
   countUp?: boolean;
   onComplete?: () => void;
@@ -25,7 +27,20 @@ function formatMmSs(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function resolveTimerMode(
+  countUp: boolean,
+  durationSeconds: number | undefined
+): { isCountUp: boolean; totalDuration: number; initialDisplay: number } {
+  const isCountUp = countUp || durationSeconds === undefined;
+  const totalDuration = isCountUp
+    ? COUNT_UP_RING_CAP
+    : (durationSeconds ?? 120);
+  const initialDisplay = isCountUp ? 0 : totalDuration;
+  return { isCountUp, totalDuration, initialDisplay };
+}
+
 export default function AssessmentTimer({
+  timerKey,
   durationSeconds,
   countUp = false,
   onComplete,
@@ -35,13 +50,13 @@ export default function AssessmentTimer({
   const { t } = useTranslation();
   const ringGradientId = useId();
 
-  const isCountUp = countUp || durationSeconds === undefined;
-  const totalDuration = isCountUp ? COUNT_UP_RING_CAP : (durationSeconds ?? 120);
+  const { isCountUp, totalDuration, initialDisplay } = resolveTimerMode(
+    countUp,
+    durationSeconds
+  );
 
   const [status, setStatus] = useState<TimerStatus>("idle");
-  const [displaySeconds, setDisplaySeconds] = useState(
-    isCountUp ? 0 : totalDuration
-  );
+  const [displaySeconds, setDisplaySeconds] = useState(initialDisplay);
 
   const elapsedRef = useRef(0);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -94,6 +109,18 @@ export default function AssessmentTimer({
     }, 200);
   }, [clearTick, syncDisplay]);
 
+  const resetTimerState = useCallback(() => {
+    clearTick();
+    elapsedRef.current = 0;
+    setStatus("idle");
+    const mode = resolveTimerMode(countUp, durationSeconds);
+    setDisplaySeconds(mode.initialDisplay);
+  }, [clearTick, countUp, durationSeconds]);
+
+  useEffect(() => {
+    resetTimerState();
+  }, [timerKey, durationSeconds, countUp, resetTimerState]);
+
   useEffect(() => () => clearTick(), [clearTick]);
 
   const handleStart = () => {
@@ -121,10 +148,7 @@ export default function AssessmentTimer({
   };
 
   const handleReset = () => {
-    clearTick();
-    elapsedRef.current = 0;
-    setStatus("idle");
-    setDisplaySeconds(isCountUp ? 0 : totalDuration);
+    resetTimerState();
   };
 
   const handleStop = () => {

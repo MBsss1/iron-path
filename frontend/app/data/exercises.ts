@@ -38,6 +38,7 @@ export type Exercise = {
   progressions: string[];
   contraindications?: string[];
   imageUrl?: string;
+  imageKey?: string;
   videoUrl?: string;
 };
 

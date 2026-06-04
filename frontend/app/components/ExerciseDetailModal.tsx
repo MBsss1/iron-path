@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { ExerciseInfo } from "../data/exerciseLibrary";
 import { useTranslation } from "../i18n/useTranslation";
 
@@ -15,13 +16,35 @@ function pickLang(locale: string): Lang {
   return locale === "ru" ? "ru" : "en";
 }
 
+function SectionCard({
+  title,
+  children,
+  variant = "default",
+}: {
+  title: string;
+  children: ReactNode;
+  variant?: "default" | "danger";
+}) {
+  return (
+    <section
+      className={`border rounded-sm p-4 ${
+        variant === "danger"
+          ? "border-iron-danger/40 bg-iron-danger/5"
+          : "border-iron-border iron-card-panel"
+      }`}
+    >
+      <p className="iron-label">{title}</p>
+      <div className="mt-2">{children}</div>
+    </section>
+  );
+}
+
 export default function ExerciseDetailModal({ exercise, isOpen, onClose }: Props) {
   const { t, locale } = useTranslation();
   const lang = pickLang(locale);
 
   if (!isOpen || !exercise) return null;
 
-  const categoryLabel = t(`exerciseLibrary.category.${exercise.category}`);
   const musclesLabel = exercise.muscles
     .map((m) => {
       const key = `exerciseLibrary.muscle.${m}`;
@@ -30,10 +53,9 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose }: Props
     })
     .join(", ");
 
-  const easier =
-    exercise.easierVariant?.[lang] ?? t("exerciseLibrary.variantNone");
-  const harder =
-    exercise.harderVariant?.[lang] ?? t("exerciseLibrary.variantNone");
+  const instructions = exercise.instructions[lang];
+  const mistakes = exercise.mistakes[lang].slice(0, 4);
+  const imageSrc = exercise.imageUrl;
 
   return (
     <div
@@ -44,59 +66,82 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose }: Props
       onClick={onClose}
     >
       <div
-        className="iron-modal p-5 sm:p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto animate-modal-enter"
+        className="iron-modal p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="iron-label text-iron-accent">{categoryLabel}</p>
+        {imageSrc && (
+          <div className="mb-4 rounded-sm overflow-hidden border border-iron-border">
+            <img
+              src={imageSrc}
+              alt=""
+              className="w-full h-40 object-cover"
+            />
+          </div>
+        )}
+
+        <p className="iron-label text-iron-accent">
+          {t(`exerciseLibrary.category.${exercise.category}`)}
+        </p>
         <h2 id="exercise-detail-title" className="iron-heading text-2xl mt-1">
           {exercise.name[lang]}
         </h2>
 
-        <section className="mt-4">
-          <p className="iron-label">{t("exerciseLibrary.description")}</p>
-          <p className="mt-2 text-sm text-iron-text leading-relaxed">
-            {exercise.description[lang]}
-          </p>
-        </section>
+        <div className="mt-4 space-y-3">
+          <SectionCard title={t("exerciseLibrary.sectionWhy")}>
+            <p className="text-sm text-iron-text leading-relaxed">
+              {exercise.description[lang]}
+            </p>
+          </SectionCard>
 
-        <section className="mt-4">
-          <p className="iron-label">{t("exerciseLibrary.muscles")}</p>
-          <p className="mt-1.5 text-sm text-iron-muted">{musclesLabel}</p>
-        </section>
+          <SectionCard title={t("exerciseLibrary.sectionMuscles")}>
+            <p className="text-sm text-iron-muted leading-relaxed">{musclesLabel}</p>
+          </SectionCard>
 
-        <section className="mt-4">
-          <p className="iron-label">{t("exerciseLibrary.instructions")}</p>
-          <ul className="mt-2 space-y-1.5 text-sm text-iron-text list-disc pl-4">
-            {exercise.instructions[lang].map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </section>
+          <SectionCard title={t("exerciseLibrary.sectionHow")}>
+            <ol className="space-y-2 text-sm text-iron-text list-none p-0 m-0">
+              {instructions.map((line, index) => (
+                <li key={line} className="flex gap-3 leading-relaxed">
+                  <span className="shrink-0 font-semibold text-iron-accent tabular-nums">
+                    {index + 1}.
+                  </span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ol>
+          </SectionCard>
 
-        <section className="mt-4">
-          <p className="iron-label">{t("exerciseLibrary.mistakes")}</p>
-          <ul className="mt-2 space-y-1.5 text-sm text-iron-danger/90 list-disc pl-4">
-            {exercise.mistakes[lang].map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </section>
+          {mistakes.length > 0 && (
+            <SectionCard title={t("exerciseLibrary.sectionMistakes")} variant="danger">
+              <ul className="space-y-2 text-sm text-iron-danger/95 list-none p-0 m-0">
+                {mistakes.map((line) => (
+                  <li key={line} className="flex gap-2 leading-relaxed">
+                    <span className="shrink-0" aria-hidden="true">
+                      !
+                    </span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </SectionCard>
+          )}
 
-        <div className="mt-4 grid grid-cols-1 gap-3 text-sm">
-          <div className="border border-iron-border p-3 rounded-sm iron-card-panel">
-            <p className="iron-label">{t("exerciseLibrary.easier")}</p>
-            <p className="mt-1 text-iron-text">{easier}</p>
-          </div>
-          <div className="border border-iron-border p-3 rounded-sm iron-card-panel">
-            <p className="iron-label">{t("exerciseLibrary.harder")}</p>
-            <p className="mt-1 text-iron-text">{harder}</p>
-          </div>
+          {exercise.easierVariant && (
+            <SectionCard title={t("exerciseLibrary.sectionEasier")}>
+              <p className="text-sm text-iron-text">{exercise.easierVariant[lang]}</p>
+            </SectionCard>
+          )}
+
+          {exercise.harderVariant && (
+            <SectionCard title={t("exerciseLibrary.sectionHarder")}>
+              <p className="text-sm text-iron-text">{exercise.harderVariant[lang]}</p>
+            </SectionCard>
+          )}
         </div>
 
         <button
           type="button"
           onClick={onClose}
-          className="iron-interactive iron-btn-primary w-full mt-6 py-3 text-sm font-semibold rounded-sm"
+          className="iron-interactive iron-btn-primary w-full mt-5 py-3 text-sm font-semibold rounded-sm"
         >
           {t("exerciseLibrary.close")}
         </button>

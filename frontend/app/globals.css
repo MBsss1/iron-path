@@ -437,9 +437,54 @@ html.telegram-webapp body {
   transition: stroke-dashoffset 0.35s linear, stroke 0.25s ease;
 }
 
+/* ——— Training / rest timers ——— */
+.training-timer-ring-progress {
+  transition: stroke-dashoffset 0.35s linear, stroke 0.25s ease;
+}
+
+.training-timer-digits {
+  animation: training-digit-fade 0.22s ease-out both;
+}
+
+@keyframes training-digit-fade {
+  from {
+    opacity: 0.35;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rest-timer-complete {
+  animation: rest-timer-done 0.45s ease-out both;
+}
+
+@keyframes rest-timer-done {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .assessment-timer-ring-progress {
+  .assessment-timer-ring-progress,
+  .training-timer-ring-progress {
     transition: none;
+  }
+
+  .training-timer-digits {
+    animation: none !important;
+  }
+
+  .rest-timer-complete {
+    animation: none !important;
   }
 
   *,

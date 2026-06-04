@@ -3,11 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ClassId } from "../data/classes";
 import type { GeneratedExercise, GeneratedWorkout } from "../data/workoutGeneratorV2";
-import { getWorkoutXp } from "../data/xpRewards";
 import { translateDayType, translatePhase } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import type { Profile } from "../hooks/useProfile";
-import { applyClassXpBonus } from "../utils/classBonuses";
 import { migrateProfile } from "../utils/migrations";
 import {
   advanceAfterWorkoutLogged,
@@ -20,6 +18,10 @@ import {
   type CalendarDay,
   type TrainingCalendarState,
 } from "../utils/trainingCalendar";
+import {
+  countSessionExercises,
+  getWorkoutMainItems,
+} from "../utils/trainingWorkoutView";
 import { safeGet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 import { getExerciseInfo } from "../data/exerciseLibrary";
@@ -29,6 +31,9 @@ import NextMilestoneBlock from "./coaching/NextMilestoneBlock";
 import ReassessmentPromptBlock from "./coaching/ReassessmentPromptBlock";
 import { getPathModeFromProfile } from "../data/pathMode";
 import ExerciseDetailModal from "./ExerciseDetailModal";
+import TrainingTimer from "./TrainingTimer";
+import TrainingExerciseCard from "./TrainingExerciseCard";
+import RestTimerModal from "./RestTimerModal";
 
 type Props = {
   onCompleteWorkout: () => void;
@@ -61,54 +66,51 @@ function pickLang(locale: string): Lang {
   return locale === "ru" ? "ru" : "en";
 }
 
-function WorkoutBlockView({
-  block,
+function TrainingSection({
+  title,
+  description,
+  items,
   lang,
-  blockTitle,
   onOpenExercise,
-  detailsLabel,
+  onRestTimer,
 }: {
-  block: { title: { en: string; ru: string }; items: GeneratedExercise[] };
+  title: string;
+  description: string;
+  items: GeneratedExercise[];
   lang: Lang;
-  blockTitle?: string;
   onOpenExercise: (exerciseId: string) => void;
-  detailsLabel: string;
+  onRestTimer: (exerciseId: string, restSeconds: number) => void;
 }) {
-  if (block.items.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
-    <div className="border border-iron-border p-4 iron-card-panel rounded-sm">
-      <p className="iron-label">
-        {blockTitle ?? block.title[lang]}
-      </p>
-      <ul className="mt-3 space-y-3">
-        {block.items.map((item) => {
-          const hasDetails = Boolean(getExerciseInfo(item.exerciseId));
+    <section className="border border-iron-border rounded-sm p-4 iron-card-panel space-y-4">
+      <div>
+        <h3 className="iron-heading text-lg">{title}</h3>
+        <p className="text-sm text-iron-muted mt-1 leading-relaxed">{description}</p>
+      </div>
+      <div className="space-y-3">
+        {items.map((item) => (
+          <TrainingExerciseCard
+            key={`${item.exerciseId}-${item.prescription.en}`}
+            item={item}
+            lang={lang}
+            onDetails={onOpenExercise}
+            onRestTimer={onRestTimer}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
 
-          return (
-            <li
-              key={item.exerciseId}
-              className="border-b border-iron-border pb-3 last:border-0 last:pb-0"
-            >
-              <div className="flex justify-between gap-3 text-sm">
-                <span className="text-iron-text font-medium">{item.name[lang]}</span>
-                <span className="text-iron-muted shrink-0 text-right">
-                  {item.prescription[lang]}
-                </span>
-              </div>
-              {hasDetails && (
-                <button
-                  type="button"
-                  onClick={() => onOpenExercise(item.exerciseId)}
-                  className="mt-1.5 text-xs font-semibold text-iron-accent hover:text-iron-text iron-interactive"
-                >
-                  {detailsLabel}
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+function AfterWorkoutNote({ t }: { t: (key: string) => string }) {
+  return (
+    <div className="border border-iron-border/80 rounded-sm p-4 bg-iron-panel/80">
+      <p className="text-sm font-semibold text-iron-text">{t("training.afterWorkout.title")}</p>
+      <p className="text-sm text-iron-muted mt-2 leading-relaxed">
+        {t("training.afterWorkout.body")}
+      </p>
     </div>
   );
 }
@@ -118,55 +120,35 @@ function TodayWorkoutView({
   lang,
   t,
   onOpenExercise,
+  onRestTimer,
 }: {
   workout: GeneratedWorkout;
   lang: Lang;
   t: (key: string, params?: Record<string, string | number>) => string;
   onOpenExercise: (exerciseId: string) => void;
+  onRestTimer: (exerciseId: string, restSeconds: number) => void;
 }) {
-  const detailsLabel = t("exerciseLibrary.details");
+  const mainItems = getWorkoutMainItems(workout);
 
   return (
-    <div className="space-y-3">
-      <p className="text-xs text-iron-muted text-center">
-        {t("training.estimatedMinutes", { minutes: workout.estimatedMinutes })}
-      </p>
-      <WorkoutBlockView
-        block={workout.blocks.warmup}
+    <div className="space-y-4">
+      <TrainingSection
+        title={t("training.block.warmupTitle")}
+        description={t("training.block.warmupDescription")}
+        items={workout.blocks.warmup.items}
         lang={lang}
         onOpenExercise={onOpenExercise}
-        detailsLabel={detailsLabel}
+        onRestTimer={onRestTimer}
       />
-      <WorkoutBlockView
-        block={workout.blocks.mainWork}
+      <TrainingSection
+        title={t("training.block.workoutTitle")}
+        description={t("training.block.workoutDescription")}
+        items={mainItems}
         lang={lang}
         onOpenExercise={onOpenExercise}
-        detailsLabel={detailsLabel}
+        onRestTimer={onRestTimer}
       />
-      {workout.blocks.accessoryWork.items.length > 0 && (
-        <WorkoutBlockView
-          block={workout.blocks.accessoryWork}
-          lang={lang}
-          blockTitle={t("training.accessory")}
-          onOpenExercise={onOpenExercise}
-          detailsLabel={detailsLabel}
-        />
-      )}
-      {workout.blocks.conditioning && workout.blocks.conditioning.items.length > 0 && (
-        <WorkoutBlockView
-          block={workout.blocks.conditioning}
-          lang={lang}
-          blockTitle={t("training.conditioning")}
-          onOpenExercise={onOpenExercise}
-          detailsLabel={detailsLabel}
-        />
-      )}
-      <WorkoutBlockView
-        block={workout.blocks.cooldown}
-        lang={lang}
-        onOpenExercise={onOpenExercise}
-        detailsLabel={detailsLabel}
-      />
+      <AfterWorkoutNote t={t} />
     </div>
   );
 }
@@ -217,8 +199,8 @@ export default function TrainingScreen({
   onCompleteWorkout,
   onCompleteWeek,
   program,
-  classId,
-  level,
+  classId: _classId,
+  level: _level,
   assessmentComplete,
   onStartAssessment,
   assessmentInput = null,
@@ -235,6 +217,12 @@ export default function TrainingScreen({
   const detailExercise = detailExerciseId
     ? getExerciseInfo(detailExerciseId) ?? null
     : null;
+
+  const [restTimer, setRestTimer] = useState<{
+    exerciseId: string;
+    seconds: number;
+    name: string;
+  } | null>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [calendarState, setCalendarState] = useState<TrainingCalendarState>(() =>
@@ -279,11 +267,23 @@ export default function TrainingScreen({
     ? translateDayType(todayDayType, t)
     : todayWorkout.title[lang];
 
-  const workoutXp = applyClassXpBonus(
-    getWorkoutXp(program.phase),
-    classId,
-    "workout",
-    level
+  const exerciseCount = useMemo(
+    () => countSessionExercises(todayWorkout),
+    [todayWorkout]
+  );
+
+  const handleOpenRestTimer = useCallback(
+    (exerciseId: string, restSeconds: number) => {
+      const item =
+        todayWorkout.blocks.warmup.items.find((i) => i.exerciseId === exerciseId) ??
+        getWorkoutMainItems(todayWorkout).find((i) => i.exerciseId === exerciseId);
+      setRestTimer({
+        exerciseId,
+        seconds: restSeconds,
+        name: item?.name[lang] ?? exerciseId,
+      });
+    },
+    [todayWorkout, lang]
   );
 
   const handleLogWorkout = useCallback(() => {
@@ -327,10 +327,6 @@ export default function TrainingScreen({
         <h2 className="iron-heading text-2xl sm:text-3xl mt-1">{todayTitle}</h2>
         <p className="mt-2 text-sm text-iron-muted">
           {t("training.planSlot", { current: activeSlot, total: 7 })}
-          {" · "}
-          {t("training.estimatedMinutes", {
-            minutes: todayWorkout.estimatedMinutes,
-          })}
         </p>
         <p className="mt-1 text-xs text-iron-muted">
           {t("training.phaseContext", {
@@ -339,6 +335,8 @@ export default function TrainingScreen({
           })}
         </p>
       </div>
+
+      <TrainingTimer />
 
       {assessmentInput && assessmentResult && (
         <TrainingReasoningBlock
@@ -369,6 +367,7 @@ export default function TrainingScreen({
           lang={lang}
           t={t}
           onOpenExercise={setDetailExerciseId}
+          onRestTimer={handleOpenRestTimer}
         />
 
         <ExerciseDetailModal
@@ -377,17 +376,30 @@ export default function TrainingScreen({
           onClose={() => setDetailExerciseId(null)}
         />
 
+        <RestTimerModal
+          isOpen={restTimer !== null}
+          durationSeconds={restTimer?.seconds ?? 60}
+          exerciseName={restTimer?.name ?? ""}
+          onClose={() => setRestTimer(null)}
+        />
+
         {workoutLoggedToday ? (
           <p className="text-center text-sm font-semibold text-iron-accent py-3 border border-iron-border rounded-sm bg-iron-raised">
             {t("training.logWorkoutDone")}
           </p>
         ) : (
           <>
+            <div className="border border-iron-border rounded-sm p-4 bg-iron-raised/40 text-sm text-iron-muted space-y-1">
+              <p className="font-semibold text-iron-text">{t("training.summary.title")}</p>
+              <p>{t("training.summary.exercises", { count: exerciseCount })}</p>
+              <p>
+                {t("training.summary.minutes", {
+                  minutes: todayWorkout.estimatedMinutes,
+                })}
+              </p>
+            </div>
             <p className="text-sm text-iron-muted text-center leading-relaxed">
               {t("training.logWorkoutExplain")}
-            </p>
-            <p className="text-xs text-iron-muted text-center">
-              {t("training.logWorkoutReward", { xp: workoutXp })}
             </p>
             <button
               type="button"

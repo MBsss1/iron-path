@@ -635,52 +635,35 @@ html.telegram-webapp body {
   vertical-align: bottom;
 }
 
-/* ——— Logo intro assembly (official mark) ——— */
+/* ——— Logo intro (inline SVG only) ——— */
 .logo-intro-scene {
-  min-height: min(70vh, 420px);
-  transition:
-    opacity var(--motion-duration-slow) var(--motion-ease-out),
-    transform var(--motion-duration-slow) var(--motion-ease-out);
-}
-
-.logo-intro-scene--shrink {
-  opacity: 0;
-  transform: scale(0.96);
+  min-height: min(70vh, 440px);
 }
 
 .logo-intro-hero {
   position: relative;
-  width: 149px;
-  height: 134px;
+  width: min(200px, 72vw);
   color: var(--iron-text);
   contain: layout style paint;
 }
 
-.logo-intro-hero__mark {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 149px;
-  height: 76px;
+.logo-intro-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-.logo-intro-hero__official {
-  position: absolute;
-  inset: 0;
+.logo-intro-mark-group--assembled {
+  filter: none;
+}
+
+.logo-intro-wordmark {
   opacity: 0;
   transition: opacity var(--motion-duration-normal) var(--motion-ease-out);
-  pointer-events: none;
 }
 
-.logo-intro-hero__official--visible {
+.logo-intro-wordmark--visible {
   opacity: 1;
-}
-
-.logo-intro-hero__img {
-  display: block;
-  width: 149px;
-  height: auto;
-  max-height: 134px;
 }
 
 .logo-intro-part {
@@ -770,16 +753,6 @@ html.telegram-webapp body {
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
-}
-
-.logo-intro-scene--shrink .logo-intro-hero {
-  transform: scale(0.78) translate3d(0, -12px, 0);
-  transition: transform var(--motion-duration-slow) var(--motion-ease-out);
-}
-
-.logo-intro-scene--shrink .logo-intro-taglines {
-  opacity: 0;
-  transform: translate3d(0, -6px, 0);
 }
 
 /* ——— Intro experience ——— */
@@ -895,12 +868,8 @@ html.telegram-webapp body {
     transform: none !important;
   }
 
-  .logo-intro-hero__official--visible {
-    opacity: 1;
-  }
-
-  .logo-intro-scene--shrink .logo-intro-hero {
-    transform: none !important;
+  .logo-intro-wordmark--visible {
+    opacity: 1 !important;
   }
 
   .iron-anim-premium-screen,

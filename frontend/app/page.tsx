@@ -116,7 +116,7 @@ function HomeContent() {
   const [showPopup, setShowPopup] = useState(false);
   const [lastXpReward, setLastXpReward] = useState(0);
   const [showWeekPopup, setShowWeekPopup] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
   const [xpFloat, setXpFloat] = useState<number | null>(null);
   const [showDailyReward, setShowDailyReward] = useState(false);
@@ -126,11 +126,27 @@ function HomeContent() {
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
   const handleIntroComplete = useCallback(() => setShowIntro(false), []);
 
+  /** Intro first (no splash) for new users; splash only when intro was already seen. */
   useEffect(() => {
-    if (!showSplash && languageChosen && !hasIntroSeen()) {
-      setShowIntro(true);
+    if (!languageLoaded) return;
+
+    if (!languageChosen) {
+      setShowIntro(false);
+      setShowSplash(false);
+      return;
     }
-  }, [showSplash, languageChosen]);
+
+    if (!hasIntroSeen()) {
+      setShowSplash(false);
+      setShowIntro(true);
+      return;
+    }
+
+    setShowIntro(false);
+    setShowSplash(true);
+    const splashTimer = window.setTimeout(() => setShowSplash(false), 1600);
+    return () => window.clearTimeout(splashTimer);
+  }, [languageLoaded, languageChosen]);
   const clearXpFloat = useCallback(() => setXpFloat(null), []);
   const goBackToMore = useCallback(() => setScreen("more"), []);
 

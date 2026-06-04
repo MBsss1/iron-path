@@ -1,21 +1,22 @@
 /**
- * Decomposed geometry of the official Iron Path logo mark (149×134 PNG).
- * Coordinates match the raster icon above the IRON PATH wordmark.
- * Used only to animate assembly — final frame uses /brand/iron-path-logo.png.
+ * Inline SVG geometry for the Iron Path logo (mark + wordmark).
+ * No raster assets — avoids broken images in Telegram WebView.
  */
-export const LOGO_MARK_VIEWBOX = { width: 149, height: 76 };
+export const LOGO_VIEWBOX = { width: 200, height: 118 };
+export const LOGO_MARK_HEIGHT = 78;
 
-/** Sloped foundation (ramp rising left → right). */
-export const LOGO_BASE_PATH = "M22 66 L127 66 L127 56 L22 61 Z";
+/** Sloped base: flat bottom, top edge rises left → right. */
+export const LOGO_BASE_PATH = "M28 68 L172 68 L172 58 L28 64 Z";
 
+/** Tops aligned; bottoms sit on the sloped base (left shortest → right tallest). */
 export const LOGO_COLUMNS = [
-  { id: "column-left", x: 36, y: 24, width: 15, height: 37 },
-  { id: "column-center", x: 60, y: 24, width: 15, height: 33 },
-  { id: "column-right", x: 84, y: 24, width: 15, height: 29 },
+  { id: "column-left", x: 54, y: 30, width: 16, height: 34 },
+  { id: "column-center", x: 84, y: 30, width: 16, height: 30 },
+  { id: "column-right", x: 114, y: 30, width: 16, height: 26 },
 ] as const;
 
-export const LOGO_MIDDLE_BAR = { x: 30, y: 17, width: 89, height: 5 };
-export const LOGO_TOP_BAR = { x: 44, y: 9, width: 61, height: 3 };
+export const LOGO_MIDDLE_BAR = { x: 38, y: 20, width: 124, height: 6 };
+export const LOGO_TOP_BAR = { x: 48, y: 10, width: 104, height: 4 };
 
 export type LogoPartId =
   | "base"
@@ -25,7 +26,7 @@ export type LogoPartId =
   | "middle-bar"
   | "top-bar";
 
-/** Assembly order: foundation → pillars → capitals. */
+/** Foundation → pillars → capitals. */
 export const LOGO_ASSEMBLY_ORDER: LogoPartId[] = [
   "base",
   "column-left",
@@ -35,26 +36,21 @@ export const LOGO_ASSEMBLY_ORDER: LogoPartId[] = [
   "top-bar",
 ];
 
-/** Initial offsets (px) before snapping into place — no rotation. */
-export const LOGO_PART_ORIGIN: Record<
-  LogoPartId,
-  { x: number; y: number; opacity?: number }
-> = {
-  base: { x: 0, y: 22 },
-  "column-left": { x: -10, y: -18 },
-  "column-center": { x: 0, y: -22 },
-  "column-right": { x: 10, y: -18 },
-  "middle-bar": { x: -14, y: 0 },
-  "top-bar": { x: 14, y: 0 },
+/** Entry direction per part (translate only, no rotation). */
+export const LOGO_PART_ORIGIN: Record<LogoPartId, { x: number; y: number }> = {
+  base: { x: -16, y: 22 },
+  "column-left": { x: 0, y: 26 },
+  "column-center": { x: 0, y: 26 },
+  "column-right": { x: 0, y: 26 },
+  "middle-bar": { x: 0, y: -16 },
+  "top-bar": { x: 0, y: -20 },
 };
 
 export const LOGO_INTRO_TIMING_MS = {
-  partStagger: 220,
-  partDuration: 480,
-  assembleSettle: 200,
-  glint: 900,
-  taglineStagger: 380,
-  taglineHold: 700,
-  shrink: 520,
-  handoff: 180,
+  partStagger: 200,
+  partDuration: 460,
+  assembleSettle: 180,
+  glint: 880,
+  taglineStagger: 360,
+  taglineBeforeCta: 400,
 } as const;

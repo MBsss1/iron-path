@@ -1,4 +1,5 @@
 import type { AchievementCategory, AchievementId } from "../data/achievements";
+import type { DayType } from "../data/workoutGeneratorV2";
 import type { AvatarId } from "../data/avatar";
 import type { BossDefinition } from "../data/bosses";
 import type { ClassId } from "../data/classes";
@@ -201,6 +202,10 @@ export type WorkoutMission = {
   title: string;
   exercises: [string, string][];
 };
+
+export function translateDayType(dayType: DayType, t: TranslateFn): string {
+  return t(`training.dayType.${dayType}`);
+}
 
 export function translateProgramWorkout(
   workoutLabel: string,

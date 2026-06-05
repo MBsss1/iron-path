@@ -3,14 +3,22 @@ import {
   type Exercise,
   type LocalizedText,
 } from "./exercises";
-import type { FitnessLevel } from "./fitnessAssessment";
+import type {
+  CardioAccess,
+  CardioPreference,
+  FitnessLevel,
+} from "./fitnessAssessment";
 import type { DayType, GeneratedExercise } from "./workoutGeneratorV2";
+
+export type WarmupLayer = "general" | "joints" | "activation";
 
 export type WarmupBuildContext = {
   input: {
     equipment: string[];
     limitations: string[];
     weight: number;
+    cardioAccess?: CardioAccess;
+    cardioPreference?: CardioPreference;
   };
   result: { overallLevel: FitnessLevel };
   dayType: DayType;
@@ -38,90 +46,142 @@ export const BANNED_WARMUP_EXERCISE_IDS = new Set([
 ]);
 
 export const ALLOWED_WARMUP_EXERCISE_IDS = new Set([
+  "marching",
+  "brisk_walk",
   "arm_circles",
   "shoulder_rolls",
   "elbow_rotations",
   "wrist_rotations",
-  "wall_slides",
   "hip_circles",
-  "leg_swings",
-  "ankle_rotations",
   "knee_rotations",
+  "ankle_rotations",
+  "scapular_pulls",
+  "dead_hang",
+  "wall_slides",
+  "leg_swings",
   "bird_dog",
   "dead_bug_light",
-  "scapular_pulls",
-  "marching",
-  "brisk_walk",
 ]);
 
+const EXERCISE_LAYER: Record<string, WarmupLayer> = {
+  marching: "general",
+  brisk_walk: "general",
+  arm_circles: "joints",
+  shoulder_rolls: "joints",
+  elbow_rotations: "joints",
+  wrist_rotations: "joints",
+  hip_circles: "joints",
+  knee_rotations: "joints",
+  ankle_rotations: "joints",
+  scapular_pulls: "activation",
+  dead_hang: "activation",
+  wall_slides: "activation",
+  leg_swings: "activation",
+  bird_dog: "activation",
+  dead_bug_light: "activation",
+};
+
 const WARMUP_PRESCRIPTIONS: Record<string, LocalizedText> = {
-  arm_circles: { en: "60 sec", ru: "60 сек" },
-  shoulder_rolls: { en: "60 sec", ru: "60 сек" },
-  elbow_rotations: { en: "45 sec", ru: "45 сек" },
-  wrist_rotations: { en: "45 sec", ru: "45 сек" },
+  marching: { en: "60 sec", ru: "60 сек" },
+  brisk_walk: { en: "60 sec", ru: "60 сек" },
+  arm_circles: { en: "30 sec", ru: "30 сек" },
+  shoulder_rolls: { en: "30 sec", ru: "30 сек" },
+  elbow_rotations: { en: "30 sec", ru: "30 сек" },
+  wrist_rotations: { en: "30 sec", ru: "30 сек" },
+  hip_circles: { en: "30 sec", ru: "30 сек" },
+  knee_rotations: { en: "20 sec", ru: "20 сек" },
+  ankle_rotations: { en: "20 sec", ru: "20 сек" },
+  scapular_pulls: { en: "10 reps", ru: "10 повторений" },
+  dead_hang: { en: "20–30 sec", ru: "20–30 сек" },
   wall_slides: { en: "10 reps", ru: "10 повторений" },
-  hip_circles: { en: "60 sec", ru: "60 сек" },
   leg_swings: { en: "10 each leg", ru: "10 на каждую ногу" },
-  ankle_rotations: { en: "45 sec", ru: "45 сек" },
-  knee_rotations: { en: "45 sec", ru: "45 сек" },
   bird_dog: { en: "8 each side", ru: "8 на сторону" },
   dead_bug_light: { en: "8 each side", ru: "8 на сторону" },
-  scapular_pulls: { en: "10 reps", ru: "10 повторений" },
-  marching: { en: "90 sec", ru: "90 сек" },
-  brisk_walk: { en: "90 sec", ru: "90 сек" },
 };
 
 const WARMUP_DURATION_SECONDS: Record<string, number> = {
-  arm_circles: 60,
-  shoulder_rolls: 60,
-  elbow_rotations: 45,
-  wrist_rotations: 45,
-  wall_slides: 50,
-  hip_circles: 60,
-  leg_swings: 50,
-  ankle_rotations: 45,
-  knee_rotations: 45,
-  bird_dog: 70,
-  dead_bug_light: 70,
-  scapular_pulls: 50,
-  marching: 90,
-  brisk_walk: 90,
+  marching: 60,
+  brisk_walk: 60,
+  arm_circles: 30,
+  shoulder_rolls: 30,
+  elbow_rotations: 30,
+  wrist_rotations: 30,
+  hip_circles: 30,
+  knee_rotations: 20,
+  ankle_rotations: 20,
+  scapular_pulls: 45,
+  dead_hang: 25,
+  wall_slides: 45,
+  leg_swings: 40,
+  bird_dog: 60,
+  dead_bug_light: 60,
 };
 
-const DAY_PRIORITY: Record<DayType, string[]> = {
-  pull: ["scapular_pulls", "shoulder_rolls"],
-  push: ["arm_circles", "wrist_rotations"],
-  legs: ["hip_circles", "ankle_rotations", "leg_swings"],
-  easy_run: ["marching", "brisk_walk", "ankle_rotations"],
-  intervals: ["marching", "brisk_walk", "ankle_rotations"],
-  full_body: [
-    "arm_circles",
-    "hip_circles",
-    "scapular_pulls",
-    "leg_swings",
-    "bird_dog",
-  ],
-  mobility: ["hip_circles", "shoulder_rolls", "bird_dog", "dead_bug_light"],
+const REDUCED_GENERAL_SECONDS = 45;
+
+type DayBlueprint = {
+  general: string[];
+  joints: string[];
+  activation: string[];
 };
 
-const FILL_POOL = [
-  "elbow_rotations",
-  "wall_slides",
-  "knee_rotations",
-  "dead_bug_light",
-  "marching",
-  "brisk_walk",
-];
-
-const DAY_TYPE_INDEX: Record<DayType, number> = {
-  full_body: 0,
-  push: 1,
-  pull: 2,
-  legs: 3,
-  easy_run: 4,
-  intervals: 5,
-  mobility: 6,
+/** Iron Path warmup standard — three layers per day type. */
+const DAY_BLUEPRINTS: Record<DayType, DayBlueprint> = {
+  pull: {
+    general: ["marching"],
+    joints: ["arm_circles", "shoulder_rolls"],
+    activation: ["scapular_pulls", "dead_hang"],
+  },
+  push: {
+    general: ["marching"],
+    joints: ["arm_circles", "shoulder_rolls", "wrist_rotations"],
+    activation: ["wall_slides"],
+  },
+  legs: {
+    general: ["marching"],
+    joints: ["hip_circles", "knee_rotations", "ankle_rotations"],
+    activation: ["leg_swings"],
+  },
+  easy_run: {
+    general: ["brisk_walk", "marching"],
+    joints: ["hip_circles", "ankle_rotations"],
+    activation: ["leg_swings"],
+  },
+  intervals: {
+    general: ["brisk_walk", "marching"],
+    joints: ["hip_circles", "ankle_rotations"],
+    activation: ["leg_swings"],
+  },
+  full_body: {
+    general: ["marching"],
+    joints: ["arm_circles", "shoulder_rolls", "hip_circles", "ankle_rotations"],
+    activation: ["bird_dog"],
+  },
+  mobility: {
+    general: ["marching"],
+    joints: ["hip_circles", "shoulder_rolls"],
+    activation: ["bird_dog", "dead_bug_light"],
+  },
 };
+
+const LEVEL_RANK: Record<FitnessLevel, number> = {
+  absolute_beginner: 0,
+  beginner: 1,
+  novice: 2,
+  intermediate: 3,
+  advanced: 4,
+};
+
+const ACTIVATION_FALLBACKS: Record<string, string[]> = {
+  scapular_pulls: ["wall_slides"],
+  dead_hang: ["wall_slides"],
+  leg_swings: ["bird_dog", "dead_bug_light"],
+  wall_slides: ["shoulder_rolls"],
+};
+
+export function getWarmupLayer(exerciseId: string): WarmupLayer | null {
+  return EXERCISE_LAYER[exerciseId] ?? null;
+}
 
 function hasLimitation(ctx: WarmupBuildContext, id: string): boolean {
   return ctx.input.limitations.includes(id);
@@ -131,12 +191,25 @@ function hasEquipment(ctx: WarmupBuildContext, eq: string): boolean {
   return ctx.input.equipment.includes(eq);
 }
 
+function hasBar(ctx: WarmupBuildContext): boolean {
+  return hasEquipment(ctx, "pull_up_bar");
+}
+
 function isHighImpactBlocked(ctx: WarmupBuildContext): boolean {
   return (
     hasLimitation(ctx, "knees") ||
     hasLimitation(ctx, "overweight") ||
     ctx.input.weight > 100
   );
+}
+
+function isCardioLimited(ctx: WarmupBuildContext): boolean {
+  const access = ctx.input.cardioAccess ?? "outdoor";
+  return access === "none" || access === "limited";
+}
+
+function isRunningDay(dayType: DayType): boolean {
+  return dayType === "easy_run" || dayType === "intervals";
 }
 
 function canUseWarmupExercise(ctx: WarmupBuildContext, exercise: Exercise): boolean {
@@ -149,11 +222,18 @@ function canUseWarmupExercise(ctx: WarmupBuildContext, exercise: Exercise): bool
     }
   }
   if (isHighImpactBlocked(ctx) && exercise.id === "leg_swings") return false;
-  if (hasLimitation(ctx, "shoulders") && exercise.id === "scapular_pulls") {
-    return false;
+  if (hasLimitation(ctx, "shoulders")) {
+    if (exercise.id === "scapular_pulls" || exercise.id === "dead_hang") {
+      return false;
+    }
   }
-  if (!hasEquipment(ctx, "pull_up_bar") && exercise.id === "scapular_pulls") {
-    return false;
+  if (!hasBar(ctx)) {
+    if (exercise.id === "scapular_pulls" || exercise.id === "dead_hang") {
+      return false;
+    }
+  }
+  if (exercise.id === "dead_hang" || exercise.id === "scapular_pulls") {
+    return hasBar(ctx) && !hasLimitation(ctx, "shoulders");
   }
   const needs = exercise.equipment.filter((e) => e !== "none");
   if (needs.length > 0) {
@@ -163,31 +243,71 @@ function canUseWarmupExercise(ctx: WarmupBuildContext, exercise: Exercise): bool
   return true;
 }
 
-function getWarmupCount(level: FitnessLevel): { min: number; max: number } {
-  switch (level) {
-    case "absolute_beginner":
-      return { min: 3, max: 4 };
-    case "beginner":
-      return { min: 4, max: 5 };
-    case "novice":
-      return { min: 5, max: 5 };
-    default:
-      return { min: 5, max: 6 };
+function resolveGeneralLayer(ctx: WarmupBuildContext, blueprint: DayBlueprint): string[] {
+  const ids = [...blueprint.general];
+
+  if (isRunningDay(ctx.dayType)) {
+    if (isCardioLimited(ctx)) {
+      return ["marching"];
+    }
+    return ids.includes("brisk_walk") ? ["brisk_walk", "marching"] : ["marching"];
   }
+
+  if (isCardioLimited(ctx) || ctx.input.cardioPreference === "dislike") {
+    return ["marching"];
+  }
+
+  return ids.length > 0 ? ids : ["marching"];
 }
 
-function rotatePool<T>(pool: T[], offset: number): T[] {
-  if (pool.length === 0) return [];
-  const start = offset % pool.length;
-  return [...pool.slice(start), ...pool.slice(0, start)];
+function tryResolveExercise(
+  ctx: WarmupBuildContext,
+  primaryId: string,
+  seen: Set<string>
+): string | null {
+  const candidates = [primaryId, ...(ACTIVATION_FALLBACKS[primaryId] ?? [])];
+  for (const id of candidates) {
+    if (seen.has(id) || !ALLOWED_WARMUP_EXERCISE_IDS.has(id)) continue;
+    const ex = getExercise(id);
+    if (!ex || !canUseWarmupExercise(ctx, ex)) continue;
+    return id;
+  }
+  return null;
 }
 
-function toWarmupGenerated(exerciseId: string): GeneratedExercise {
+function extraJointForLevel(ctx: WarmupBuildContext): string | null {
+  const rank = LEVEL_RANK[ctx.result.overallLevel];
+  if (rank < LEVEL_RANK.intermediate) return null;
+
+  const upperDays: DayType[] = ["pull", "push", "full_body"];
+  const lowerDays: DayType[] = ["legs", "easy_run", "intervals", "full_body"];
+
+  if (upperDays.includes(ctx.dayType)) {
+    return tryResolveExercise(ctx, "elbow_rotations", new Set());
+  }
+  if (lowerDays.includes(ctx.dayType)) {
+    return tryResolveExercise(ctx, "knee_rotations", new Set());
+  }
+  return null;
+}
+
+function toWarmupGenerated(
+  exerciseId: string,
+  reducedGeneral: boolean
+): GeneratedExercise {
   const ex = getExercise(exerciseId);
-  const prescription = WARMUP_PRESCRIPTIONS[exerciseId] ?? {
+  const layer = EXERCISE_LAYER[exerciseId];
+  const isReducedGeneral =
+    reducedGeneral && layer === "general" && exerciseId === "marching";
+
+  let prescription = WARMUP_PRESCRIPTIONS[exerciseId] ?? {
     en: "30 sec",
     ru: "30 сек",
   };
+  if (isReducedGeneral) {
+    prescription = { en: "45 sec", ru: "45 сек" };
+  }
+
   return {
     exerciseId,
     name: ex?.name ?? { en: exerciseId, ru: exerciseId },
@@ -196,52 +316,92 @@ function toWarmupGenerated(exerciseId: string): GeneratedExercise {
   };
 }
 
+function durationForItem(exerciseId: string, reducedGeneral: boolean): number {
+  if (reducedGeneral && exerciseId === "marching") {
+    return REDUCED_GENERAL_SECONDS;
+  }
+  return WARMUP_DURATION_SECONDS[exerciseId] ?? 30;
+}
+
 export function buildWarmupExercises(ctx: WarmupBuildContext): GeneratedExercise[] {
-  const { min, max } = getWarmupCount(ctx.result.overallLevel);
-  const target =
-    min +
-    (DAY_TYPE_INDEX[ctx.dayType] + ctx.result.overallLevel.length) %
-      (max - min + 1);
+  const blueprint = DAY_BLUEPRINTS[ctx.dayType];
+  const reducedGeneral =
+    isCardioLimited(ctx) ||
+    ctx.input.cardioPreference === "dislike" ||
+    (!isRunningDay(ctx.dayType) && isCardioLimited(ctx));
 
   const ordered: string[] = [];
   const seen = new Set<string>();
+  const layersPresent = new Set<WarmupLayer>();
 
-  const tryAdd = (id: string) => {
-    if (seen.has(id) || !ALLOWED_WARMUP_EXERCISE_IDS.has(id)) return;
-    const ex = getExercise(id);
-    if (!ex || !canUseWarmupExercise(ctx, ex)) return;
-    seen.add(id);
-    ordered.push(id);
+  const addResolved = (id: string) => {
+    const resolved = tryResolveExercise(ctx, id, seen);
+    if (!resolved) return;
+    seen.add(resolved);
+    ordered.push(resolved);
+    const layer = EXERCISE_LAYER[resolved];
+    if (layer) layersPresent.add(layer);
   };
 
-  for (const id of DAY_PRIORITY[ctx.dayType]) tryAdd(id);
-
-  const universal = ["arm_circles", "shoulder_rolls", "hip_circles"];
-  for (const id of universal) {
-    if (ordered.length >= target) break;
-    tryAdd(id);
+  for (const id of resolveGeneralLayer(ctx, blueprint)) {
+    addResolved(id);
   }
 
-  const fillOffset =
-    DAY_TYPE_INDEX[ctx.dayType] * 2 + ctx.result.overallLevel.length;
-  for (const id of rotatePool(FILL_POOL, fillOffset)) {
-    if (ordered.length >= target) break;
-    tryAdd(id);
+  for (const id of blueprint.joints) {
+    addResolved(id);
   }
 
-  return ordered.slice(0, target).map(toWarmupGenerated);
+  for (const id of blueprint.activation) {
+    addResolved(id);
+  }
+
+  const layerOrder: WarmupLayer[] = ["general", "joints", "activation"];
+  for (const layer of layerOrder) {
+    if (layersPresent.has(layer)) continue;
+    const pool =
+      layer === "general"
+        ? ["marching", "brisk_walk"]
+        : layer === "joints"
+          ? ["arm_circles", "shoulder_rolls", "hip_circles", "ankle_rotations"]
+          : ["bird_dog", "wall_slides", "dead_bug_light"];
+    for (const id of pool) {
+      if (layersPresent.has(layer)) break;
+      addResolved(id);
+    }
+  }
+
+  const extraJoint = extraJointForLevel(ctx);
+  if (extraJoint && !seen.has(extraJoint)) {
+    seen.add(extraJoint);
+    ordered.push(extraJoint);
+    layersPresent.add("joints");
+  }
+
+  return ordered.map((id) => toWarmupGenerated(id, reducedGeneral));
 }
 
+export function getWarmupLayersPresent(items: GeneratedExercise[]): WarmupLayer[] {
+  const layers = new Set<WarmupLayer>();
+  for (const item of items) {
+    const layer = getWarmupLayer(item.exerciseId);
+    if (layer) layers.add(layer);
+  }
+  return [...layers];
+}
+
+/** Setup and transition time between checklist items (~15–20 sec each). */
+const TRANSITION_SECONDS_PER_ITEM = 18;
+
 export function estimateWarmupSeconds(items: GeneratedExercise[]): number {
-  return items.reduce(
-    (sum, item) =>
-      sum + (WARMUP_DURATION_SECONDS[item.exerciseId] ?? 35),
-    0
-  );
+  const exerciseTime = items.reduce((sum, item) => {
+    const reduced =
+      item.prescription.en === "45 sec" || item.prescription.ru === "45 сек";
+    return sum + durationForItem(item.exerciseId, reduced);
+  }, 0);
+  return exerciseTime + items.length * TRANSITION_SECONDS_PER_ITEM;
 }
 
 export function estimateWarmupMinutes(items: GeneratedExercise[]): number {
-  const raw = Math.round(estimateWarmupSeconds(items) / 60);
-  if (items.length === 0) return 5;
-  return Math.min(7, Math.max(5, raw));
+  const seconds = estimateWarmupSeconds(items);
+  return Math.max(1, Math.ceil(seconds / 60));
 }

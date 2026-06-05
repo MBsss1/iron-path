@@ -25,6 +25,10 @@ import {
   buildStageMainExercises,
   type WeekBuildContext,
 } from "./progressions/stageWorkoutBuilder";
+import {
+  buildWarmupExercises,
+  estimateWarmupSeconds,
+} from "./warmupBuilder";
 
 export type { AssessmentInput, AssessmentResult } from "./fitnessAssessment";
 export { assessFitness } from "./fitnessAssessment";
@@ -88,7 +92,7 @@ const LEVEL_RANK: Record<FitnessLevel, number> = {
   advanced: 4,
 };
 
-type GeneratorContext = {
+export type GeneratorContext = {
   input: AssessmentInput;
   result: AssessmentResult;
   dayType: DayType;
@@ -310,39 +314,7 @@ function gen(
 }
 
 export function selectWarmupExercises(ctx: GeneratorContext): GeneratedExercise[] {
-  const items: GeneratedExercise[] = [];
-  const add = (id: string, en: string, ru: string, rest = 0) => {
-    const ex = getExercise(id);
-    if (!ex || !canUseExercise(ctx, ex)) return;
-    items.push(toGenerated(id, { en, ru }, rest));
-  };
-
-  add("arm_circles", "2 × 10 each direction", "2 × 10 в каждую сторону");
-  add("shoulder_rolls", "8 forward, 8 back", "8 вперёд, 8 назад");
-  add("hip_circles", "8 each direction", "8 в каждую сторону");
-
-  if (
-    isRunningDayType(ctx.dayType) &&
-    allowsRunningWorkouts(ctx.input.cardioAccess)
-  ) {
-    add("brisk_walk", "3 min", "3 мин", 0);
-  } else if (!isHighImpactBlocked(ctx)) {
-    add("jumping_jacks", "30 sec", "30 сек", 0);
-  } else {
-    add("brisk_walk", "3 min", "3 мин", 0);
-  }
-
-  if (ctx.dayType === "push" || ctx.dayType === "full_body") {
-    add("incline_pushup_warmup", "2 × 8", "2 × 8", 45);
-  }
-  if (
-    (ctx.dayType === "pull" || ctx.dayType === "full_body") &&
-    hasEquipment(ctx, "pull_up_bar")
-  ) {
-    add("scapular_pulls", "2 × 8", "2 × 8", 45);
-  }
-
-  return items.slice(0, 6);
+  return buildWarmupExercises(ctx);
 }
 
 export function selectCooldownExercises(ctx: GeneratorContext): GeneratedExercise[] {
@@ -660,7 +632,7 @@ function estimateMinutes(workout: Omit<GeneratedWorkout, "estimatedMinutes">): n
   const countRest = (items: GeneratedExercise[]) =>
     items.reduce((s, i) => s + i.restSeconds, 0);
 
-  total += workout.blocks.warmup.items.length * 45;
+  total += estimateWarmupSeconds(workout.blocks.warmup.items);
   total += countRest(workout.blocks.mainWork.items);
   total += workout.blocks.mainWork.items.length * 90;
   total += countRest(workout.blocks.accessoryWork.items);

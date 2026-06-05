@@ -252,6 +252,225 @@ export const EXERCISES: Exercise[] = [
     },
     progressions: ["incline_pushups", "pushups"],
   }),
+  ex({
+    id: "elbow_rotations",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["arms"],
+    name: { en: "Elbow rotations", ru: "Вращения локтями" },
+    instructions: {
+      en: [
+        "Arms bent 90°, elbows at sides.",
+        "Rotate forearms in small circles.",
+        "10 each direction, keep shoulders still.",
+      ],
+      ru: [
+        "Руки согнуты 90°, локти у корпуса.",
+        "Вращай предплечья небольшими кругами.",
+        "10 в каждую сторону, плечи неподвижны.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Moving shoulders", "Circles too large"],
+      ru: ["Двигают плечи", "Слишком широкие круги"],
+    },
+    regressions: ["arm_circles"],
+  }),
+  ex({
+    id: "wrist_rotations",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["forearms"],
+    name: { en: "Wrist rotations", ru: "Вращения запястьями" },
+    instructions: {
+      en: [
+        "Extend arms forward, palms down.",
+        "Circle wrists slowly both ways.",
+        "10 reps each direction.",
+      ],
+      ru: [
+        "Руки вперёд, ладони вниз.",
+        "Медленно вращай запястья в обе стороны.",
+        "10 раз в каждую сторону.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Rushing", "Bending elbows"],
+      ru: ["Торопятся", "Сгибают локти"],
+    },
+  }),
+  ex({
+    id: "wall_slides",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["shoulders", "upper back"],
+    name: { en: "Wall slides", ru: "Скольжение по стене" },
+    instructions: {
+      en: [
+        "Back flat to wall, arms in W shape.",
+        "Slide arms up overhead without losing contact.",
+        "10 slow reps.",
+      ],
+      ru: [
+        "Спина к стене, руки в форме W.",
+        "Скользи руками вверх, не отрывая от стены.",
+        "10 медленных повторов.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Arching lower back", "Ribs flaring"],
+      ru: ["Прогиб поясницы", "Рёбра выходят вперёд"],
+    },
+    contraindications: ["shoulders"],
+    regressions: ["shoulder_rolls"],
+  }),
+  ex({
+    id: "leg_swings",
+    category: "warmup",
+    level: "beginner",
+    muscles: ["hips", "legs"],
+    name: { en: "Leg swings", ru: "Махи ногой" },
+    instructions: {
+      en: [
+        "Hold wall for balance.",
+        "Swing one leg forward and back smoothly.",
+        "10 each leg, controlled range.",
+      ],
+      ru: [
+        "Держись за стену для баланса.",
+        "Махи одной ногой вперёд-назад плавно.",
+        "10 на каждую ногу, контролируемая амплитуда.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Swinging too hard", "Leaning torso"],
+      ru: ["Слишком резкие махи", "Наклон корпуса"],
+    },
+    contraindications: ["knees", "overweight"],
+    regressions: ["hip_circles"],
+  }),
+  ex({
+    id: "ankle_rotations",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["calves", "ankles"],
+    name: { en: "Ankle rotations", ru: "Вращения голеностопом" },
+    instructions: {
+      en: [
+        "Stand on one foot or hold support.",
+        "Circle ankle slowly both ways.",
+        "10 each foot.",
+      ],
+      ru: [
+        "Стоя на одной ноге или с опорой.",
+        "Медленно вращай голеностоп в обе стороны.",
+        "10 на каждую стопу.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Moving too fast", "Unstable balance"],
+      ru: ["Слишком быстро", "Нет устойчивости"],
+    },
+  }),
+  ex({
+    id: "knee_rotations",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["legs"],
+    name: { en: "Knee rotations", ru: "Вращения коленями" },
+    instructions: {
+      en: [
+        "Feet together, hands on knees.",
+        "Draw small circles with knees.",
+        "8 each direction.",
+      ],
+      ru: [
+        "Стопы вместе, руки на коленях.",
+        "Небольшие круги коленями.",
+        "8 в каждую сторону.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Circles too large", "Locked hips"],
+      ru: ["Слишком широкие круги", "Заблокирован таз"],
+    },
+    contraindications: ["knees"],
+    regressions: ["ankle_rotations"],
+  }),
+  ex({
+    id: "bird_dog",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["core", "back"],
+    name: { en: "Bird dog", ru: "Собака-птица" },
+    instructions: {
+      en: [
+        "On all fours, spine neutral.",
+        "Extend opposite arm and leg.",
+        "Hold 2 sec, 8 each side.",
+      ],
+      ru: [
+        "На четвереньках, спина нейтральна.",
+        "Вытягивай противоположные руку и ногу.",
+        "Пауза 2 сек, 8 на сторону.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Rotating hips", "Arching back"],
+      ru: ["Поворот таза", "Прогиб спины"],
+    },
+    progressions: ["dead_bug_light"],
+  }),
+  ex({
+    id: "dead_bug_light",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["core"],
+    name: { en: "Dead bug (light)", ru: "Мёртвый жук (лёгкий)" },
+    instructions: {
+      en: [
+        "On back, knees bent, arms up.",
+        "Tap heel to floor one leg at a time.",
+        "Slow, 8 each side, back flat.",
+      ],
+      ru: [
+        "На спине, колени согнуты, руки вверх.",
+        "Касайся пола пяткой по одной ноге.",
+        "Медленно, 8 на сторону, поясница прижата.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Arching lower back", "Moving too fast"],
+      ru: ["Прогиб поясницы", "Слишком быстро"],
+    },
+    regressions: ["bird_dog"],
+    progressions: ["dead_bug"],
+  }),
+  ex({
+    id: "marching",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["legs", "core"],
+    name: { en: "Marching in place", ru: "Ходьба на месте" },
+    instructions: {
+      en: [
+        "Stand tall, march knees up gently.",
+        "Pump arms naturally.",
+        "60 seconds at easy pace.",
+      ],
+      ru: [
+        "Стоя ровно, поднимай колени мягко.",
+        "Руки работают естественно.",
+        "60 секунд в лёгком темпе.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Leaning back", "Stomping feet"],
+      ru: ["Откидываются назад", "Топают ногами"],
+    },
+    regressions: ["brisk_walk"],
+    progressions: ["light_jog"],
+  }),
 
   // Pull
   ex({

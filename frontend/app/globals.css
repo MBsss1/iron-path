@@ -521,6 +521,14 @@ html.telegram-webapp body {
   animation: iron-done-pop var(--motion-duration-fast) var(--motion-ease-out) both;
 }
 
+.warmup-start-btn {
+  animation: iron-done-pop var(--motion-duration-fast) var(--motion-ease-out) both;
+}
+
+.warmup-complete-moment {
+  animation: iron-done-pop var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
 .iron-skeleton {
   background: linear-gradient(
     90deg,

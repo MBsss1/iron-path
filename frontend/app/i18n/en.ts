@@ -765,6 +765,7 @@ const en = {
     block: {
       warmupTitle: "Warm-up",
       warmupDescription: "Prepare your muscles and joints for the workout.",
+      warmupDuration: "≈ {{minutes}} min",
       workoutTitle: "Workout",
       workoutDescription: "Main part of today's workout.",
     },
@@ -783,6 +784,8 @@ const en = {
       progress: "Completed {{done}} of {{total}}",
       remaining: "{{count}} exercises left",
       goToWorkout: "Go to workout",
+      startWorkout: "Start workout",
+      warmupProgress: "{{percent}}%",
       warmupCompleteHint:
         "Warm-up complete. Move on to the main workout.",
       workoutCompleteHint:

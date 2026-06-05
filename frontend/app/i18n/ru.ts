@@ -765,6 +765,7 @@ const ru = {
     block: {
       warmupTitle: "Разминка",
       warmupDescription: "Подготовьте мышцы и суставы к нагрузке.",
+      warmupDuration: "≈ {{minutes}} мин",
       workoutTitle: "Тренировка",
       workoutDescription: "Главная часть сегодняшней тренировки.",
     },
@@ -783,6 +784,8 @@ const ru = {
       progress: "Выполнено {{done}} из {{total}}",
       remaining: "Осталось: {{count}} упражнений",
       goToWorkout: "Перейти к тренировке",
+      startWorkout: "Начать тренировку",
+      warmupProgress: "{{percent}}%",
       warmupCompleteHint:
         "Разминка завершена. Переходите к тренировке.",
       workoutCompleteHint:

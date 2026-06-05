@@ -39,6 +39,7 @@ import { getPathModeFromProfile } from "../data/pathMode";
 import ExerciseDetailModal from "./ExerciseDetailModal";
 import TrainingTimer from "./TrainingTimer";
 import TrainingExerciseCard from "./TrainingExerciseCard";
+import WarmupChecklist from "./training/WarmupChecklist";
 import RestTimerPanel from "./RestTimerPanel";
 import Stagger from "../animations/Stagger";
 import StepTransition from "../animations/StepTransition";
@@ -312,7 +313,12 @@ export default function TrainingScreen({
   );
 
   const handleGoToWorkout = () => {
-    patchSession({ activeStage: "workout" });
+    if (!allWarmupDone) return;
+    patchSession({
+      activeStage: "workout",
+      workoutTimerStartedAt: Date.now(),
+      workoutTimerIsRunning: true,
+    });
   };
 
   const handleOpenRest = useCallback(
@@ -390,50 +396,44 @@ export default function TrainingScreen({
         </p>
       </div>
 
-      <TrainingTimer session={session} onSessionChange={patchSession} />
+      {activeStage === "workout" && (
+        <TrainingTimer session={session} onSessionChange={patchSession} />
+      )}
 
       <section className="border border-iron-accent-dim/40 bg-iron-panel p-4 rounded-sm space-y-4 min-h-[200px]">
         <StepTransition stepKey={activeStage} className="space-y-4">
         {activeStage === "warmup" && (
-          <>
-            {allWarmupDone && (
-              <CompletionMoment message={t("completion.warmup")} />
-            )}
-            <TrainingStageBlock
-              stage="warmup"
-              title={t("training.block.warmupTitle")}
-              description={t("training.block.warmupDescription")}
+          <div className="space-y-4">
+            <WarmupChecklist
               items={warmupItems}
               completedIds={completedWarmup}
               lang={lang}
               onToggleComplete={toggleWarmup}
-              onOpenExercise={setDetailExerciseId}
-              onOpenRest={handleOpenRest}
-              t={t}
             />
-            {allWarmupDone ? (
-              <div className="space-y-3 pt-2 border-t border-iron-border">
-                <p className="text-sm text-iron-muted leading-relaxed">
-                  {t("training.flow.warmupCompleteHint")}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleGoToWorkout}
-                  className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[52px] rounded-sm"
-                >
-                  {t("training.flow.goToWorkout")}
-                </button>
-              </div>
-            ) : (
-              warmupItems.length > 0 && (
-                <p className="text-xs text-iron-muted">
+            <div className="space-y-2 pt-2 border-t border-iron-border">
+              {!allWarmupDone && warmupItems.length > 0 && (
+                <p className="text-xs text-iron-muted text-center">
                   {t("training.flow.remaining", {
                     count: warmupItems.length - warmupDoneCount,
                   })}
                 </p>
-              )
-            )}
-          </>
+              )}
+              <button
+                type="button"
+                onClick={handleGoToWorkout}
+                disabled={!allWarmupDone}
+                className={`iron-interactive w-full py-4 text-base font-semibold min-h-[52px] rounded-sm transition-opacity ${
+                  allWarmupDone
+                    ? "iron-btn-primary warmup-start-btn"
+                    : "border border-iron-border text-iron-muted opacity-50 cursor-not-allowed"
+                }`}
+              >
+                {allWarmupDone
+                  ? t("training.flow.startWorkout")
+                  : t("training.flow.goToWorkout")}
+              </button>
+            </div>
+          </div>
         )}
 
         {activeStage === "workout" && (

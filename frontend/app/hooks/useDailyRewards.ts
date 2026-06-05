@@ -100,6 +100,7 @@ export function useDailyRewards() {
     loaded,
     lastClaimDate: data.lastClaimDate,
     currentStreak: data.currentStreak,
+    storageReady: loaded,
     canClaim,
     rewardDay,
     xpReward,

@@ -245,12 +245,26 @@ function HomeContent() {
   } = useSeasons();
 
   const {
+<<<<<<< HEAD
     loaded: dailyRewardsLoaded,
+=======
+    storageReady: dailyRewardsReady,
+>>>>>>> 552e347 (clean up first launch and more screen)
     canClaim,
     rewardDay,
     xpReward,
     claimReward,
   } = useDailyRewards();
+<<<<<<< HEAD
+=======
+
+  const canShowDailyReward =
+    dailyRewardsReady &&
+    Boolean(profile) &&
+    Boolean(profile?.classId) &&
+    workoutCount > 0 &&
+    canClaim;
+>>>>>>> 552e347 (clean up first launch and more screen)
 
   const {
     loaded: statsLoaded,
@@ -352,11 +366,24 @@ function HomeContent() {
   ]);
 
   useEffect(() => {
+<<<<<<< HEAD
     if (!storageReady) return;
     if (canClaim && profile && !showSplash) {
+=======
+    if (canShowDailyReward && !showSplash) {
+>>>>>>> 552e347 (clean up first launch and more screen)
       setShowDailyReward(true);
+      return;
     }
+<<<<<<< HEAD
   }, [canClaim, profile, showSplash, storageReady]);
+=======
+
+    if (workoutCount === 0) {
+      setShowDailyReward(false);
+    }
+  }, [canShowDailyReward, showSplash, workoutCount]);
+>>>>>>> 552e347 (clean up first launch and more screen)
 
   useEffect(() => {
     if (leveledUp) hapticLevelUp();
@@ -871,6 +898,7 @@ function HomeContent() {
               profile && hasPathModeSelected(profile) &&
               screen === "more" && (
               <MoreScreen
+<<<<<<< HEAD
                 onSelectBosses={() => setScreen("bosses")}
                 onSelectProgress={() => setScreen("progress")}
                 onSelectSettings={() => setScreen("settings")}
@@ -884,6 +912,12 @@ function HomeContent() {
                 mind={mind}
                 work={work}
                 equippedTitle={equippedTitle}
+=======
+                onSelectProfile={() => setScreen("profile")}
+                onSelectProgress={() => setScreen("progress")}
+                onSelectStages={() => setScreen("achievements")}
+                onSelectSettings={() => setScreen("settings")}
+>>>>>>> 552e347 (clean up first launch and more screen)
               />
             )}
 
@@ -966,12 +1000,21 @@ function HomeContent() {
               onCloseBossDefeat={handleCloseBossDefeat}
             />
 
+<<<<<<< HEAD
             <DailyRewardPopup
               isOpen={showDailyReward && canClaim}
               day={rewardDay}
               xpReward={xpReward}
               onClaim={handleClaimDailyReward}
             />
+=======
+        <DailyRewardPopup
+          isOpen={showDailyReward && canShowDailyReward}
+          day={rewardDay}
+          xpReward={xpReward}
+          onClaim={handleClaimDailyReward}
+        />
+>>>>>>> 552e347 (clean up first launch and more screen)
 
             <BottomNav screen={navScreen} setScreen={setScreen} />
           </>

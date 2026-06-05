@@ -888,7 +888,7 @@ const ru = {
   more: {
     menu: "Меню",
     title: "Ещё",
-    subtitle: "Записи и настройки",
+    subtitle: "Профиль, прогресс и настройки",
     profile: {
       label: "Личное дело",
       title: "Профиль",

@@ -888,7 +888,7 @@ const en = {
   more: {
     menu: "Menu",
     title: "More",
-    subtitle: "Records and settings",
+    subtitle: "Profile, progress, and settings",
     profile: {
       label: "Identity",
       title: "Profile",

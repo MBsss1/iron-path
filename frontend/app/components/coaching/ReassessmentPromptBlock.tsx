@@ -6,16 +6,29 @@ import IronButton from "../IronButton";
 type Props = {
   onRetake: () => void;
   onDismiss: () => void;
+  variant?: "default" | "adaptation";
 };
 
-export default function ReassessmentPromptBlock({ onRetake, onDismiss }: Props) {
+export default function ReassessmentPromptBlock({
+  onRetake,
+  onDismiss,
+  variant = "default",
+}: Props) {
   const { t } = useTranslation();
+  const titleKey =
+    variant === "adaptation"
+      ? "coaching.reassessment.adaptationTitle"
+      : "coaching.reassessment.title";
+  const bodyKey =
+    variant === "adaptation"
+      ? "coaching.reassessment.adaptationBody"
+      : "coaching.reassessment.body";
 
   return (
     <div className="border border-iron-accent-dim/50 iron-card-accent p-4 rounded-sm space-y-3">
-      <p className="iron-label">{t("coaching.reassessment.title")}</p>
+      <p className="iron-label">{t(titleKey)}</p>
       <p className="text-sm text-iron-text leading-relaxed">
-        {t("coaching.reassessment.body")}
+        {t(bodyKey)}
       </p>
       <p className="text-xs text-iron-muted">{t("coaching.reassessment.hint")}</p>
       <div className="grid grid-cols-2 gap-2">

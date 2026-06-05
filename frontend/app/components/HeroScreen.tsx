@@ -51,6 +51,7 @@ type Props = {
   onViewBoss: () => void;
   assessmentInput?: AssessmentInput | null;
   showReassessmentPrompt?: boolean;
+  showAdaptationHint?: boolean;
   onRetakeAssessment?: () => void;
   onDismissReassessment?: () => void;
 };
@@ -84,6 +85,7 @@ export default function HeroScreen({
   onViewBoss,
   assessmentInput = null,
   showReassessmentPrompt = false,
+  showAdaptationHint = false,
   onRetakeAssessment,
   onDismissReassessment,
 }: Props) {
@@ -280,8 +282,11 @@ export default function HeroScreen({
         />
       )}
 
-      {showReassessmentPrompt && onRetakeAssessment && onDismissReassessment && (
+      {(showReassessmentPrompt || showAdaptationHint) &&
+        onRetakeAssessment &&
+        onDismissReassessment && (
         <ReassessmentPromptBlock
+          variant={showAdaptationHint && !showReassessmentPrompt ? "adaptation" : "default"}
           onRetake={onRetakeAssessment}
           onDismiss={onDismissReassessment}
         />

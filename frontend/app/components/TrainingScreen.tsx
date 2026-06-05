@@ -55,6 +55,7 @@ type Props = {
   assessmentInput?: AssessmentInput | null;
   assessmentResult?: AssessmentResult | null;
   showReassessmentPrompt?: boolean;
+  showAdaptationHint?: boolean;
   onRetakeAssessment?: () => void;
   onDismissReassessment?: () => void;
 };
@@ -187,6 +188,7 @@ export default function TrainingScreen({
   assessmentInput = null,
   assessmentResult = null,
   showReassessmentPrompt = false,
+  showAdaptationHint = false,
   onRetakeAssessment,
   onDismissReassessment,
 }: Props) {
@@ -537,8 +539,11 @@ export default function TrainingScreen({
         </details>
       )}
 
-      {showReassessmentPrompt && onRetakeAssessment && onDismissReassessment && (
+      {(showReassessmentPrompt || showAdaptationHint) &&
+        onRetakeAssessment &&
+        onDismissReassessment && (
         <ReassessmentPromptBlock
+          variant={showAdaptationHint && !showReassessmentPrompt ? "adaptation" : "default"}
           onRetake={onRetakeAssessment}
           onDismiss={onDismissReassessment}
         />

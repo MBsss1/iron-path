@@ -71,7 +71,15 @@ import FitnessAssessmentScreen from "./components/FitnessAssessmentScreen";
 import TrainingStartDebriefScreen from "./components/coaching/TrainingStartDebriefScreen";
 import { useFitnessAssessment } from "./hooks/useFitnessAssessment";
 import { useCoachingState } from "./hooks/useCoachingState";
-import { shouldSuggestReassessment } from "./data/trainingCoaching";
+import {
+  shouldSuggestAdaptation,
+  shouldSuggestReassessment,
+} from "./data/trainingCoaching";
+import {
+  estimateWeeksWithoutProgress,
+  resetProgressionState,
+  tickProgressionWeek,
+} from "./utils/progressionState";
 import type { AssessmentInput } from "./data/fitnessAssessment";
 import { STORAGE_KEYS } from "./utils/storageKeys";
 
@@ -288,6 +296,7 @@ function HomeContent() {
       const prevCount = coachingState?.assessmentCompletionCount ?? 0;
       completeAssessment(input);
       onAssessmentCompleted();
+      resetProgressionState(input);
       setDebriefVariant(prevCount >= 1 ? "reassessment" : "initial");
       try {
         localStorage.removeItem(STORAGE_KEYS.trainingCalendar);
@@ -544,6 +553,16 @@ function HomeContent() {
 
   const weekNumber = Number(week);
 
+  useEffect(() => {
+    if (!assessmentInput) return;
+    tickProgressionWeek(assessmentInput, weekNumber);
+  }, [assessmentInput, weekNumber]);
+
+  const weeksWithoutProgress = useMemo(() => {
+    if (!assessmentInput) return 0;
+    return estimateWeeksWithoutProgress(assessmentInput, weekNumber);
+  }, [assessmentInput, weekNumber]);
+
   const showReassessmentPrompt = useMemo(() => {
     if (!assessmentComplete || !assessmentRecord?.completedAt || !coachingLoaded) {
       return false;
@@ -554,7 +573,8 @@ function HomeContent() {
     return shouldSuggestReassessment(
       assessmentRecord.completedAt,
       weekNumber,
-      coachingState?.lastReassessmentPromptDismissWeek ?? 0
+      coachingState?.lastReassessmentPromptDismissWeek ?? 0,
+      { weeksWithoutProgress }
     );
   }, [
     assessmentComplete,
@@ -562,6 +582,22 @@ function HomeContent() {
     coachingLoaded,
     coachingState?.lastReassessmentPromptDismissWeek,
     weekNumber,
+    weeksWithoutProgress,
+  ]);
+
+  const showAdaptationHint = useMemo(() => {
+    if (!assessmentComplete || !assessmentInput || showReassessmentPrompt) return false;
+    if (weekNumber === (coachingState?.lastReassessmentPromptDismissWeek ?? 0)) {
+      return false;
+    }
+    return shouldSuggestAdaptation(weeksWithoutProgress);
+  }, [
+    assessmentComplete,
+    assessmentInput,
+    coachingState?.lastReassessmentPromptDismissWeek,
+    showReassessmentPrompt,
+    weekNumber,
+    weeksWithoutProgress,
   ]);
 
   const handleDismissReassessment = useCallback(() => {
@@ -805,6 +841,7 @@ function HomeContent() {
                 onViewBoss={handleViewBoss}
                 assessmentInput={assessmentInput}
                 showReassessmentPrompt={showReassessmentPrompt}
+                showAdaptationHint={showAdaptationHint}
                 onRetakeAssessment={handleStartAssessment}
                 onDismissReassessment={handleDismissReassessment}
               />
@@ -847,6 +884,7 @@ function HomeContent() {
                 assessmentInput={assessmentInput}
                 assessmentResult={assessmentResult}
                 showReassessmentPrompt={showReassessmentPrompt}
+                showAdaptationHint={showAdaptationHint}
                 onRetakeAssessment={handleStartAssessment}
                 onDismissReassessment={handleDismissReassessment}
               />

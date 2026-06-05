@@ -8,6 +8,7 @@ import {
   type AssessmentResult,
   type CardioAccess,
   type CardioPreference,
+  type CardioTestType,
   type FitnessLevel,
   type Limitation,
 } from "../data/fitnessAssessment";
@@ -31,7 +32,10 @@ type StepId =
   | "pushups"
   | "squats"
   | "plank"
+  | "endurance"
   | "limitations";
+
+type RunPreset = "under5" | "5to10" | "10to20" | "over20";
 
 const CARDIO_ACCESS: CardioAccess[] = [
   "outdoor",
@@ -75,6 +79,12 @@ export default function FitnessAssessmentScreen({
   const [maxPushUps, setMaxPushUps] = useState("");
   const [squatReps, setSquatReps] = useState("");
   const [plankSeconds, setPlankSeconds] = useState("");
+  const [cardioTestType, setCardioTestType] = useState<CardioTestType | null>(
+    null
+  );
+  const [runMinutes, setRunMinutes] = useState("");
+  const [walkMinutes, setWalkMinutes] = useState("");
+  const [runPreset, setRunPreset] = useState<RunPreset | null>(null);
   const [limitations, setLimitations] = useState<Limitation[]>([]);
   const [previewResult, setPreviewResult] = useState<AssessmentResult | null>(
     null
@@ -83,9 +93,13 @@ export default function FitnessAssessmentScreen({
   const steps = useMemo((): StepId[] => {
     const list: StepId[] = ["equipment", "cardio"];
     if (hasBar) list.push("pullups");
-    list.push("pushups", "squats", "plank", "limitations");
+    list.push("pushups", "squats", "plank", "endurance", "limitations");
     return list;
   }, [hasBar]);
+
+  const { weight: profileWeight } = parseProfileNumbers(profile);
+  const suggestWalkDefault =
+    profileWeight >= 100 || cardioAccess === "none";
 
   const currentStep = steps[stepIndex] ?? "equipment";
   const totalSteps = steps.length;
@@ -119,7 +133,8 @@ export default function FitnessAssessmentScreen({
       cardioPreference === null ||
       !maxPushUps.trim() ||
       !squatReps.trim() ||
-      !plankSeconds.trim()
+      !plankSeconds.trim() ||
+      cardioTestType === null
     ) {
       return null;
     }
@@ -141,7 +156,7 @@ export default function FitnessAssessmentScreen({
     const limits =
       limitations.length > 0 ? limitations : (["none"] as Limitation[]);
 
-    return {
+    const input: AssessmentInput = {
       age,
       height,
       weight,
@@ -155,6 +170,20 @@ export default function FitnessAssessmentScreen({
       cardioAccess,
       cardioPreference,
     };
+
+    if (cardioTestType) {
+      input.cardioTestType = cardioTestType;
+      if (cardioTestType === "run") {
+        const mins = parseInt(runMinutes, 10);
+        if (!Number.isNaN(mins) && mins >= 0) input.runMinutes = mins;
+      }
+      if (cardioTestType === "walk") {
+        const mins = parseInt(walkMinutes, 10);
+        if (!Number.isNaN(mins) && mins >= 0) input.walkMinutes = mins;
+      }
+    }
+
+    return input;
   };
 
   const canAdvance = (): boolean => {
@@ -178,6 +207,19 @@ export default function FitnessAssessmentScreen({
       case "plank": {
         const n = parseInt(plankSeconds, 10);
         return !Number.isNaN(n) && n >= 0 && n <= 600;
+      }
+      case "endurance": {
+        if (!cardioTestType) return false;
+        if (cardioTestType === "skipped") return true;
+        if (cardioTestType === "run") {
+          const n = parseInt(runMinutes, 10);
+          return !Number.isNaN(n) && n >= 0 && n <= 180;
+        }
+        if (cardioTestType === "walk") {
+          const n = parseInt(walkMinutes, 10);
+          return !Number.isNaN(n) && n >= 1 && n <= 180;
+        }
+        return false;
       }
       case "limitations":
         return limitations.length > 0;
@@ -247,6 +289,7 @@ export default function FitnessAssessmentScreen({
           <li>{t("assessment.intro.checkPush")}</li>
           <li>{t("assessment.intro.checkLegs")}</li>
           <li>{t("assessment.intro.checkCore")}</li>
+          <li>{t("assessment.intro.checkCardio")}</li>
         </ul>
         <p className="mt-4 text-sm text-iron-text leading-relaxed">
           {t("assessment.intro.outro")}
@@ -262,6 +305,7 @@ export default function FitnessAssessmentScreen({
     const lang = locale === "ru" ? "ru" : "en";
     const strengths = previewResult.notes[lang].slice(0, 2);
     const cardioLine = previewResult.cardioSummary[lang];
+    const previewInput = buildInput();
 
     return (
       <ScreenShell
@@ -288,6 +332,29 @@ export default function FitnessAssessmentScreen({
         <div className="iron-card-panel p-4 mb-4">
           <p className="iron-label">{t("assessment.results.cardioBlock")}</p>
           <p className="mt-2 text-sm text-iron-text">{cardioLine}</p>
+          {previewInput?.cardioTestType === "run" && (
+            <p className="mt-2 text-sm text-iron-text">
+              {t("coaching.debrief.metricRun")}:{" "}
+              <span className="font-semibold">
+                {previewInput.runMinutes ?? 0}{" "}
+                {t("coaching.milestone.unitMinutes")}
+              </span>
+            </p>
+          )}
+          {previewInput?.cardioTestType === "walk" && (
+            <p className="mt-2 text-sm text-iron-text">
+              {t("coaching.debrief.metricWalk")}:{" "}
+              <span className="font-semibold">
+                {previewInput.walkMinutes ?? 0}{" "}
+                {t("coaching.milestone.unitMinutes")}
+              </span>
+            </p>
+          )}
+          {previewInput?.cardioTestType === "skipped" && (
+            <p className="mt-2 text-sm text-iron-muted">
+              {t("coaching.debrief.cardioSkippedNote")}
+            </p>
+          )}
         </div>
 
         {strengths.length > 0 && (
@@ -459,6 +526,131 @@ export default function FitnessAssessmentScreen({
             </div>
           </div>
         );
+      case "endurance": {
+        const presetClass = (selected: boolean) =>
+          `text-left border border-iron-border p-2.5 text-sm font-semibold rounded-sm iron-interactive ${
+            selected
+              ? "bg-iron-accent-dim text-iron-bg border-iron-accent"
+              : "iron-card-raised text-iron-text"
+          }`;
+
+        const applyPreset = (preset: RunPreset) => {
+          setRunPreset(preset);
+          const values: Record<RunPreset, string> = {
+            under5: "3",
+            "5to10": "7",
+            "10to20": "15",
+            over20: "25",
+          };
+          setRunMinutes(values[preset]);
+        };
+
+        return (
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                className={optionClass(cardioTestType === "run")}
+                onClick={() => {
+                  setCardioTestType("run");
+                  setWalkMinutes("");
+                }}
+              >
+                {t("assessment.endurance.modeRun")}
+              </button>
+              <button
+                type="button"
+                className={optionClass(cardioTestType === "walk")}
+                onClick={() => {
+                  setCardioTestType("walk");
+                  setRunMinutes("");
+                  setRunPreset(null);
+                }}
+              >
+                {t("assessment.endurance.modeWalk")}
+              </button>
+              <button
+                type="button"
+                className={optionClass(cardioTestType === "skipped")}
+                onClick={() => {
+                  setCardioTestType("skipped");
+                  setRunMinutes("");
+                  setWalkMinutes("");
+                  setRunPreset(null);
+                }}
+              >
+                {t("assessment.endurance.modeSkip")}
+              </button>
+            </div>
+
+            {suggestWalkDefault && cardioTestType === null && (
+              <p className="text-sm text-iron-accent border border-iron-accent-dim/40 rounded-sm p-3">
+                {t("assessment.endurance.safetySuggestWalk")}
+              </p>
+            )}
+
+            {cardioTestType === "run" && (
+              <div className="space-y-4">
+                <p className="font-semibold text-iron-text">
+                  {t("assessment.endurance.runQuestion")}
+                </p>
+                <p className="text-xs text-iron-muted">
+                  {t("assessment.endurance.runHint")}
+                </p>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={runMinutes}
+                  onChange={(e) => {
+                    setRunMinutes(e.target.value);
+                    setRunPreset(null);
+                  }}
+                  placeholder={t("assessment.endurance.minutesPlaceholder")}
+                  className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      ["under5", "assessment.endurance.presetUnder5"],
+                      ["5to10", "assessment.endurance.preset5to10"],
+                      ["10to20", "assessment.endurance.preset10to20"],
+                      ["over20", "assessment.endurance.presetOver20"],
+                    ] as const
+                  ).map(([preset, labelKey]) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      className={presetClass(runPreset === preset)}
+                      onClick={() => applyPreset(preset)}
+                    >
+                      {t(labelKey)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {cardioTestType === "walk" && (
+              <div className="space-y-4">
+                <p className="font-semibold text-iron-text">
+                  {t("assessment.endurance.walkQuestion")}
+                </p>
+                <p className="text-xs text-iron-muted">
+                  {t("assessment.endurance.walkHint")}
+                </p>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={walkMinutes}
+                  onChange={(e) => setWalkMinutes(e.target.value)}
+                  placeholder={t("assessment.endurance.minutesPlaceholder")}
+                  className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
+                />
+              </div>
+            )}
+          </div>
+        );
+      }
       case "limitations":
         return (
           <div className="space-y-3">
@@ -501,6 +693,7 @@ export default function FitnessAssessmentScreen({
   const stepTipKey = `assessment.${currentStep}.tip` as const;
   const stepWarnKey = `assessment.${currentStep}.warn` as const;
   const isLimitationsStep = currentStep === "limitations";
+  const isEnduranceStep = currentStep === "endurance";
 
   return (
     <ScreenShell
@@ -527,7 +720,13 @@ export default function FitnessAssessmentScreen({
             <span className="text-iron-accent font-semibold">ⓘ </span>
             {t(stepTipKey)}
           </p>
-          <p className="mt-2 text-sm text-iron-danger/90">{t(stepWarnKey)}</p>
+          {(isEnduranceStep || t(stepWarnKey)) && (
+            <p className="mt-2 text-sm text-iron-danger/90">
+              {isEnduranceStep
+                ? t("assessment.endurance.warn")
+                : t(stepWarnKey)}
+            </p>
+          )}
         </>
       )}
 

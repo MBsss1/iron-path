@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   dailyPersonalTasks: "iron-path-daily-personal-tasks",
   habitControl: "iron-path-habit-control",
   coachingState: "iron-path-coaching-state",
+  progressionState: "iron-path-progression-state",
   activeTrainingSession: "iron-path-active-training-session",
   introSeen: "iron-path-intro-seen",
 } as const;

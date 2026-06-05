@@ -3,6 +3,10 @@ import type {
   AssessmentResult,
   FitnessLevel,
 } from "./fitnessAssessment";
+import { resolveCardioTestType } from "./fitnessAssessment";
+import { normalizeFitnessGoal } from "./fitnessGoals";
+import { getFocusTracksForDay } from "./progressions/goalPriorities";
+import { getStageSnapshot } from "./progressions/stageEngine";
 import type { DayType } from "./workoutGeneratorV2";
 
 const LEVEL_RANK: Record<FitnessLevel, number> = {
@@ -54,24 +58,26 @@ export function getStartDebriefFocusKeys(
   return [...new Set(keys)].slice(0, 5);
 }
 
-/** i18n keys — why today's / this week's training looks this way. */
+/** i18n keys — why today's training looks this way (stage-driven). */
 export function getTrainingReasonKeys(
   input: AssessmentInput,
   result: AssessmentResult,
   dayType?: DayType
 ): string[] {
   const keys: string[] = [];
+  const goal = normalizeFitnessGoal(input.goal);
 
-  if (input.maxPullUps <= 2) {
-    keys.push("coaching.reason.pullLow");
+  if (dayType) {
+    const focusTracks = getFocusTracksForDay(goal, dayType);
+    for (const trackId of focusTracks.slice(0, 2)) {
+      const snap = getStageSnapshot(input, trackId);
+      if (snap.toRung !== null) {
+        keys.push(`coaching.reason.stage.${trackId}`);
+      }
+    }
   }
-  if (input.maxPushUps <= 5) {
-    keys.push("coaching.reason.pushLow");
-  }
-  if (
-    input.limitations.includes("overweight") ||
-    input.weight > 100
-  ) {
+
+  if (input.limitations.includes("overweight") || input.weight > 100) {
     keys.push("coaching.reason.overweight");
   }
   if (input.limitations.includes("knees")) {
@@ -80,9 +86,6 @@ export function getTrainingReasonKeys(
   if (input.limitations.includes("back")) {
     keys.push("coaching.reason.back");
   }
-  if (LEVEL_RANK[result.overallLevel] <= LEVEL_RANK.beginner) {
-    keys.push("coaching.reason.beginner");
-  }
   if (!input.equipment.includes("pull_up_bar")) {
     keys.push("coaching.reason.noBar");
   }
@@ -90,11 +93,29 @@ export function getTrainingReasonKeys(
     keys.push("coaching.reason.cardioLimited");
   }
 
+  if (goal === "mass_gain") {
+    keys.push("coaching.reason.goalMass");
+    if (resolveCardioTestType(input) === "skipped") {
+      keys.push("coaching.reason.noCardioMass");
+    }
+    if (resolveCardioTestType(input) === "walk" && dayType === "mobility") {
+      keys.push("coaching.reason.walkRecovery");
+    }
+  } else if (goal === "weight_loss") {
+    keys.push("coaching.reason.goalWeightLoss");
+  } else if (goal === "running") {
+    keys.push("coaching.reason.goalRunning");
+  }
+
   if (dayType === "mobility") {
     keys.push("coaching.reason.mobilityDay");
   }
   if (dayType === "easy_run" || dayType === "intervals") {
     keys.push("coaching.reason.cardioDay");
+  }
+
+  if (LEVEL_RANK[result.overallLevel] <= LEVEL_RANK.beginner) {
+    keys.push("coaching.reason.beginner");
   }
 
   if (keys.length === 0) {
@@ -110,14 +131,32 @@ export function getWeeksSinceAssessment(completedAt: string | null): number {
   return Math.floor(ms / (7 * 24 * 60 * 60 * 1000));
 }
 
+export type ReassessmentOptions = {
+  /** User advanced 2+ stage bands since last assessment. */
+  milestonesAdvancedEarly?: boolean;
+  /** Weeks without metric change on primary tracks. */
+  weeksWithoutProgress?: number;
+};
+
 export function shouldSuggestReassessment(
   completedAt: string | null,
   programWeek: number,
-  lastPromptedWeek: number
+  lastPromptedWeek: number,
+  options?: ReassessmentOptions
 ): boolean {
   if (!completedAt) return false;
+
+  if (options?.milestonesAdvancedEarly) return true;
+  if ((options?.weeksWithoutProgress ?? 0) >= 4) return true;
+
   const weeksSince = getWeeksSinceAssessment(completedAt);
   if (weeksSince >= 4) return true;
   if (programWeek >= 4 && programWeek - lastPromptedWeek >= 4) return true;
   return false;
+}
+
+export function shouldSuggestAdaptation(
+  weeksWithoutProgress: number
+): boolean {
+  return weeksWithoutProgress >= 3 && weeksWithoutProgress < 4;
 }

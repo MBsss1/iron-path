@@ -19,6 +19,12 @@ import {
   type ActiveFitnessGoal,
   type FitnessGoal,
 } from "./fitnessGoals";
+import {
+  buildStageAccessoryExercises,
+  buildStageConditioningExercises,
+  buildStageMainExercises,
+  type WeekBuildContext,
+} from "./progressions/stageWorkoutBuilder";
 
 export type { AssessmentInput, AssessmentResult } from "./fitnessAssessment";
 export { assessFitness } from "./fitnessAssessment";
@@ -670,18 +676,30 @@ export function generateWorkout(
   input: AssessmentInput,
   result: AssessmentResult,
   dayType: DayType,
-  pathMode: PathMode = "balance"
+  pathMode: PathMode = "balance",
+  sessionSeed = 0,
+  weekCtx?: WeekBuildContext
 ): GeneratedWorkout {
   const ctx: GeneratorContext = { input, result, dayType, pathMode };
 
   const warmupItems = selectWarmupExercises(ctx);
-  const mainItems = selectMainExercises(ctx);
-  const accessoryItems = selectAccessoryExercises(ctx);
-  const conditioningItems = selectConditioningExercises(ctx);
+  let mainItems = buildStageMainExercises(ctx, sessionSeed, weekCtx);
+  if (mainItems.length === 0) {
+    mainItems = selectMainExercises(ctx);
+  }
+  let accessoryItems = buildStageAccessoryExercises(ctx, sessionSeed);
+  if (accessoryItems.length === 0) {
+    accessoryItems = selectAccessoryExercises(ctx);
+  }
+  let conditioningItems = buildStageConditioningExercises(ctx, sessionSeed, weekCtx);
+  const skipLegacyConditioning = normalizeFitnessGoal(input.goal) === "mass_gain";
+  if (conditioningItems === undefined && !skipLegacyConditioning) {
+    conditioningItems = selectConditioningExercises(ctx);
+  }
   const cooldownItems = selectCooldownExercises(ctx);
 
   const raw: Omit<GeneratedWorkout, "estimatedMinutes"> = {
-    id: `${input.goal}_${result.overallLevel}_${dayType}_${pathMode}`,
+    id: `${input.goal}_${result.overallLevel}_${dayType}_${pathMode}_${sessionSeed}`,
     title: DAY_TITLES[dayType],
     goal: input.goal,
     level: result.overallLevel,
@@ -902,11 +920,32 @@ export function generateWeekPlan(
   );
   const types = applyCardioWeekTemplate(withPath, input);
 
-  const days: WeekDaySlot[] = types.map((dayType, dayIndex) => ({
-    dayIndex,
-    dayType,
-    workout: generateWorkout(input, result, dayType, pathMode),
-  }));
+  const fullBodyExcludeIds = new Set<string>();
+  const days: WeekDaySlot[] = types.map((dayType, dayIndex) => {
+    const fullBodyOccurrence = types
+      .slice(0, dayIndex)
+      .filter((d) => d === "full_body").length;
+    const weekCtx: WeekBuildContext = {
+      weekDayTypes: types,
+      excludeMainIds:
+        dayType === "full_body" ? fullBodyExcludeIds : new Set<string>(),
+      fullBodyOccurrence,
+    };
+    const workout = generateWorkout(
+      input,
+      result,
+      dayType,
+      pathMode,
+      dayIndex,
+      weekCtx
+    );
+    if (dayType === "full_body") {
+      for (const item of workout.blocks.mainWork.items) {
+        fullBodyExcludeIds.add(item.exerciseId);
+      }
+    }
+    return { dayIndex, dayType, workout };
+  });
 
   return {
     goal: input.goal,

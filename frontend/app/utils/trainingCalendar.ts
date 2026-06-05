@@ -170,7 +170,7 @@ export function getTodayWorkout(
   const { input, result } = getAssessmentForProfile(profile);
   const slot = weekPlan.days[activeDayIndex];
   const pathMode = getPathModeFromProfile(profile) ?? "balance";
-  return generateWorkout(input, result, slot.dayType, pathMode);
+  return generateWorkout(input, result, slot.dayType, pathMode, activeDayIndex);
 }
 
 export function advanceAfterWorkoutLogged(

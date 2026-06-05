@@ -1,7 +1,9 @@
 "use client";
 
-import type { AssessmentInput } from "../../data/fitnessAssessment";
-import { getPhysicalMilestoneTracks } from "../../data/physicalMilestones";
+import {
+  formatMilestoneGoalText,
+  getGoalOrderedMilestones,
+} from "../../data/physicalMilestones";
 import { useFitnessAssessment } from "../../hooks/useFitnessAssessment";
 import { useTranslation } from "../../i18n/useTranslation";
 
@@ -17,7 +19,7 @@ export default function ProgressPhysicalMilestonesSection() {
     );
   }
 
-  const tracks = getPhysicalMilestoneTracks(input);
+  const tracks = getGoalOrderedMilestones(input);
 
   return (
     <div className="space-y-4">
@@ -30,18 +32,29 @@ export default function ProgressPhysicalMilestonesSection() {
           className="border border-iron-border iron-card-panel p-4 rounded-sm"
         >
           <div className="flex justify-between items-baseline gap-2">
-            <p className="font-bold text-sm text-iron-text">{t(track.i18nLabel)}</p>
+            <p className="font-bold text-sm text-iron-text">
+              {track.id === "running" && track.cardioMode === "walk"
+                ? t("coaching.milestone.walking")
+                : t(track.i18nLabel)}
+            </p>
             <p className="text-xs text-iron-muted">
-              {track.current} {t(track.i18nUnit)}
+              {track.cardioMode === "skipped"
+                ? t("coaching.milestones.skippedLine")
+                : `${track.current} ${t(track.i18nUnit)}`}
             </p>
           </div>
           {track.nextRung !== null ? (
             <>
+              {track.cardioMode !== "skipped" && (
+                <p className="text-xs text-iron-accent mt-1">
+                  {t("coaching.milestones.currentStage", {
+                    from: track.previousRung,
+                    to: track.nextRung,
+                  })}
+                </p>
+              )}
               <p className="text-xs text-iron-muted mt-2">
-                {t("coaching.milestones.nextTarget", {
-                  value: track.nextRung,
-                  unit: t(track.i18nUnit),
-                })}
+                {formatMilestoneGoalText(track, t)}
               </p>
               <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden rounded-sm">
                 <div

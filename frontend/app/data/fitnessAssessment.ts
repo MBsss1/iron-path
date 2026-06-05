@@ -1,5 +1,5 @@
 import type { Equipment } from "./exercises";
-import type { FitnessGoal } from "./fitnessGoals";
+import { normalizeFitnessGoal, type FitnessGoal } from "./fitnessGoals";
 
 export type { FitnessGoal } from "./fitnessGoals";
 
@@ -8,6 +8,8 @@ export type Limitation = "knees" | "back" | "shoulders" | "overweight" | "none";
 export type CardioAccess = "outdoor" | "treadmill" | "limited" | "none";
 
 export type CardioPreference = "enjoy" | "neutral" | "dislike";
+
+export type CardioTestType = "run" | "walk" | "skipped";
 
 export type FitnessLevel =
   | "absolute_beginner"
@@ -27,6 +29,10 @@ export type AssessmentInput = {
   plankSeconds: number;
   run1kmSeconds?: number;
   walkRun12MinMeters?: number;
+  /** New cardio endurance test (optional for legacy saves). */
+  cardioTestType?: CardioTestType;
+  runMinutes?: number;
+  walkMinutes?: number;
   equipment: Equipment[];
   limitations: Limitation[];
   cardioAccess: CardioAccess;
@@ -112,7 +118,77 @@ export function classifyCoreLevel(plankSeconds: number): FitnessLevel {
   return "advanced";
 }
 
+export function resolveCardioTestType(input: AssessmentInput): CardioTestType {
+  if (input.cardioTestType) return input.cardioTestType;
+  if (input.cardioAccess === "none") return "skipped";
+  if (
+    input.run1kmSeconds !== undefined ||
+    input.walkRun12MinMeters !== undefined
+  ) {
+    return "run";
+  }
+  return "skipped";
+}
+
+export function getRunningMetricMinutes(input: AssessmentInput): number {
+  const testType = resolveCardioTestType(input);
+
+  if (testType === "run" && input.runMinutes !== undefined) {
+    return Math.max(0, input.runMinutes);
+  }
+  if (testType === "walk" && input.walkMinutes !== undefined) {
+    return Math.max(0, input.walkMinutes);
+  }
+  if (testType === "skipped") return 0;
+
+  if (input.run1kmSeconds && input.run1kmSeconds > 0) {
+    const paceMin = input.run1kmSeconds / 60;
+    if (paceMin <= 6) return 30;
+    if (paceMin <= 7) return 20;
+    if (paceMin <= 8) return 15;
+    if (paceMin <= 10) return 10;
+    return 5;
+  }
+
+  if (input.walkRun12MinMeters && input.walkRun12MinMeters > 0) {
+    const m = input.walkRun12MinMeters;
+    if (m >= 2400) return 30;
+    if (m >= 2000) return 20;
+    if (m >= 1800) return 15;
+    if (m >= 1600) return 10;
+    if (m >= 1200) return 5;
+    return 0;
+  }
+
+  if (input.cardioAccess === "none") return 0;
+  if (input.cardioPreference === "dislike") return 5;
+  if (normalizeFitnessGoal(input.goal) === "running") return 10;
+  return 5;
+}
+
 export function classifyCardioLevel(input: AssessmentInput): FitnessLevel {
+  const testType = resolveCardioTestType(input);
+
+  if (testType === "run" && input.runMinutes !== undefined) {
+    const m = input.runMinutes;
+    if (m <= 4) return "absolute_beginner";
+    if (m <= 9) return "beginner";
+    if (m <= 19) return "novice";
+    if (m <= 29) return "intermediate";
+    return "advanced";
+  }
+
+  if (testType === "walk" && input.walkMinutes !== undefined) {
+    const m = input.walkMinutes;
+    if (m <= 9) return "absolute_beginner";
+    if (m <= 14) return "beginner";
+    if (m <= 24) return "novice";
+    if (m <= 34) return "intermediate";
+    return "advanced";
+  }
+
+  if (testType === "skipped") return "absolute_beginner";
+
   if (input.run1kmSeconds !== undefined) {
     const s = input.run1kmSeconds;
     if (s > 480) return "absolute_beginner";
@@ -219,9 +295,13 @@ function buildSafetyNotes(input: AssessmentInput): { en: string[]; ru: string[] 
     en.push("No bar: use rows and scapular work until a pull-up bar is available.");
     ru.push("Без турника: тяги и лопаточная работа, пока нет перекладины.");
   }
-  if (input.cardioAccess === "none") {
+  if (input.cardioAccess === "none" || resolveCardioTestType(input) === "skipped") {
     en.push("Cardio plan uses walking and low-impact conditioning instead of running.");
     ru.push("Кардио: ходьба и щадящая кондиция вместо бега.");
+  }
+  if (resolveCardioTestType(input) === "walk") {
+    en.push("Endurance builds from brisk walking before continuous running.");
+    ru.push("Выносливость наращивается с быстрой ходьбы, затем бег.");
   }
   if (input.cardioPreference === "dislike") {
     en.push("Fewer run days; walking and circuits are preferred.");

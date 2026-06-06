@@ -1408,7 +1408,7 @@ html.telegram-webapp body {
   }
 }
 
-/* ——— Logo intro scene ——— */
+/* ——— Logo intro scene (legacy) ——— */
 .logo-intro-scene {
   min-height: min(70vh, 440px);
 }
@@ -1423,6 +1423,165 @@ html.telegram-webapp body {
   width: 100%;
   max-width: 200px;
   margin-inline: auto;
+}
+
+/* ——— Cinematic intro sequence ——— */
+.intro-cinematic-screen {
+  background: #0a0b0c;
+}
+
+.intro-cinematic-screen::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 85% 70% at 50% 42%,
+    rgba(210, 180, 140, 0.04) 0%,
+    transparent 58%
+  );
+}
+
+.intro-cinematic-screen::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 120% 90% at 50% 50%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+.intro-sequence {
+  min-height: min(72vh, 460px);
+  position: relative;
+  z-index: 1;
+}
+
+.intro-sequence-logo-wrap {
+  width: min(220px, 76vw);
+  contain: layout style paint;
+}
+
+.intro-sequence-mark {
+  width: 100%;
+  max-width: 220px;
+  margin-inline: auto;
+}
+
+.intro-sequence-glow {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle at 50% 48%,
+    rgba(210, 180, 140, 0.22) 0%,
+    rgba(210, 180, 140, 0.08) 38%,
+    transparent 68%
+  );
+  opacity: 0;
+}
+
+.intro-sequence--animate .intro-sequence-glow {
+  animation: intro-sequence-glow 1400ms var(--motion-ease-out) 800ms both;
+}
+
+.intro-sequence-phrase {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.intro-sequence--animate .intro-sequence-phrase-1 {
+  animation: intro-sequence-phrase 480ms var(--motion-ease-out) 1200ms both;
+}
+
+.intro-sequence--animate .intro-sequence-phrase-2 {
+  animation: intro-sequence-phrase 480ms var(--motion-ease-out) 1500ms both;
+}
+
+.intro-sequence--animate .intro-sequence-phrase-3 {
+  animation: intro-sequence-phrase 480ms var(--motion-ease-out) 1800ms both;
+}
+
+.intro-sequence-cta {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.intro-sequence--animate .intro-sequence-cta {
+  animation:
+    intro-sequence-cta-rise 460ms var(--motion-ease-out) 2200ms both,
+    intro-sequence-cta-pulse 520ms var(--motion-ease-out) 2400ms both;
+}
+
+.intro-sequence--static .intro-sequence-glow {
+  opacity: 0;
+}
+
+.intro-sequence--static .intro-sequence-phrase {
+  opacity: 1;
+  transform: none;
+}
+
+.intro-sequence--static .intro-sequence-cta {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes intro-sequence-glow {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes intro-sequence-phrase {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes intro-sequence-cta-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes intro-sequence-cta-pulse {
+  0% {
+    box-shadow:
+      0 0 0 rgba(210, 180, 140, 0),
+      inset 0 0 0 rgba(210, 180, 140, 0);
+  }
+  45% {
+    box-shadow:
+      0 0 22px rgba(210, 180, 140, 0.28),
+      inset 0 0 0 1px rgba(210, 180, 140, 0.35);
+  }
+  100% {
+    box-shadow:
+      0 0 0 rgba(210, 180, 140, 0),
+      inset 0 0 0 rgba(210, 180, 140, 0);
+  }
 }
 
 .logo-intro-glint {
@@ -1593,6 +1752,20 @@ html.telegram-webapp body {
 
   .intro-product-card {
     transition: none !important;
+  }
+
+  .intro-sequence--animate .intro-sequence-glow,
+  .intro-sequence--animate .intro-sequence-phrase-1,
+  .intro-sequence--animate .intro-sequence-phrase-2,
+  .intro-sequence--animate .intro-sequence-phrase-3,
+  .intro-sequence--animate .intro-sequence-cta {
+    animation: none !important;
+  }
+
+  .intro-sequence--static .intro-sequence-phrase,
+  .intro-sequence--static .intro-sequence-cta {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   .iron-logo-svg--animate .iron-logo-topBar,

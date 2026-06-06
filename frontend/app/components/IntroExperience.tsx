@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import LogoIntroSequence from "./intro/LogoIntroSequence";
+import IntroSequence from "./intro/IntroSequence";
 import { markIntroSeen } from "../utils/introStorage";
 import { useTranslation } from "../i18n/useTranslation";
 
@@ -29,7 +29,7 @@ export default function IntroExperience({ onComplete }: Props) {
   }, [finishIntro]);
 
   return (
-    <div className="fixed inset-0 z-[101] iron-page flex flex-col items-center justify-center px-6 py-10 bg-[var(--iron-bg)]">
+    <div className="intro-cinematic-screen fixed inset-0 z-[101] flex flex-col items-center justify-center px-6 py-10">
       <button
         type="button"
         onClick={finishIntro}
@@ -38,7 +38,7 @@ export default function IntroExperience({ onComplete }: Props) {
         {t("intro.skip")}
       </button>
 
-      <LogoIntroSequence onBegin={finishIntro} />
+      <IntroSequence onBegin={finishIntro} />
     </div>
   );
 }

@@ -57,11 +57,37 @@ function ex(partial: ExerciseInput): Exercise {
 export const EXERCISES: Exercise[] = [
   // Warmup
   ex({
+    id: "head_rotations",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["neck"],
+    name: { en: "Head tilts and turns", ru: "Наклоны и повороты головы" },
+    instructions: {
+      en: [
+        "Tilt head forward and back gently.",
+        "Tilt right and left.",
+        "Turn head left and right.",
+        "5–8 reps each way, move slowly.",
+      ],
+      ru: [
+        "Наклоны головы вперёд-назад.",
+        "Наклоны вправо-влево.",
+        "Повороты вправо-влево.",
+        "5–8 раз в каждую сторону, без резких движений.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Forcing range", "Moving too fast"],
+      ru: ["Резкая амплитуда", "Слишком быстро"],
+    },
+    contraindications: ["back"],
+  }),
+  ex({
     id: "arm_circles",
     category: "warmup",
     level: "absolute_beginner",
     muscles: ["shoulders"],
-    name: { en: "Arm circles", ru: "Круги руками" },
+    name: { en: "Arm circles", ru: "Круговые вращения руками" },
     instructions: {
       en: [
         "Stand tall, arms extended to the sides.",
@@ -85,7 +111,7 @@ export const EXERCISES: Exercise[] = [
     category: "warmup",
     level: "absolute_beginner",
     muscles: ["shoulders"],
-    name: { en: "Shoulder rolls", ru: "Вращения плечами" },
+    name: { en: "Shoulder circles", ru: "Круговые вращения плечами" },
     instructions: {
       en: [
         "Roll shoulders forward 8 times.",
@@ -105,11 +131,35 @@ export const EXERCISES: Exercise[] = [
     regressions: ["arm_circles"],
   }),
   ex({
+    id: "torso_rotations",
+    category: "warmup",
+    level: "absolute_beginner",
+    muscles: ["core", "back"],
+    name: { en: "Torso twists", ru: "Повороты корпуса" },
+    instructions: {
+      en: [
+        "Stand feet shoulder-width, arms relaxed.",
+        "Rotate torso left and right smoothly.",
+        "10 controlled reps.",
+      ],
+      ru: [
+        "Стопы на ширине плеч, руки расслаблены.",
+        "Плавные повороты корпуса вправо-влево.",
+        "10 контролируемых повторений.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Twisting hips only", "Moving too fast"],
+      ru: ["Крутят только бёдра", "Слишком быстро"],
+    },
+    contraindications: ["back"],
+  }),
+  ex({
     id: "hip_circles",
     category: "warmup",
     level: "absolute_beginner",
     muscles: ["hips", "core"],
-    name: { en: "Hip circles", ru: "Круги бёдрами" },
+    name: { en: "Hip circles", ru: "Круговые движения тазом" },
     instructions: {
       en: [
         "Hands on hips, feet shoulder-width.",

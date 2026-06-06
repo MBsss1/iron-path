@@ -29,6 +29,8 @@ type FloatingProps = {
   onCloseWeekPopup: () => void;
   showPopup: boolean;
   lastXpReward: number;
+  xp: number;
+  maxXp: number;
   onCloseWorkoutPopup: () => void;
   leveledUp: boolean;
   level: number;
@@ -76,6 +78,8 @@ export default function AppPopups(props: Props) {
       <WorkoutPopup
         isOpen={props.showPopup}
         xpReward={props.lastXpReward}
+        xp={props.xp}
+        maxXp={props.maxXp}
         onClose={props.onCloseWorkoutPopup}
       />
 

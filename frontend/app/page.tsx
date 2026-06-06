@@ -1,7 +1,7 @@
 "use client";
 
 import OnboardingScreen from "./components/OnboardingScreen";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useProfile, type Profile } from "./hooks/useProfile";
 import { generateProgram } from "./data/programGenerator";
 import { usePlayer } from "./hooks/usePlayer";
@@ -37,6 +37,8 @@ import ScreenTransition from "./components/ScreenTransition";
 import { ScreenLoadingSkeleton } from "./components/ui/Skeleton";
 import { hasIntroSeen } from "./utils/introStorage";
 import XpFloatAnimation from "./components/XpFloatAnimation";
+import QuestStartOverlay from "./components/rpg/QuestStartOverlay";
+import CompletionCelebration from "./components/rpg/CompletionCelebration";
 import DailyRewardPopup from "./components/DailyRewardPopup";
 import {
   applyTelegramTheme,
@@ -429,6 +431,57 @@ function HomeContent() {
 
   const rank = useMemo(() => translateRank(getRank(level), t), [level, t]);
 
+  const questNavRef = useRef<(() => void) | null>(null);
+  const [questOverlayActive, setQuestOverlayActive] = useState(false);
+
+  const withQuestStart = useCallback((nav: () => void) => {
+    questNavRef.current = nav;
+    setQuestOverlayActive(true);
+  }, []);
+
+  const handleQuestOverlayComplete = useCallback(() => {
+    const nav = questNavRef.current;
+    questNavRef.current = null;
+    setQuestOverlayActive(false);
+    nav?.();
+  }, []);
+
+  const onStartTrainingQuest = useCallback(
+    () => withQuestStart(handleStartTraining),
+    [withQuestStart, handleStartTraining]
+  );
+
+  const onOpenTodayQuest = useCallback(
+    () => withQuestStart(handleOpenToday),
+    [withQuestStart, handleOpenToday]
+  );
+
+  const allQuestsCompleteRef = useRef(
+    completedCount === totalCount && totalCount > 0
+  );
+  const [showDailyComplete, setShowDailyComplete] = useState(false);
+  const [pendingDailyComplete, setPendingDailyComplete] = useState(false);
+
+  useEffect(() => {
+    const allComplete = completedCount === totalCount && totalCount > 0;
+    if (allComplete && !allQuestsCompleteRef.current) {
+      if (showPopup) {
+        setPendingDailyComplete(true);
+      } else {
+        setShowDailyComplete(true);
+      }
+    }
+    allQuestsCompleteRef.current = allComplete;
+  }, [completedCount, totalCount, showPopup]);
+
+  const handleCloseWorkoutPopup = useCallback(() => {
+    setShowPopup(false);
+    if (pendingDailyComplete) {
+      setShowDailyComplete(true);
+      setPendingDailyComplete(false);
+    }
+  }, [pendingDailyComplete, setShowPopup]);
+
   const handleOnboardingFinish = useCallback(
     (data: Profile) => {
       saveProfile(data);
@@ -487,6 +540,41 @@ function HomeContent() {
 
       {languageChosen && xpFloat !== null && (
         <XpFloatAnimation amount={xpFloat} onDone={clearXpFloat} />
+      )}
+
+      <QuestStartOverlay
+        active={questOverlayActive}
+        onComplete={handleQuestOverlayComplete}
+      />
+
+      {languageChosen && showDailyComplete && (
+        <CompletionCelebration
+          isOpen={showDailyComplete}
+          variant="daily"
+          title={t("animations.dailyComplete.title")}
+          subtitle={t("animations.dailyComplete.subtitle")}
+          xpProgress={{
+            current: xp,
+            max: MAX_XP_PER_LEVEL,
+            label: t("animations.xpProgressLabel"),
+          }}
+          rewards={[
+            {
+              label: t("animations.dailyComplete.quests"),
+              value: `${completedCount}/${totalCount}`,
+            },
+            {
+              label: t("animations.dailyComplete.streak"),
+              value: `${loginStreak}`,
+            },
+            {
+              label: t("animations.dailyComplete.rank"),
+              value: rank,
+            },
+          ]}
+          closeLabel={t("animations.dailyComplete.continue")}
+          onClose={() => setShowDailyComplete(false)}
+        />
       )}
 
       {languageChosen && !showIntro && (
@@ -566,8 +654,8 @@ function HomeContent() {
                 bossProgressPercent={bossProgressPercent}
                 bossProgressContext={bossProgressContext}
                 allBossesDefeated={allBossesDefeated}
-                onStartTraining={handleStartTraining}
-                onOpenToday={handleOpenToday}
+                onStartTraining={onStartTrainingQuest}
+                onOpenToday={onOpenTodayQuest}
                 onViewBoss={handleViewBoss}
                 assessmentInput={assessmentInput}
                 showReassessmentPrompt={showReassessmentPrompt}
@@ -596,7 +684,7 @@ function HomeContent() {
                 onCompleteDeepWork={completeDeepWork}
                 onCompleteProtein={completeProtein}
                 onCompleteSleep={completeSleep}
-                onGoToTraining={handleStartTraining}
+                onGoToTraining={onStartTrainingQuest}
               />
             )}
 
@@ -730,7 +818,9 @@ function HomeContent() {
               onCloseWeekPopup={() => setShowWeekPopup(false)}
               showPopup={showPopup}
               lastXpReward={lastXpReward}
-              onCloseWorkoutPopup={() => setShowPopup(false)}
+              xp={xp}
+              maxXp={MAX_XP_PER_LEVEL}
+              onCloseWorkoutPopup={handleCloseWorkoutPopup}
               leveledUp={leveledUp}
               level={level}
               rank={rank}
@@ -752,7 +842,11 @@ function HomeContent() {
               onClaim={handleClaimDailyReward}
             />
 
-            <BottomNav screen={navScreen} setScreen={setScreen} />
+            <BottomNav
+              screen={navScreen}
+              setScreen={setScreen}
+              trainingPulse={assessmentComplete && !workoutMissionCompleted}
+            />
           </>
         )}
       </main>

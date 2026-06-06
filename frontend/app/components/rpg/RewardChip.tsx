@@ -6,6 +6,7 @@ type Props = {
   amount: number | string;
   suffix?: string;
   variant?: "gold" | "muted";
+  pulse?: boolean;
   className?: string;
 };
 
@@ -13,6 +14,7 @@ export default function RewardChip({
   amount,
   suffix,
   variant = "gold",
+  pulse = false,
   className = "",
 }: Props) {
   const { t } = useTranslation();
@@ -20,7 +22,9 @@ export default function RewardChip({
 
   return (
     <span
-      className={`iron-reward-chip ${variant === "muted" ? "iron-reward-chip-muted" : ""} ${className}`.trim()}
+      className={`iron-reward-chip ${variant === "muted" ? "iron-reward-chip-muted" : ""} ${
+        pulse ? "iron-reward-chip-pulse" : ""
+      } ${className}`.trim()}
     >
       +{amount} {label}
     </span>

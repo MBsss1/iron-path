@@ -1,6 +1,6 @@
 "use client";
 
-import AnimatedProgressFill from "../../animations/AnimatedProgressFill";
+import AnimatedXpBar from "./AnimatedXpBar";
 import { useTranslation } from "../../i18n/useTranslation";
 
 type Props = {
@@ -21,7 +21,6 @@ export default function PlayerHud({
   className = "",
 }: Props) {
   const { t } = useTranslation();
-  const xpPercent = maxXp > 0 ? Math.min(100, Math.round((xp / maxXp) * 100)) : 0;
 
   return (
     <header
@@ -47,9 +46,7 @@ export default function PlayerHud({
             {rank}
           </p>
         </div>
-        <div className="mt-1.5 w-full h-1 iron-hud-progress-track overflow-hidden rounded-sm">
-          <AnimatedProgressFill percent={xpPercent} />
-        </div>
+        <AnimatedXpBar xp={xp} maxXp={maxXp} className="mt-1.5" />
       </div>
     </header>
   );

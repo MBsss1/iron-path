@@ -665,6 +665,21 @@ const en = {
     protein: "Protein",
     sleep: "Sleep",
   },
+  animations: {
+    questEyebrow: "Quest",
+    questStarted: "Quest started",
+    progressGain: "+progress",
+    xpProgressLabel: "Level progress",
+    workoutCompletePhrase: "The path grows stronger",
+    dailyComplete: {
+      title: "Day closed",
+      subtitle: "Streak continues",
+      continue: "Continue the path",
+      streak: "Streak",
+      rank: "Rank",
+      quests: "Daily quests",
+    },
+  },
   today: {
     title: "Today's log",
     week: "Week {{week}} / 24",
@@ -1030,7 +1045,7 @@ const en = {
   },
   popup: {
     workout: {
-      title: "Workout recorded",
+      title: "Workout complete",
       xp: "+{{amount}} XP",
       body: "+1 Body",
       continue: "Continue",

@@ -7,6 +7,8 @@ export const tabIndicatorMotion = "iron-nav-indicator-slide";
 export const tabPress = "iron-nav-tab-press";
 export const staggerChildren = "iron-stagger";
 export const numberRoll = "digit-wheel-slot";
+export const questStartPress = "iron-btn-quest-press";
+export const rewardChipPulse = "iron-reward-chip-pulse";
 export const completionPop = "iron-completion-pop";
 
 export const screenEnter = "iron-screen-enter";

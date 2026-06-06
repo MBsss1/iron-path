@@ -665,6 +665,21 @@ const ru = {
     protein: "Белок",
     sleep: "Сон",
   },
+  animations: {
+    questEyebrow: "Квест",
+    questStarted: "Квест начат",
+    progressGain: "+прогресс",
+    xpProgressLabel: "Прогресс уровня",
+    workoutCompletePhrase: "Путь стал крепче",
+    dailyComplete: {
+      title: "День закрыт",
+      subtitle: "Серия продолжается",
+      continue: "Продолжить путь",
+      streak: "Серия",
+      rank: "Ранг",
+      quests: "Дневные квесты",
+    },
+  },
   today: {
     title: "Сегодня",
     week: "Неделя {{week}} / 24",
@@ -1030,7 +1045,7 @@ const ru = {
   },
   popup: {
     workout: {
-      title: "Тренировка записана",
+      title: "Тренировка завершена",
       xp: "+{{amount}} опыта",
       body: "+1 к телу",
       continue: "Продолжить",

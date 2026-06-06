@@ -220,6 +220,7 @@ export default function HeroScreen({
           reward={<RewardChip amount={workoutXp} />}
           actionLabel={mainCta.label}
           onAction={mainCta.action}
+          questStart
         />
 
         {assessmentInput && (
@@ -308,6 +309,7 @@ export default function HeroScreen({
           progress={progress}
           actionLabel={mainCta.label}
           onAction={mainCta.action}
+          questStart
         />
 
         <div className="space-y-2">

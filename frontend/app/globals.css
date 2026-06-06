@@ -387,6 +387,395 @@ html.telegram-webapp body {
   background: rgba(210, 180, 140, 0.12);
 }
 
+/* ——— RPG motion & celebration ——— */
+@keyframes iron-quest-start-overlay-in {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes iron-quest-start-panel-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.02) translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.98) translateY(-4px);
+  }
+}
+
+@keyframes iron-btn-quest-press {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.94);
+  }
+  65% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes iron-reward-chip-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(210, 180, 140, 0);
+  }
+  40% {
+    transform: scale(1.12);
+    box-shadow: 0 0 14px rgba(210, 180, 140, 0.45);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(210, 180, 140, 0);
+  }
+}
+
+@keyframes iron-xp-spark {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--spark-x, 0), var(--spark-y, -12px)) scale(0.2);
+  }
+}
+
+@keyframes iron-xp-float-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 12px) scale(0.85);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -36px) scale(1);
+  }
+}
+
+@keyframes iron-exercise-gold-flash {
+  0% {
+    border-color: var(--iron-border);
+    box-shadow: var(--iron-shadow-card);
+  }
+  35% {
+    border-color: var(--iron-accent);
+    box-shadow:
+      0 0 0 1px rgba(210, 180, 140, 0.35),
+      0 0 20px rgba(210, 180, 140, 0.2);
+  }
+  100% {
+    border-color: rgba(210, 180, 140, 0.35);
+    box-shadow: var(--iron-shadow-card);
+  }
+}
+
+@keyframes iron-exercise-float-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.9);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -28px) scale(1);
+  }
+}
+
+@keyframes iron-exercise-seal {
+  0% {
+    box-shadow: inset 0 0 0 rgba(210, 180, 140, 0);
+  }
+  40% {
+    box-shadow: inset 0 0 0 2px rgba(210, 180, 140, 0.35);
+  }
+  100% {
+    box-shadow: inset 0 0 0 1px rgba(210, 180, 140, 0.12);
+  }
+}
+
+@keyframes iron-celebration-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes iron-celebration-panel-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes iron-celebration-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes iron-celebration-particle-drift {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  30% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+}
+
+@keyframes iron-celebration-xp-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes iron-nav-training-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+    text-shadow: 0 0 8px rgba(210, 180, 140, 0.35);
+  }
+}
+
+.iron-quest-start-overlay {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(210, 180, 140, 0.14) 0%,
+    rgba(15, 17, 19, 0.92) 55%,
+    rgba(15, 17, 19, 0.98) 100%
+  );
+  animation: iron-quest-start-overlay-in 650ms var(--motion-ease-out) both;
+}
+
+.iron-quest-start-panel {
+  border: 1px solid var(--iron-accent-dim);
+  background: rgba(23, 26, 29, 0.96);
+  border-radius: 4px;
+  padding: 1.25rem 1.75rem;
+  box-shadow:
+    var(--iron-shadow-modal),
+    0 0 32px rgba(210, 180, 140, 0.12);
+  text-align: center;
+}
+
+.iron-quest-start-panel-animate {
+  animation: iron-quest-start-panel-in 650ms var(--motion-ease-out) both;
+}
+
+.iron-quest-start-eyebrow {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--iron-muted);
+}
+
+.iron-quest-start-title {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--iron-accent);
+  margin-top: 0.35rem;
+}
+
+.iron-btn-quest-press {
+  animation: iron-btn-quest-press 140ms var(--motion-ease-out) both;
+}
+
+.iron-reward-chip-pulse {
+  animation: iron-reward-chip-pulse 650ms var(--motion-ease-out) both;
+}
+
+.iron-xp-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 1px;
+  background: var(--iron-accent);
+  animation: iron-xp-spark 750ms var(--motion-ease-out) both;
+}
+
+.iron-xp-spark-0 { --spark-x: -18px; --spark-y: -10px; animation-delay: 0ms; }
+.iron-xp-spark-1 { --spark-x: 16px; --spark-y: -14px; animation-delay: 40ms; }
+.iron-xp-spark-2 { --spark-x: -8px; --spark-y: -20px; animation-delay: 80ms; }
+.iron-xp-spark-3 { --spark-x: 22px; --spark-y: -6px; animation-delay: 30ms; }
+.iron-xp-spark-4 { --spark-x: -22px; --spark-y: -4px; animation-delay: 60ms; }
+.iron-xp-spark-5 { --spark-x: 6px; --spark-y: -18px; animation-delay: 100ms; }
+
+.iron-xp-float-burst {
+  animation: iron-xp-float-burst 1.1s var(--motion-ease-out) both;
+}
+
+.iron-xp-float-chip {
+  background: rgba(23, 26, 29, 0.96);
+  border: 1px solid var(--iron-accent-dim);
+  border-radius: 4px;
+  box-shadow:
+    var(--iron-shadow-modal),
+    0 0 20px rgba(210, 180, 140, 0.15);
+}
+
+.iron-exercise-complete-flash {
+  animation: iron-exercise-gold-flash 600ms var(--motion-ease-out) both;
+}
+
+.iron-exercise-sealed {
+  animation: iron-exercise-seal 500ms var(--motion-ease-out) both;
+}
+
+.iron-exercise-float-label {
+  position: absolute;
+  top: -0.35rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--iron-accent);
+  pointer-events: none;
+  z-index: 2;
+  animation: iron-exercise-float-up 900ms var(--motion-ease-out) both;
+}
+
+.iron-celebration-overlay {
+  background: rgba(15, 17, 19, 0.88);
+  animation: iron-celebration-overlay-in 280ms ease-out both;
+}
+
+.iron-celebration-frame {
+  position: relative;
+  border: 1px solid var(--iron-accent-dim);
+  background: var(--iron-raised);
+  border-radius: 4px;
+  box-shadow:
+    var(--iron-shadow-modal),
+    inset 0 1px 0 rgba(210, 180, 140, 0.1);
+  overflow: hidden;
+}
+
+.iron-celebration-panel {
+  animation: iron-celebration-panel-in 420ms var(--motion-ease-out) both;
+}
+
+.iron-celebration-glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(210, 180, 140, 0.18) 0%,
+    transparent 62%
+  );
+  animation: iron-celebration-glow-pulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.iron-celebration-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--iron-accent);
+  opacity: 0.5;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.iron-celebration-particle-a {
+  top: 18%;
+  left: 22%;
+  animation: iron-celebration-particle-drift 2.2s ease-out infinite;
+}
+
+.iron-celebration-particle-b {
+  top: 24%;
+  right: 20%;
+  animation: iron-celebration-particle-drift 2.6s ease-out 0.4s infinite;
+}
+
+.iron-celebration-eyebrow {
+  text-align: center;
+  font-size: 1.25rem;
+  color: var(--iron-accent);
+}
+
+.iron-celebration-xp-reveal {
+  animation: iron-celebration-xp-in 520ms var(--motion-ease-out) both;
+}
+
+.iron-nav-tab-active .iron-nav-tab-icon {
+  filter: drop-shadow(0 0 6px rgba(210, 180, 140, 0.35));
+}
+
+.iron-nav-training-pulse .iron-nav-tab-icon {
+  animation: iron-nav-training-pulse 2s ease-in-out infinite;
+}
+
 /* ——— Navigation ——— */
 .iron-nav-glass {
   background: rgba(15, 17, 19, 0.96);
@@ -1172,6 +1561,27 @@ html.telegram-webapp body {
 
   .iron-nav-indicator-slide {
     transition: none !important;
+  }
+
+  .iron-quest-start-overlay,
+  .iron-quest-start-panel-animate,
+  .iron-btn-quest-press,
+  .iron-reward-chip-pulse,
+  .iron-xp-spark,
+  .iron-xp-float-burst,
+  .iron-exercise-complete-flash,
+  .iron-exercise-sealed,
+  .iron-exercise-float-label,
+  .iron-celebration-glow,
+  .iron-celebration-particle,
+  .iron-celebration-panel,
+  .iron-celebration-xp-reveal,
+  .iron-nav-training-pulse .iron-nav-tab-icon {
+    animation: none !important;
+  }
+
+  .iron-nav-tab-active .iron-nav-tab-icon {
+    filter: none;
   }
 
   .rest-timer-complete {

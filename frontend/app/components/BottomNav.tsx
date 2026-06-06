@@ -8,6 +8,7 @@ import { useTranslation } from "../i18n/useTranslation";
 type Props = {
   screen: string;
   setScreen: (screen: string) => void;
+  trainingPulse?: boolean;
 };
 
 const NAV_ITEMS = [
@@ -23,7 +24,7 @@ type IndicatorMetrics = {
   width: number;
 };
 
-export default function BottomNav({ screen, setScreen }: Props) {
+export default function BottomNav({ screen, setScreen, trainingPulse = false }: Props) {
   const { t } = useTranslation();
   const [pressedId, setPressedId] = useState<string | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
@@ -58,11 +59,12 @@ export default function BottomNav({ screen, setScreen }: Props) {
   }, [activeIndex, screen, t]);
 
   const handleSelect = (name: string) => {
-    if (screen === name) return;
     hapticTab();
     setPressedId(name);
-    setScreen(name);
-    window.setTimeout(() => setPressedId(null), 120);
+    if (screen !== name) {
+      setScreen(name);
+    }
+    window.setTimeout(() => setPressedId(null), 160);
   };
 
   return (
@@ -86,6 +88,7 @@ export default function BottomNav({ screen, setScreen }: Props) {
         {NAV_ITEMS.map(({ id, labelKey, icon }, index) => {
           const isActive = screen === id;
           const isPressed = pressedId === id;
+          const isTraining = id === "training";
 
           return (
             <button
@@ -97,8 +100,10 @@ export default function BottomNav({ screen, setScreen }: Props) {
               onClick={() => handleSelect(id)}
               aria-current={isActive ? "page" : undefined}
               className={`relative flex flex-col items-center justify-center flex-1 min-h-[60px] min-w-[52px] py-2 px-1 text-[10px] font-semibold tracking-wide iron-interactive iron-nav-tab-label ${
-                isActive ? "text-iron-accent" : "text-iron-muted"
-              } ${isPressed ? tabPress : ""}`}
+                isActive ? "text-iron-accent iron-nav-tab-active" : "text-iron-muted"
+              } ${isPressed ? tabPress : ""} ${
+                isTraining && trainingPulse && !isActive ? "iron-nav-training-pulse" : ""
+              }`}
             >
               <span
                 className={`iron-nav-tab-icon text-base leading-none ${

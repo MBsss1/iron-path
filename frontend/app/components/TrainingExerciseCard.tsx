@@ -1,11 +1,12 @@
 "use client";
 
-import type { KeyboardEvent, MouseEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import type { GeneratedExercise } from "../data/workoutGeneratorV2";
 import { getExerciseInfo, hasExerciseInfo } from "../data/exerciseLibrary";
 import { exerciseItemKey } from "../utils/trainingWorkoutView";
 import { useTranslation } from "../i18n/useTranslation";
 import { hapticDone } from "../utils/haptics";
+import { usePrefersReducedMotion } from "../animations/usePrefersReducedMotion";
 
 type Lang = "en" | "ru";
 
@@ -29,6 +30,7 @@ export default function TrainingExerciseCard({
   onOpenRest,
 }: Props) {
   const { t } = useTranslation();
+  const reduced = usePrefersReducedMotion();
   const key = exerciseItemKey(item);
   const restSeconds = item.restSeconds > 0 ? item.restSeconds : 60;
   const info = getExerciseInfo(item.exerciseId);
@@ -36,6 +38,19 @@ export default function TrainingExerciseCard({
   const categoryLabel = categoryKey ? t(categoryKey) : null;
   const hasDetails = hasExerciseInfo(item.exerciseId);
   const compact = variant === "warmup";
+
+  const prevCompleted = useRef(completed);
+  const [celebrate, setCelebrate] = useState(false);
+
+  useEffect(() => {
+    if (!prevCompleted.current && completed) {
+      setCelebrate(true);
+      const timer = window.setTimeout(() => setCelebrate(false), 950);
+      prevCompleted.current = completed;
+      return () => window.clearTimeout(timer);
+    }
+    prevCompleted.current = completed;
+  }, [completed]);
 
   const handleToggle = () => {
     if (!completed) hapticDone();
@@ -61,23 +76,31 @@ export default function TrainingExerciseCard({
       onKeyDown={handleKeyDown}
       aria-pressed={completed}
       aria-label={`${item.name[lang]} — ${t("training.exercise.done")}`}
-      className={`iron-card-tap border rounded-sm transition-colors cursor-pointer active:scale-[0.99] ${
+      className={`iron-card-tap relative border rounded-sm transition-colors cursor-pointer active:scale-[0.99] ${
         completed
           ? "border-iron-accent/30 bg-iron-panel/50 opacity-80"
           : "border-iron-border bg-iron-raised/60 shadow-[var(--iron-shadow-card)]"
+      } ${celebrate && !reduced ? "iron-exercise-complete-flash" : ""} ${
+        completed ? "iron-exercise-sealed" : ""
       } ${compact ? "p-3" : "p-4"}`}
     >
+      {celebrate && !reduced && (
+        <span className="iron-exercise-float-label" aria-hidden="true">
+          {t("animations.progressGain")}
+        </span>
+      )}
+
       <div className="flex gap-3 items-start">
         <div
           className={`shrink-0 w-9 h-9 rounded-sm border flex items-center justify-center pointer-events-none ${
             completed
-              ? "border-iron-accent bg-iron-accent-dim/30 text-iron-accent iron-done-pop"
+              ? "border-iron-accent bg-iron-accent-dim/30 text-iron-accent"
               : "border-iron-border bg-iron-panel text-iron-muted"
-          }`}
+          } ${celebrate && !reduced ? "iron-done-pop" : completed ? "iron-done-pop" : ""}`}
           aria-hidden="true"
         >
           {completed ? (
-            <span className="text-base font-bold iron-done-pop">✓</span>
+            <span className="text-base font-bold">✓</span>
           ) : (
             <span className="w-3 h-3 rounded-sm border border-iron-muted/60" />
           )}

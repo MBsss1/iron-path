@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import AnimatedProgressFill from "../../animations/AnimatedProgressFill";
+import { usePrefersReducedMotion } from "../../animations/usePrefersReducedMotion";
 
 export type QuestCardStatus = "available" | "completed" | "locked" | "neutral";
 
@@ -14,6 +15,7 @@ type Props = {
   progress?: number;
   actionLabel?: string;
   onAction?: () => void;
+  questStart?: boolean;
   disabled?: boolean;
   variant?: "main" | "side";
   meta?: ReactNode;
@@ -29,21 +31,39 @@ export default function QuestCard({
   progress,
   actionLabel,
   onAction,
+  questStart = false,
   disabled = false,
   variant = "side",
   meta,
   className = "",
 }: Props) {
+  const reduced = usePrefersReducedMotion();
+  const [btnPress, setBtnPress] = useState(false);
   const isCompleted = status === "completed";
   const isLocked = status === "locked";
   const isMain = variant === "main";
+
+  const runAction = useCallback(() => {
+    if (!onAction || disabled) return;
+    if (questStart && !reduced) {
+      setBtnPress(true);
+      window.setTimeout(() => {
+        setBtnPress(false);
+        onAction();
+      }, 140);
+      return;
+    }
+    onAction();
+  }, [onAction, disabled, questStart, reduced]);
 
   const frameClass = [
     "iron-quest-card",
     isMain ? "iron-quest-card-main" : "",
     isCompleted ? "iron-quest-card-done" : "",
     isLocked ? "iron-quest-card-locked" : "",
-    onAction && !disabled && !isCompleted ? "iron-quest-card-interactive" : "",
+    onAction && !disabled && !isCompleted && !actionLabel
+      ? "iron-quest-card-interactive"
+      : "",
     className,
   ]
     .filter(Boolean)
@@ -99,11 +119,11 @@ export default function QuestCard({
       {actionLabel && onAction && !isCompleted && !isLocked && (
         <button
           type="button"
-          onClick={onAction}
+          onClick={runAction}
           disabled={disabled}
           className={`iron-interactive w-full mt-3 py-2.5 text-sm font-semibold rounded-sm min-h-[48px] ${
             isMain ? "iron-btn-primary" : "iron-btn-secondary"
-          }`}
+          } ${btnPress ? "iron-btn-quest-press" : ""}`}
         >
           {actionLabel}
         </button>
@@ -115,7 +135,7 @@ export default function QuestCard({
     return (
       <button
         type="button"
-        onClick={onAction}
+        onClick={runAction}
         disabled={disabled}
         className={`${frameClass} w-full text-left`}
       >

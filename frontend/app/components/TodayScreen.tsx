@@ -186,6 +186,7 @@ export default function TodayScreen({
             status={workoutDone ? "completed" : "available"}
             actionLabel={workoutDone ? undefined : t("today.goToTraining")}
             onAction={workoutDone ? undefined : onGoToTraining}
+            questStart={!workoutDone}
           />
         ) : (
           <QuestCard

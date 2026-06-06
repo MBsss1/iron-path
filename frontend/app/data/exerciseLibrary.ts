@@ -56,6 +56,14 @@ const DESCRIPTIONS: Record<string, LocalizedText> = {
 
   },
 
+  prone_reverse_fly: {
+
+    en: "Floor-based back and rear-shoulder work when a bar is not available.",
+
+    ru: "Работа для спины и задних дельт на полу, если нет турника или перекладины.",
+
+  },
+
   scapular_pullups: {
 
     en: "Activates shoulder blades and lats — essential prep before heavy pulling volume.",
@@ -301,6 +309,8 @@ export const EXERCISE_LIBRARY_IDS = [
   "negative_pullups",
 
   "australian_rows",
+
+  "prone_reverse_fly",
 
   "scapular_pullups",
 

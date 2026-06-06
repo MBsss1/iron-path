@@ -7,6 +7,7 @@ const PULL_EXERCISE_IDS = new Set([
   "scapular_pullups",
   "scapular_pulls",
   "australian_rows",
+  "prone_reverse_fly",
   "backpack_rows",
   "negative_pullups",
   "assisted_pullups",

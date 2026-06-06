@@ -136,6 +136,7 @@ const ru = {
       run: "Бег",
       pistolSquats: "Присед на одной ноге",
       australianRows: "Австралийские подтягивания",
+      proneReverseFly: "Разведение рук лёжа на животе (Лодочка)",
       backpackRows: "Тяга рюкзака",
       hangingKneeRaises: "Подъём коленей в висе",
     },

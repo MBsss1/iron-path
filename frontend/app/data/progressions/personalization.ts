@@ -1,4 +1,8 @@
 import {
+  isHorizontalPullExerciseId,
+  resolveConditionalStageSlot,
+} from "../conditionalExercises";
+import {
   shouldAvoidRunning,
   type AssessmentInput,
   type Limitation,
@@ -84,7 +88,7 @@ export function canUseStageExercise(
 
   if (shouldDeEmphasizePull(ctx.goal, ctx.input.weight)) {
     if (["negative_pullups", "pullups", "chinups"].includes(slot.exerciseId)) {
-      return slot.exerciseId === "australian_rows" ? true : false;
+      return isHorizontalPullExerciseId(slot.exerciseId);
     }
   }
 
@@ -141,6 +145,7 @@ export function filterAndPersonalizePool(
   pool: StageExerciseSlot[]
 ): StageExerciseSlot[] {
   return pool
+    .map((slot) => resolveConditionalStageSlot(slot, ctx.input))
     .filter((slot) => canUseStageExercise(ctx, slot))
     .map((slot) => adjustPrescriptionForProfile(ctx, slot));
 }

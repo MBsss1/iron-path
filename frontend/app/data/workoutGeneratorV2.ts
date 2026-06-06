@@ -29,6 +29,9 @@ import {
   buildWarmupExercises,
   estimateWarmupSeconds,
 } from "./warmupBuilder";
+import {
+  resolveHorizontalPullExerciseId,
+} from "./conditionalExercises";
 
 export type { AssessmentInput, AssessmentResult } from "./fitnessAssessment";
 export { assessFitness } from "./fitnessAssessment";
@@ -303,6 +306,15 @@ function gen(
   return toGenerated(exerciseId, { en, ru }, restSeconds, notes);
 }
 
+function genHorizontalPull(
+  ctx: GeneratorContext,
+  en: string,
+  ru: string,
+  restSeconds = 75
+): GeneratedExercise {
+  return gen(resolveHorizontalPullExerciseId(ctx.input), en, ru, restSeconds);
+}
+
 export function selectWarmupExercises(ctx: GeneratorContext): GeneratedExercise[] {
   return buildWarmupExercises(ctx);
 }
@@ -341,7 +353,7 @@ function pickPullMain(ctx: GeneratorContext): GeneratedExercise[] {
       items.push(gen("dead_hang", "3 × 20–30 sec", "3 × 20–30 сек", 60));
       items.push(gen("scapular_pullups", "3 × 8", "3 × 8", 60));
     }
-    items.push(gen("australian_rows", "3 × 8–10", "3 × 8–10", 75));
+    items.push(genHorizontalPull(ctx, "3 × 8–10", "3 × 8–10", 75));
     if (hasEquipment(ctx, "backpack") && !hasLimitation(ctx, "back")) {
       items.push(gen("backpack_rows", "3 × 12", "3 × 12", 60));
     }
@@ -352,7 +364,7 @@ function pickPullMain(ctx: GeneratorContext): GeneratedExercise[] {
     if (hasEquipment(ctx, "pull_up_bar")) {
       items.push(gen("negative_pullups", "3 × 4", "3 × 4", 90));
     }
-    items.push(gen("australian_rows", "3 × 10–12", "3 × 10–12", 75));
+    items.push(genHorizontalPull(ctx, "3 × 10–12", "3 × 10–12", 75));
     return items;
   }
 
@@ -362,9 +374,9 @@ function pickPullMain(ctx: GeneratorContext): GeneratedExercise[] {
     } else {
       items.push(gen("pullups", "3 × 5–8", "3 × 5–8", 90));
     }
-    items.push(gen("australian_rows", "3 × 10", "3 × 10", 75));
+    items.push(genHorizontalPull(ctx, "3 × 10", "3 × 10", 75));
   } else {
-    items.push(gen("australian_rows", "4 × 10–12", "4 × 10–12", 75));
+    items.push(genHorizontalPull(ctx, "4 × 10–12", "4 × 10–12", 75));
     if (hasEquipment(ctx, "backpack")) {
       items.push(gen("backpack_rows", "3 × 12", "3 × 12", 60));
     }

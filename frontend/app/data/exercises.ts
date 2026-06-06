@@ -623,7 +623,7 @@ export const EXERCISES: Exercise[] = [
       en: ["Kipping excessively", "Half reps"],
       ru: ["Сильный читинг", "Неполная амплитуда"],
     },
-    regressions: ["negative_pullups", "australian_rows"],
+    regressions: ["negative_pullups", "australian_rows", "prone_reverse_fly"],
     progressions: ["pullups"],
   }),
   ex({
@@ -651,6 +651,36 @@ export const EXERCISES: Exercise[] = [
     },
     regressions: ["scapular_pullups"],
     progressions: ["pullups", "backpack_rows"],
+  }),
+  ex({
+    id: "prone_reverse_fly",
+    category: "pull",
+    level: "beginner",
+    equipment: ["none"],
+    muscles: ["back", "shoulders"],
+    name: {
+      en: "Prone reverse fly (Superman)",
+      ru: "Разведение рук лёжа на животе (Лодочка)",
+    },
+    instructions: {
+      en: [
+        "Lie face down, arms extended to the sides or slightly forward.",
+        "Lift chest and arms off the floor, squeeze shoulder blades.",
+        "Lower with control, 4 sets of 10.",
+      ],
+      ru: [
+        "Лёжа на животе, руки в стороны или чуть вперёд.",
+        "Подними грудь и руки от пола, сведи лопатки.",
+        "Опускай с контролем, 4 подхода по 10.",
+      ],
+    },
+    commonMistakes: {
+      en: ["Jerking the neck", "Only lifting arms without chest"],
+      ru: ["Рывок головой", "Поднимают только руки без груди"],
+    },
+    contraindications: ["back"],
+    regressions: [],
+    progressions: ["australian_rows", "scapular_pulls"],
   }),
   ex({
     id: "pullups",
@@ -728,7 +758,7 @@ export const EXERCISES: Exercise[] = [
       ru: ["Округление поясницы", "Поднимают плечи"],
     },
     contraindications: ["back"],
-    regressions: ["australian_rows"],
+    regressions: ["australian_rows", "prone_reverse_fly"],
     progressions: ["pullups"],
   }),
 

@@ -136,6 +136,7 @@ const en = {
       run: "Run",
       pistolSquats: "Pistol Squats",
       australianRows: "Australian Rows",
+      proneReverseFly: "Prone reverse fly (Superman)",
       backpackRows: "Backpack Rows",
       hangingKneeRaises: "Hanging Knee Raises",
     },

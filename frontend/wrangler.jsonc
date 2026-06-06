@@ -1,20 +1,11 @@
 {
-    "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "iron-path",
-    "main": ".open-next/worker.js",
-    "compatibility_date": "2026-06-01",
-    "compatibility_flags": ["nodejs_compat"],
-    "assets": {
-      "directory": ".open-next/assets",
-      "binding": "ASSETS"
-    },
-    "services": [
-      {
-        "binding": "WORKER_SELF_REFERENCE",
-        "service": "iron-path"
-      }
-    ],
-    "observability": {
-      "enabled": true
-    }
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "iron-path",
+  "compatibility_date": "2026-06-01",
+  "assets": {
+    "directory": "./out"
+  },
+  "observability": {
+    "enabled": true
   }
+}

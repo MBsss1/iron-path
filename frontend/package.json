@@ -5,11 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
     "lint": "eslint",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "build:cf": "opennextjs-cloudflare build"
+    "preview": "npx --yes serve out",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "next": "16.2.6",
@@ -17,7 +15,6 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.19.11",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

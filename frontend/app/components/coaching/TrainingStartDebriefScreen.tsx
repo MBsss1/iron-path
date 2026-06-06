@@ -1,10 +1,13 @@
 "use client";
 
-import type { AssessmentInput, AssessmentResult } from "../../data/fitnessAssessment";
 import {
-  getGoalOrderedMilestones,
-} from "../../data/physicalMilestones";
-import { resolveCardioTestType } from "../../data/fitnessAssessment";
+  getAssessmentCardioResultsMode,
+  resolveCardioTestType,
+  shouldAvoidRunning,
+  type AssessmentInput,
+  type AssessmentResult,
+} from "../../data/fitnessAssessment";
+import { getGoalOrderedMilestones } from "../../data/physicalMilestones";
 import { getStartDebriefFocusKeys } from "../../data/trainingCoaching";
 import { useTranslation } from "../../i18n/useTranslation";
 import ScreenShell from "../ScreenShell";
@@ -30,6 +33,9 @@ export default function TrainingStartDebriefScreen({
   const stageGoals = getGoalOrderedMilestones(input)
     .filter((m) => m.nextRung !== null)
     .slice(0, 5);
+  const cardioMode = getAssessmentCardioResultsMode(input);
+  const cardioTestType = resolveCardioTestType(input);
+  const avoidRunning = shouldAvoidRunning(input.cardioAccess, input.cardioPreference);
 
   const title =
     variant === "reassessment"
@@ -68,7 +74,7 @@ export default function TrainingStartDebriefScreen({
               {input.plankSeconds} {t("coaching.milestone.unitSeconds")}
             </span>
           </li>
-          {resolveCardioTestType(input) === "run" && (
+          {cardioMode === "run" && (
             <li>
               {t("coaching.debrief.metricRun")}:{" "}
               <span className="font-semibold">
@@ -76,7 +82,7 @@ export default function TrainingStartDebriefScreen({
               </span>
             </li>
           )}
-          {resolveCardioTestType(input) === "walk" && (
+          {cardioMode === "walk" && (
             <li>
               {t("coaching.debrief.metricWalk")}:{" "}
               <span className="font-semibold">
@@ -84,12 +90,26 @@ export default function TrainingStartDebriefScreen({
               </span>
             </li>
           )}
-          {resolveCardioTestType(input) === "skipped" && (
-            <li>
+          {cardioMode === "low_impact" && (
+            <li className="leading-relaxed">
               {t("coaching.debrief.metricCardioSkipped")}:{" "}
-              <span className="font-semibold text-iron-muted">
-                {t("coaching.debrief.cardioSkippedNote")}
+              <span className="font-semibold">
+                {t("assessment.results.cardioWalkLowImpact")}
               </span>
+              {cardioTestType === "walk" && (
+                <span className="block mt-1 text-iron-muted">
+                  {t("coaching.debrief.metricWalk")}:{" "}
+                  <span className="font-semibold text-iron-text">
+                    {input.walkMinutes ?? 0}{" "}
+                    {t("coaching.milestone.unitMinutes")}
+                  </span>
+                </span>
+              )}
+              {avoidRunning && (
+                <span className="block mt-1 text-iron-muted">
+                  {t("assessment.results.cardioNoRunning")}
+                </span>
+              )}
             </li>
           )}
         </ul>

@@ -5,7 +5,9 @@ import type { Profile } from "../hooks/useProfile";
 import {
   assessFitness,
   canOfferRunningTest,
+  getAssessmentCardioResultsMode,
   getDefaultCardioTestTypeWhenAvoidingRun,
+  resolveCardioTestType,
   shouldAvoidRunning,
   shouldSkipEnduranceStep,
   type AssessmentInput,
@@ -328,10 +330,12 @@ export default function FitnessAssessmentScreen({
   ) => (
     <div
       key={labelKey}
-      className="flex justify-between items-center border-b border-iron-border py-3 last:border-0"
+      className="flex flex-col gap-1 border-b border-iron-border py-3 last:border-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
     >
-      <span className="font-semibold text-iron-text">{t(labelKey)}</span>
-      <span className="text-iron-accent font-semibold">{value}</span>
+      <span className="font-semibold text-iron-text shrink-0">{t(labelKey)}</span>
+      <span className="text-iron-accent font-semibold leading-snug sm:text-right sm:max-w-[60%]">
+        {value}
+      </span>
     </div>
   );
 
@@ -364,8 +368,13 @@ export default function FitnessAssessmentScreen({
   if (phase === "results" && previewResult) {
     const lang = locale === "ru" ? "ru" : "en";
     const strengths = previewResult.notes[lang].slice(0, 2);
-    const cardioLine = previewResult.cardioSummary[lang];
     const previewInput = buildInput();
+    const cardioMode = previewInput
+      ? getAssessmentCardioResultsMode(previewInput)
+      : null;
+    const cardioTestType = previewInput
+      ? resolveCardioTestType(previewInput)
+      : null;
 
     return (
       <ScreenShell
@@ -402,48 +411,77 @@ export default function FitnessAssessmentScreen({
               "assessment.results.core",
               `${previewInput.plankSeconds} ${t("coaching.milestone.unitSeconds")}`
             )}
-          {previewInput?.cardioTestType === "run" &&
+          {cardioMode === "run" &&
             valueRow(
               "assessment.results.cardioLevel",
-              `${previewInput.runMinutes ?? 0} ${t("coaching.milestone.unitMinutes")}`
+              `${previewInput?.runMinutes ?? 0} ${t("coaching.milestone.unitMinutes")}`
             )}
-          {previewInput?.cardioTestType === "walk" &&
+          {cardioMode === "walk" &&
             valueRow(
               "assessment.results.cardioLevel",
-              `${previewInput.walkMinutes ?? 0} ${t("coaching.milestone.unitMinutes")}`
+              `${previewInput?.walkMinutes ?? 0} ${t("coaching.milestone.unitMinutes")}`
             )}
-          {previewInput?.cardioTestType === "skipped" &&
+          {cardioMode === "low_impact" &&
             valueRow(
               "assessment.results.cardioLevel",
-              t("coaching.debrief.cardioSkippedNote")
+              t("assessment.results.cardioWalkLowImpact")
             )}
         </div>
 
         <div className="iron-card-panel p-4 mb-4">
           <p className="iron-label">{t("assessment.results.cardioBlock")}</p>
-          <p className="mt-2 text-sm text-iron-text">{cardioLine}</p>
-          {previewInput?.cardioTestType === "run" && (
-            <p className="mt-2 text-sm text-iron-text">
-              {t("coaching.debrief.metricRun")}:{" "}
-              <span className="font-semibold">
-                {previewInput.runMinutes ?? 0}{" "}
-                {t("coaching.milestone.unitMinutes")}
-              </span>
-            </p>
+          {cardioMode === "run" && (
+            <>
+              <p className="mt-2 text-sm text-iron-text leading-relaxed">
+                {previewResult.cardioSummary[lang]}
+              </p>
+              <p className="mt-2 text-sm text-iron-text">
+                {t("coaching.debrief.metricRun")}:{" "}
+                <span className="font-semibold">
+                  {previewInput?.runMinutes ?? 0}{" "}
+                  {t("coaching.milestone.unitMinutes")}
+                </span>
+              </p>
+            </>
           )}
-          {previewInput?.cardioTestType === "walk" && (
-            <p className="mt-2 text-sm text-iron-text">
-              {t("coaching.debrief.metricWalk")}:{" "}
-              <span className="font-semibold">
-                {previewInput.walkMinutes ?? 0}{" "}
-                {t("coaching.milestone.unitMinutes")}
-              </span>
-            </p>
+          {cardioMode === "walk" && (
+            <>
+              <p className="mt-2 text-sm text-iron-text leading-relaxed">
+                {t("assessment.results.cardioWalkLowImpact")}
+              </p>
+              <p className="mt-2 text-sm text-iron-text">
+                {t("coaching.debrief.metricWalk")}:{" "}
+                <span className="font-semibold">
+                  {previewInput?.walkMinutes ?? 0}{" "}
+                  {t("coaching.milestone.unitMinutes")}
+                </span>
+              </p>
+            </>
           )}
-          {previewInput?.cardioTestType === "skipped" && (
-            <p className="mt-2 text-sm text-iron-muted">
-              {t("coaching.debrief.cardioSkippedNote")}
-            </p>
+          {cardioMode === "low_impact" && (
+            <>
+              <p className="mt-2 text-sm text-iron-text leading-relaxed">
+                {t("assessment.results.cardioWalkLowImpact")}
+              </p>
+              {cardioTestType === "walk" && (
+                <p className="mt-2 text-sm text-iron-text">
+                  {t("coaching.debrief.metricWalk")}:{" "}
+                  <span className="font-semibold">
+                    {previewInput?.walkMinutes ?? 0}{" "}
+                    {t("coaching.milestone.unitMinutes")}
+                  </span>
+                </p>
+              )}
+              {previewInput &&
+                shouldAvoidRunning(
+                  previewInput.cardioAccess,
+                  previewInput.cardioPreference
+                ) && (
+                  <p className="mt-2 text-sm text-iron-muted leading-relaxed">
+                    {t("assessment.results.cardioNoRunning")}
+                  </p>
+                )}
+            </>
           )}
         </div>
 

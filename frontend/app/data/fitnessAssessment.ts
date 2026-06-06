@@ -43,6 +43,23 @@ export function getDefaultCardioTestTypeWhenAvoidingRun(
   return "walk";
 }
 
+export type AssessmentCardioResultsMode = "run" | "walk" | "low_impact";
+
+/** How assessment summary screens should present cardio/endurance results. */
+export function getAssessmentCardioResultsMode(
+  input: AssessmentInput
+): AssessmentCardioResultsMode {
+  const testType = resolveCardioTestType(input);
+  if (testType === "run") return "run";
+  if (
+    testType === "walk" &&
+    !shouldAvoidRunning(input.cardioAccess, input.cardioPreference)
+  ) {
+    return "walk";
+  }
+  return "low_impact";
+}
+
 export type FitnessLevel =
   | "absolute_beginner"
   | "beginner"

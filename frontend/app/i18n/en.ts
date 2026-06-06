@@ -573,6 +573,8 @@ const en = {
       core: "Core",
       cardioLevel: "Conditioning",
       cardioBlock: "Cardio",
+      cardioWalkLowImpact: "Walking and low-impact cardio",
+      cardioNoRunning: "Running is not used in your program.",
       planNotes: "In your plan",
       buildPath: "Build my path",
       editAnswers: "Edit answers",

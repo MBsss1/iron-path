@@ -1,5 +1,6 @@
 "use client";
 
+import type { KeyboardEvent, MouseEvent } from "react";
 import type { GeneratedExercise } from "../data/workoutGeneratorV2";
 import { getExerciseInfo, hasExerciseInfo } from "../data/exerciseLibrary";
 import { exerciseItemKey } from "../utils/trainingWorkoutView";
@@ -41,34 +42,46 @@ export default function TrainingExerciseCard({
     onToggleComplete(key);
   };
 
+  const stopCardAction = (event: MouseEvent) => {
+    event.stopPropagation();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleToggle();
+    }
+  };
+
   return (
     <article
-      className={`iron-card-tap border rounded-sm transition-colors ${
+      role="button"
+      tabIndex={0}
+      onClick={handleToggle}
+      onKeyDown={handleKeyDown}
+      aria-pressed={completed}
+      aria-label={`${item.name[lang]} — ${t("training.exercise.done")}`}
+      className={`iron-card-tap border rounded-sm transition-colors cursor-pointer active:scale-[0.99] ${
         completed
           ? "border-iron-accent/30 bg-iron-panel/50 opacity-80"
           : "border-iron-border bg-iron-raised/60 shadow-[var(--iron-shadow-card)]"
       } ${compact ? "p-3" : "p-4"}`}
     >
       <div className="flex gap-3 items-start">
-        <button
-          type="button"
-          onClick={handleToggle}
-          className={`shrink-0 w-9 h-9 rounded-sm border flex items-center justify-center iron-interactive ${
+        <div
+          className={`shrink-0 w-9 h-9 rounded-sm border flex items-center justify-center pointer-events-none ${
             completed
               ? "border-iron-accent bg-iron-accent-dim/30 text-iron-accent iron-done-pop"
               : "border-iron-border bg-iron-panel text-iron-muted"
           }`}
-          aria-pressed={completed}
-          aria-label={t("training.exercise.done")}
+          aria-hidden="true"
         >
           {completed ? (
-            <span className="text-base font-bold iron-done-pop" aria-hidden="true">
-              ✓
-            </span>
+            <span className="text-base font-bold iron-done-pop">✓</span>
           ) : (
             <span className="w-3 h-3 rounded-sm border border-iron-muted/60" />
           )}
-        </button>
+        </div>
 
         <div className="flex-1 min-w-0">
           <h4
@@ -98,8 +111,11 @@ export default function TrainingExerciseCard({
             </span>
             <button
               type="button"
-              onClick={() => onOpenRest(key, restSeconds, item.name[lang])}
-              className="iron-interactive w-8 h-8 flex items-center justify-center rounded-sm border border-iron-border bg-iron-panel text-sm"
+              onClick={(event) => {
+                stopCardAction(event);
+                onOpenRest(key, restSeconds, item.name[lang]);
+              }}
+              className="iron-interactive w-8 h-8 flex items-center justify-center rounded-sm border border-iron-border bg-iron-panel text-sm cursor-pointer active:scale-95"
               aria-label={t("training.restTimer.open")}
             >
               ⏱
@@ -109,8 +125,11 @@ export default function TrainingExerciseCard({
           {hasDetails && (
             <button
               type="button"
-              onClick={() => onDetails(item.exerciseId)}
-              className={`iron-interactive mt-2 text-xs text-iron-accent-dim hover:text-iron-accent ${
+              onClick={(event) => {
+                stopCardAction(event);
+                onDetails(item.exerciseId);
+              }}
+              className={`iron-interactive mt-2 text-xs text-iron-accent-dim hover:text-iron-accent cursor-pointer ${
                 compact ? "font-medium" : "font-bold uppercase"
               }`}
             >

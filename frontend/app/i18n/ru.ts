@@ -573,6 +573,8 @@ const ru = {
       core: "Корпус",
       cardioLevel: "Выносливость",
       cardioBlock: "Кардио",
+      cardioWalkLowImpact: "Ходьба и щадящая кардио-нагрузка",
+      cardioNoRunning: "Бег не используется в программе.",
       planNotes: "Учтём в плане",
       buildPath: "Сформировать мой путь",
       editAnswers: "Изменить ответы",

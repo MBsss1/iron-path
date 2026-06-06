@@ -769,8 +769,21 @@ const ru = {
         "Возвращайтесь завтра. Прогресс строится по дням, а не по кликам.",
       weekTooEarlyTitle: "Неделю ещё рано завершать",
       weekNotEnoughWorkoutsTitle: "Неделю ещё рано завершать",
+      weekSlotsLockedTitle: "Неделю ещё рано завершать",
       weekBlockedDescription:
         "Выполните тренировки по плану. Курс нельзя пройти за один день.",
+    },
+    locker: {
+      title: "Следующая тренировка ещё закрыта",
+      opensLabel: "Она откроется:",
+      body: "Прогресс строится по дням, а не по кликам. Возвращайтесь завтра.",
+      viewPlan: "Посмотреть план недели",
+    },
+    slotStatus: {
+      completed: "Выполнено",
+      availableToday: "Доступно сегодня",
+      opensTomorrow: "Откроется завтра",
+      opensOn: "Откроется {{date}}",
     },
     weekPlanTitle: "План недели",
     todayTitle: "Сегодня",
@@ -866,6 +879,7 @@ const ru = {
       completed: "✓",
       current: "●",
       upcoming: "○",
+      locked: "🔒",
     },
   },
   nutrition: {

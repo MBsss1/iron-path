@@ -4,6 +4,7 @@ import { STORAGE_KEYS } from "./storageKeys";
 import { getLocalDateKey, daysBetweenLocalDateKeys } from "./localDate";
 import {
   isRestDayType,
+  resolveSlotUnlocks,
   type TrainingCalendarState,
 } from "./trainingCalendar";
 
@@ -33,7 +34,10 @@ export function isWorkoutLoggedToday(): boolean {
   return false;
 }
 
-export type WeekCompletionBlockReason = "not_enough_workouts" | "too_early";
+export type WeekCompletionBlockReason =
+  | "not_enough_workouts"
+  | "too_early"
+  | "slots_locked";
 
 export type WeekCompletionStatus = {
   allowed: boolean;
@@ -44,20 +48,48 @@ export type WeekCompletionStatus = {
   requiredDays: number;
 };
 
+function hasFutureLockedTrainingSlots(
+  state: TrainingCalendarState,
+  weekPlan: WeekPlan,
+  todayKey = getLocalDateKey()
+): boolean {
+  const unlocks = resolveSlotUnlocks(state, todayKey);
+  for (const slot of weekPlan.days) {
+    const idx = slot.dayIndex;
+    if (state.completedDayIndexes.includes(idx)) continue;
+    if (isRestDayType(slot.dayType)) continue;
+    const unlockDate = unlocks[String(idx)] ?? todayKey;
+    if (todayKey < unlockDate) return true;
+  }
+  return false;
+}
+
 export function getWeekCompletionStatus(
   state: TrainingCalendarState,
   weekPlan: WeekPlan
 ): WeekCompletionStatus {
+  const todayKey = getLocalDateKey();
   const trainingDayCount = weekPlan.days.filter(
     (d) => !isRestDayType(d.dayType)
   ).length;
   const requiredSlots = Math.min(MIN_WEEK_WORKOUTS, trainingDayCount);
   const completedSlots = state.completedDayIndexes.length;
-  const weekStart = state.weekStartedDateKey ?? getLocalDateKey();
+  const weekStart = state.weekStartedDateKey ?? todayKey;
   const daysSinceWeekStart = daysBetweenLocalDateKeys(
     weekStart,
-    getLocalDateKey()
+    todayKey
   );
+
+  if (hasFutureLockedTrainingSlots(state, weekPlan, todayKey)) {
+    return {
+      allowed: false,
+      reason: "slots_locked",
+      completedSlots,
+      requiredSlots,
+      daysSinceWeekStart,
+      requiredDays: MIN_DAYS_BEFORE_WEEK_COMPLETE,
+    };
+  }
 
   if (completedSlots < requiredSlots) {
     return {

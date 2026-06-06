@@ -769,8 +769,21 @@ const en = {
         "Come back tomorrow. Progress is built by days, not clicks.",
       weekTooEarlyTitle: "Too early to complete this week",
       weekNotEnoughWorkoutsTitle: "Too early to complete this week",
+      weekSlotsLockedTitle: "Too early to complete this week",
       weekBlockedDescription:
         "Complete workouts according to the plan. You can't finish the course in one day.",
+    },
+    locker: {
+      title: "Next workout is locked",
+      opensLabel: "It opens on:",
+      body: "Progress is built by days, not clicks. Come back tomorrow.",
+      viewPlan: "View weekly plan",
+    },
+    slotStatus: {
+      completed: "Completed",
+      availableToday: "Available today",
+      opensTomorrow: "Opens tomorrow",
+      opensOn: "Opens {{date}}",
     },
     weekPlanTitle: "Week plan",
     todayTitle: "Today",
@@ -866,6 +879,7 @@ const en = {
       completed: "✓",
       current: "●",
       upcoming: "○",
+      locked: "🔒",
     },
   },
   nutrition: {

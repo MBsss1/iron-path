@@ -20,17 +20,20 @@ import {
 import { safeGet, safeSet } from "./storage";
 import { STORAGE_KEYS } from "./storageKeys";
 import { loadFitnessAssessment } from "./fitnessAssessmentStorage";
-import { getLocalDateKey } from "./localDate";
+import { getLocalDateKey, getTomorrowLocalDateKey, addLocalDays } from "./localDate";
 
 export type WeekdayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-export type DaySlotStatus = "completed" | "current" | "upcoming";
+export type DaySlotStatus = "completed" | "current" | "upcoming" | "locked";
 
 export type CalendarDay = {
   dayIndex: WeekdayIndex;
   dayType: DayType;
   status: DaySlotStatus;
   isTrainingDay: boolean;
+  unlockedDateKey: string;
+  isLocked: boolean;
+  isAvailableToday: boolean;
 };
 
 export type TrainingCalendarState = {
@@ -39,6 +42,8 @@ export type TrainingCalendarState = {
   activeDayIndex: WeekdayIndex;
   /** Local YYYY-MM-DD when the current program week started. */
   weekStartedDateKey?: string;
+  /** Slot index (0–6) → local YYYY-MM-DD when the slot opens. */
+  slotUnlocks?: Record<string, string>;
 };
 
 const CALENDAR_KEY = STORAGE_KEYS.trainingCalendar;
@@ -110,20 +115,101 @@ export function loadTrainingCalendarState(seasonWeek: number): TrainingCalendarS
     return resetCalendarForNewWeek(seasonWeek);
   }
 
-  return {
+  return normalizeCalendarState({
     seasonWeek: stored.seasonWeek,
     completedDayIndexes: [...stored.completedDayIndexes],
     activeDayIndex: clampDayIndex(stored.activeDayIndex),
-    weekStartedDateKey: stored.weekStartedDateKey ?? getLocalDateKey(),
-  };
+    weekStartedDateKey: stored.weekStartedDateKey,
+    slotUnlocks: stored.slotUnlocks,
+  });
 }
 
 export function resetCalendarForNewWeek(seasonWeek: number): TrainingCalendarState {
-  return {
+  const today = getLocalDateKey();
+  return normalizeCalendarState({
     seasonWeek,
     completedDayIndexes: [],
     activeDayIndex: 0,
-    weekStartedDateKey: getLocalDateKey(),
+    weekStartedDateKey: today,
+    slotUnlocks: buildDefaultSlotUnlocks([], today),
+  });
+}
+
+/** Default unlock schedule: first open slot today; after any completion, next slots +1 day each. */
+export function buildDefaultSlotUnlocks(
+  completedDayIndexes: number[],
+  todayKey = getLocalDateKey()
+): Record<string, string> {
+  const unlocks: Record<string, string> = {};
+  let queueOffset = completedDayIndexes.length > 0 ? 1 : 0;
+
+  for (let i = 0; i < 7; i++) {
+    if (completedDayIndexes.includes(i)) {
+      unlocks[String(i)] = todayKey;
+      continue;
+    }
+    unlocks[String(i)] = addLocalDays(todayKey, queueOffset);
+    queueOffset += 1;
+  }
+
+  return unlocks;
+}
+
+export function resolveSlotUnlocks(
+  state: TrainingCalendarState,
+  todayKey = getLocalDateKey()
+): Record<string, string> {
+  const defaults = buildDefaultSlotUnlocks(state.completedDayIndexes, todayKey);
+  if (!state.slotUnlocks || Object.keys(state.slotUnlocks).length === 0) {
+    return defaults;
+  }
+
+  const merged: Record<string, string> = { ...defaults };
+  for (const [key, value] of Object.entries(state.slotUnlocks)) {
+    if (value) merged[key] = value;
+  }
+  return merged;
+}
+
+export function isSlotUnlocked(
+  state: TrainingCalendarState,
+  dayIndex: number,
+  todayKey = getLocalDateKey()
+): boolean {
+  if (state.completedDayIndexes.includes(dayIndex)) return true;
+  const unlocks = resolveSlotUnlocks(state, todayKey);
+  const unlockDate = unlocks[String(dayIndex)] ?? todayKey;
+  return todayKey >= unlockDate;
+}
+
+export function isActiveSlotLocked(
+  state: TrainingCalendarState,
+  todayKey = getLocalDateKey()
+): boolean {
+  const active = resolveActiveDayIndex(state.completedDayIndexes);
+  if (state.completedDayIndexes.includes(active)) return false;
+  return !isSlotUnlocked(state, active, todayKey);
+}
+
+export function getActiveSlotUnlockDateKey(
+  state: TrainingCalendarState,
+  todayKey = getLocalDateKey()
+): string {
+  const active = resolveActiveDayIndex(state.completedDayIndexes);
+  const unlocks = resolveSlotUnlocks(state, todayKey);
+  return unlocks[String(active)] ?? todayKey;
+}
+
+function normalizeCalendarState(state: TrainingCalendarState): TrainingCalendarState {
+  const activeDayIndex = clampDayIndex(
+    resolveActiveDayIndex(state.completedDayIndexes)
+  );
+  const slotUnlocks = resolveSlotUnlocks(state);
+  return {
+    ...state,
+    activeDayIndex,
+    slotUnlocks,
+    weekStartedDateKey: state.weekStartedDateKey ?? getLocalDateKey(),
   };
 }
 
@@ -148,18 +234,25 @@ export function resolveActiveDayIndex(
 
 export function buildCalendarDays(
   weekPlan: WeekPlan,
-  state: TrainingCalendarState
+  state: TrainingCalendarState,
+  todayKey = getLocalDateKey()
 ): CalendarDay[] {
   const active = resolveActiveDayIndex(state.completedDayIndexes);
+  const unlocks = resolveSlotUnlocks(state, todayKey);
 
   return weekPlan.days.map((slot) => {
     const dayIndex = slot.dayIndex as WeekdayIndex;
-    let status: DaySlotStatus = "upcoming";
+    const unlockedDateKey = unlocks[String(dayIndex)] ?? todayKey;
+    const isCompleted = state.completedDayIndexes.includes(dayIndex);
+    const isLocked = !isCompleted && todayKey < unlockedDateKey;
 
-    if (state.completedDayIndexes.includes(dayIndex)) {
+    let status: DaySlotStatus = "upcoming";
+    if (isCompleted) {
       status = "completed";
     } else if (dayIndex === active) {
-      status = "current";
+      status = isLocked ? "locked" : "current";
+    } else if (isLocked) {
+      status = "locked";
     }
 
     return {
@@ -167,6 +260,9 @@ export function buildCalendarDays(
       dayType: slot.dayType,
       status,
       isTrainingDay: !isRestDayType(slot.dayType),
+      unlockedDateKey,
+      isLocked,
+      isAvailableToday: dayIndex === active && !isLocked && !isCompleted,
     };
   });
 }
@@ -191,17 +287,25 @@ export function advanceAfterWorkoutLogged(
   }
 
   const active = resolveActiveDayIndex(state.completedDayIndexes);
-  const completed = state.completedDayIndexes.includes(active)
+  const wasAlreadyCompleted = state.completedDayIndexes.includes(active);
+  const completed = wasAlreadyCompleted
     ? state.completedDayIndexes
     : [...state.completedDayIndexes, active].sort((a, b) => a - b);
 
   const nextActive = resolveActiveDayIndex(completed);
+  const slotUnlocks = { ...resolveSlotUnlocks(state) };
+  slotUnlocks[String(active)] = slotUnlocks[String(active)] ?? getLocalDateKey();
 
-  return {
+  if (!wasAlreadyCompleted) {
+    slotUnlocks[String(nextActive)] = getTomorrowLocalDateKey();
+  }
+
+  return normalizeCalendarState({
     ...state,
     completedDayIndexes: completed,
     activeDayIndex: nextActive,
-  };
+    slotUnlocks,
+  });
 }
 
 export function syncCalendarIfWorkoutMissionDone(

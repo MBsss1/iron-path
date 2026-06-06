@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ClassId } from "../data/classes";
 import type { GeneratedExercise, GeneratedWorkout } from "../data/workoutGeneratorV2";
 import { translateDayType, translatePhase } from "../i18n/labels";
@@ -11,7 +11,9 @@ import {
   advanceAfterWorkoutLogged,
   buildCalendarDays,
   buildWeekPlanForProfile,
+  getActiveSlotUnlockDateKey,
   getTodayWorkout,
+  isActiveSlotLocked,
   loadTrainingCalendarState,
   saveTrainingCalendarState,
   syncCalendarIfWorkoutMissionDone,
@@ -30,7 +32,11 @@ import {
 import { getWorkoutMainItems } from "../utils/trainingWorkoutView";
 import { safeGet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
-import { getLocalDateKey } from "../utils/localDate";
+import {
+  formatLocalDateKey,
+  getLocalDateKey,
+  getTomorrowLocalDateKey,
+} from "../utils/localDate";
 import {
   getWeekCompletionStatus,
   isWorkoutLoggedToday,
@@ -156,30 +162,64 @@ function TrainingStageBlock({
 function PlanTimeline({
   days,
   t,
+  locale,
 }: {
   days: CalendarDay[];
   t: (key: string, params?: Record<string, string | number>) => string;
+  locale: Lang;
 }) {
+  const tomorrowKey = getTomorrowLocalDateKey();
+
+  const statusIcon = (day: CalendarDay) => {
+    if (day.status === "completed") return t("training.statusIcon.completed");
+    if (day.isLocked) return t("training.statusIcon.locked");
+    if (day.status === "current") return t("training.statusIcon.current");
+    return t("training.statusIcon.upcoming");
+  };
+
+  const statusLabel = (day: CalendarDay) => {
+    if (day.status === "completed") {
+      return t("training.slotStatus.completed");
+    }
+    if (day.isAvailableToday) {
+      return t("training.slotStatus.availableToday");
+    }
+    if (day.isLocked && day.unlockedDateKey === tomorrowKey) {
+      return t("training.slotStatus.opensTomorrow");
+    }
+    if (day.isLocked) {
+      return t("training.slotStatus.opensOn", {
+        date: formatLocalDateKey(day.unlockedDateKey, locale),
+      });
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-1.5">
       {days.map((day) => {
-        const icon = t(`training.statusIcon.${day.status}`);
+        const icon = statusIcon(day);
         const slotLabel = t("training.planSlot", {
           current: day.dayIndex + 1,
           total: 7,
         });
         const label = translateDayType(day.dayType, t);
+        const availability = statusLabel(day);
+        const isHighlighted = day.status === "current" && !day.isLocked;
 
         return (
           <div
             key={day.dayIndex}
             className={`flex items-center gap-3 px-3 py-2 rounded-sm text-sm font-medium ${
-              day.status === "current"
+              isHighlighted
                 ? "bg-iron-accent/15 border border-iron-accent-dim/50 text-iron-text"
                 : day.status === "completed"
                   ? "text-iron-muted opacity-80"
-                  : "text-iron-muted"
+                  : day.isLocked
+                    ? "text-iron-muted opacity-60 border border-transparent"
+                    : "text-iron-muted"
             }`}
+            aria-disabled={day.isLocked}
           >
             <span className="w-5 text-center shrink-0" aria-hidden="true">
               {icon}
@@ -187,10 +227,56 @@ function PlanTimeline({
             <span className="w-[7.5rem] shrink-0 font-bold tracking-wide">
               {slotLabel}
             </span>
-            <span className="flex-1 truncate">{label}</span>
+            <span className="flex-1 min-w-0">
+              <span className="block truncate">{label}</span>
+              {availability && (
+                <span className="block text-[10px] font-normal text-iron-muted mt-0.5 truncate">
+                  {availability}
+                </span>
+              )}
+            </span>
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function TrainingSlotLockerCard({
+  unlockDateKey,
+  locale,
+  onViewPlan,
+  t,
+}: {
+  unlockDateKey: string;
+  locale: Lang;
+  onViewPlan: () => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
+}) {
+  const formattedDate = formatLocalDateKey(unlockDateKey, locale);
+
+  return (
+    <div
+      className="border border-iron-border rounded-sm p-5 bg-iron-panel/80 space-y-3 text-center"
+      role="status"
+    >
+      <p className="text-lg font-bold text-iron-text">
+        {t("training.locker.title")}
+      </p>
+      <div className="space-y-1">
+        <p className="text-sm text-iron-muted">{t("training.locker.opensLabel")}</p>
+        <p className="text-base font-semibold text-iron-accent">{formattedDate}</p>
+      </div>
+      <p className="text-sm text-iron-muted leading-relaxed">
+        {t("training.locker.body")}
+      </p>
+      <button
+        type="button"
+        onClick={onViewPlan}
+        className="iron-interactive iron-btn-secondary w-full py-3 text-sm font-semibold rounded-sm"
+      >
+        {t("training.locker.viewPlan")}
+      </button>
     </div>
   );
 }
@@ -229,6 +315,7 @@ export default function TrainingScreen({
   const [trainingMode, setTrainingMode] = useState(false);
   const [dailyGuardVisible, setDailyGuardVisible] = useState(false);
   const [weekGuardVisible, setWeekGuardVisible] = useState(false);
+  const weekPlanRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setProfile(migrateProfile());
@@ -239,11 +326,34 @@ export default function TrainingScreen({
     let state = loadTrainingCalendarState(seasonWeek);
     if (isWorkoutLoggedToday()) {
       state = syncCalendarIfWorkoutMissionDone(state, true);
-      saveTrainingCalendarState(state);
     }
+    saveTrainingCalendarState(state);
     setCalendarState(state);
     setWorkoutLoggedToday(isWorkoutLoggedToday());
   }, [seasonWeek]);
+
+  const activeSlotLocked = useMemo(
+    () => isActiveSlotLocked(calendarState, todayDate),
+    [calendarState, todayDate]
+  );
+
+  const activeSlotUnlockDate = useMemo(
+    () => getActiveSlotUnlockDateKey(calendarState, todayDate),
+    [calendarState, todayDate]
+  );
+
+  const scrollToWeekPlan = useCallback(() => {
+    weekPlanRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  useEffect(() => {
+    if (!activeSlotLocked || !trainingMode) return;
+    setTrainingMode(false);
+    if (session && !sessionHasProgress(session)) {
+      clearActiveTrainingSession();
+      setSession(null);
+    }
+  }, [activeSlotLocked, trainingMode, session]);
 
   const weekPlan = useMemo(
     () => buildWeekPlanForProfile(profile),
@@ -278,12 +388,13 @@ export default function TrainingScreen({
     if (
       stored &&
       sessionMatchesScope(stored, sessionScope) &&
-      sessionHasProgress(stored)
+      sessionHasProgress(stored) &&
+      !isActiveSlotLocked(calendarState, todayDate)
     ) {
       setSession(stored);
       setTrainingMode(true);
     }
-  }, [sessionScope]);
+  }, [sessionScope, calendarState, todayDate]);
 
   const weekCompletionStatus = useMemo(
     () => getWeekCompletionStatus(calendarState, weekPlan),
@@ -375,11 +486,12 @@ export default function TrainingScreen({
   );
 
   const handleStartTraining = useCallback(() => {
+    if (isActiveSlotLocked(calendarState, todayDate)) return;
     const next = loadActiveTrainingSession(sessionScope);
     setSession(next);
     setTrainingMode(true);
     setDailyGuardVisible(false);
-  }, [sessionScope]);
+  }, [sessionScope, calendarState, todayDate]);
 
   const handleBackToOverview = useCallback(() => {
     if (session && !sessionHasProgress(session)) {
@@ -415,6 +527,13 @@ export default function TrainingScreen({
 
   const activeSlot = calendarState.activeDayIndex + 1;
 
+  const weekGuardTitle =
+    weekCompletionStatus.reason === "not_enough_workouts"
+      ? t("training.guard.weekNotEnoughWorkoutsTitle")
+      : weekCompletionStatus.reason === "slots_locked"
+        ? t("training.guard.weekSlotsLockedTitle")
+        : t("training.guard.weekTooEarlyTitle");
+
   if (!assessmentComplete) {
     return (
       <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24 text-center space-y-5">
@@ -433,7 +552,7 @@ export default function TrainingScreen({
     );
   }
 
-  if (!trainingMode) {
+  if (!trainingMode || activeSlotLocked) {
     return (
       <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-28 space-y-4">
         <Stagger className="space-y-4">
@@ -450,16 +569,28 @@ export default function TrainingScreen({
             </p>
           </div>
 
-          {workoutLoggedToday && (
+          {workoutLoggedToday && !activeSlotLocked && (
             <p className="text-center text-sm font-semibold text-iron-accent py-3 border border-iron-border rounded-sm bg-iron-raised">
               {t("training.logWorkoutDone")}
             </p>
           )}
 
-          <section className="border border-iron-border p-4 iron-card-raised rounded-sm">
+          {activeSlotLocked && (
+            <TrainingSlotLockerCard
+              unlockDateKey={activeSlotUnlockDate}
+              locale={lang}
+              onViewPlan={scrollToWeekPlan}
+              t={t}
+            />
+          )}
+
+          <section
+            ref={weekPlanRef}
+            className="border border-iron-border p-4 iron-card-raised rounded-sm"
+          >
             <h3 className="iron-heading text-lg mb-1">{t("training.planProgressTitle")}</h3>
             <p className="text-xs text-iron-muted mb-3">{t("training.planProgressHint")}</p>
-            <PlanTimeline days={calendarDays} t={t} />
+            <PlanTimeline days={calendarDays} t={t} locale={lang} />
           </section>
 
           {weekGuardVisible && (
@@ -467,11 +598,7 @@ export default function TrainingScreen({
               className="border border-iron-border rounded-sm p-4 bg-iron-panel/80 space-y-1"
               role="status"
             >
-              <p className="text-sm font-semibold text-iron-text">
-                {weekCompletionStatus.reason === "not_enough_workouts"
-                  ? t("training.guard.weekNotEnoughWorkoutsTitle")
-                  : t("training.guard.weekTooEarlyTitle")}
-              </p>
+              <p className="text-sm font-semibold text-iron-text">{weekGuardTitle}</p>
               <p className="text-xs text-iron-muted leading-relaxed">
                 {t("training.guard.weekBlockedDescription")}
               </p>
@@ -490,15 +617,17 @@ export default function TrainingScreen({
             {t("training.completeWeek")}
           </button>
 
-          <button
-            type="button"
-            onClick={handleStartTraining}
-            className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[52px] rounded-sm"
-          >
-            {workoutLoggedToday
-              ? t("training.reviewWorkout")
-              : t("training.startTraining")}
-          </button>
+          {!activeSlotLocked && (
+            <button
+              type="button"
+              onClick={handleStartTraining}
+              className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[52px] rounded-sm"
+            >
+              {workoutLoggedToday
+                ? t("training.reviewWorkout")
+                : t("training.startTraining")}
+            </button>
+          )}
         </Stagger>
 
         {(showReassessmentPrompt || showAdaptationHint) &&

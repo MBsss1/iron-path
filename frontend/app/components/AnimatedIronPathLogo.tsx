@@ -18,7 +18,7 @@ export default function AnimatedIronPathLogo({
 
   return (
     <svg
-      viewBox="0 0 280 196"
+      viewBox="0 0 280 184"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-labelledby="iron-path-logo-title"
@@ -27,31 +27,31 @@ export default function AnimatedIronPathLogo({
     >
       <title id="iron-path-logo-title">Iron Path</title>
 
-      {/* 1 — top cap (narrow, centered) */}
+      {/* 1 — top cap (narrow, centered; sits closer to main beam) */}
       <g className="iron-logo-piece iron-logo-topBar" aria-hidden="true">
         <rect x="109" y="0" width="62" height="10" />
       </g>
 
-      {/* 2 — middle beam (widest horizontal) */}
+      {/* 2 — middle beam / roof (primary horizontal) */}
       <g className="iron-logo-piece iron-logo-middleBar" aria-hidden="true">
-        <rect x="36" y="16" width="208" height="12" />
+        <rect x="28" y="13" width="224" height="11" />
       </g>
 
-      {/* 3 — columns (bottoms follow slanted base: left tallest → right shortest) */}
+      {/* 3 — columns (subtle height taper follows gentle base slope) */}
       <g className="iron-logo-piece iron-logo-columns" aria-hidden="true">
-        <rect x="54" y="32" width="22" height="74" />
-        <rect x="129" y="32" width="22" height="70" />
-        <rect x="204" y="32" width="22" height="66" />
+        <rect x="65" y="26" width="25" height="80" />
+        <rect x="127" y="26" width="25" height="79" />
+        <rect x="189" y="26" width="25" height="78" />
       </g>
 
-      {/* 4 — slanted base (top edge rises left → right) */}
+      {/* 4 — base (subtle upward slope ~65% shallower than prior) */}
       <g className="iron-logo-piece iron-logo-bottomBar" aria-hidden="true">
-        <polygon points="36,116 244,116 244,96 36,108" />
+        <polygon points="28,110 252,110 252,104 28,107" />
       </g>
 
       {/* 5 — wordmark */}
       <g className="iron-logo-piece iron-logo-text">
-        <text x="140" y="156" textAnchor="middle">
+        <text x="140" y="148" textAnchor="middle">
           IRON PATH
         </text>
       </g>

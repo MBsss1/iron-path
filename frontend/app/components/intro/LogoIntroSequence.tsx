@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import AnimatedIronPathLogo from "../AnimatedIronPathLogo";
 import { usePrefersReducedMotion } from "../../animations/usePrefersReducedMotion";
 import { useTranslation } from "../../i18n/useTranslation";
-
-/** Official raster logo — served from public/branding (works in dev, build, Cloudflare). */
-export const OFFICIAL_LOGO_SRC = "/branding/iron_path_logo.png";
 
 type Props = {
   onBegin: () => void;
@@ -19,8 +17,7 @@ const TAGLINE_KEYS = [
 
 /** Mount-only timeline — must not cancel on unrelated state updates. */
 const TIMELINE_MS = {
-  logoReveal: 80,
-  glint: 1100,
+  glint: 1180,
   tagline1: 1750,
   tagline2: 2150,
   tagline3: 2550,
@@ -32,13 +29,11 @@ export default function LogoIntroSequence({ onBegin }: Props) {
   const onBeginRef = useRef(onBegin);
   onBeginRef.current = onBegin;
 
-  const [logoRevealed, setLogoRevealed] = useState(reduced);
   const [glint, setGlint] = useState(reduced);
   const [visibleTaglines, setVisibleTaglines] = useState(reduced ? 3 : 0);
 
   useEffect(() => {
     if (reduced) {
-      setLogoRevealed(true);
       setGlint(true);
       setVisibleTaglines(3);
       return;
@@ -49,7 +44,6 @@ export default function LogoIntroSequence({ onBegin }: Props) {
       timers.push(window.setTimeout(fn, ms));
     };
 
-    schedule(() => setLogoRevealed(true), TIMELINE_MS.logoReveal);
     schedule(() => setGlint(true), TIMELINE_MS.glint);
     schedule(() => setVisibleTaglines(1), TIMELINE_MS.tagline1);
     schedule(() => setVisibleTaglines(2), TIMELINE_MS.tagline2);
@@ -70,17 +64,9 @@ export default function LogoIntroSequence({ onBegin }: Props) {
           glint ? "logo-intro-hero--glint" : ""
         }`}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; reliable in Telegram WebView */}
-        <img
-          src={OFFICIAL_LOGO_SRC}
-          alt=""
-          width={149}
-          height={134}
-          decoding="async"
-          draggable={false}
-          className={`logo-intro-official ${
-            logoRevealed ? "logo-intro-unified--visible" : "logo-intro-unified"
-          }`}
+        <AnimatedIronPathLogo
+          className="logo-intro-mark"
+          reducedMotion={reduced}
         />
         <span className="logo-intro-glint" aria-hidden="true" />
       </div>

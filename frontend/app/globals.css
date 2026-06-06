@@ -1324,7 +1324,121 @@ html.telegram-webapp body {
   vertical-align: bottom;
 }
 
-/* ——— Logo intro (inline SVG only) ——— */
+/* ——— Animated Iron Path logo (inline SVG) ——— */
+.iron-logo-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  color: var(--iron-text);
+}
+
+.iron-logo-piece {
+  fill: currentColor;
+}
+
+.iron-logo-wordmark {
+  font-family: var(--font-sans), "Segoe UI", Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+}
+
+.iron-logo-svg--animate .iron-logo-piece {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.iron-logo-svg--animate .iron-logo-cap {
+  animation: iron-logo-cap-assemble 220ms var(--motion-ease-out) 0ms both;
+}
+
+.iron-logo-svg--animate .iron-logo-beam {
+  animation: iron-logo-beam-assemble 220ms var(--motion-ease-out) 180ms both;
+}
+
+.iron-logo-svg--animate .iron-logo-col-1 {
+  animation: iron-logo-column-assemble 260ms var(--motion-ease-out) 360ms both;
+}
+
+.iron-logo-svg--animate .iron-logo-col-2 {
+  animation: iron-logo-column-assemble 260ms var(--motion-ease-out) 430ms both;
+}
+
+.iron-logo-svg--animate .iron-logo-col-3 {
+  animation: iron-logo-column-assemble 260ms var(--motion-ease-out) 500ms both;
+}
+
+.iron-logo-svg--animate .iron-logo-base {
+  animation: iron-logo-base-assemble 240ms var(--motion-ease-out) 640ms both;
+}
+
+.iron-logo-svg--animate .iron-logo-wordmark {
+  animation: iron-logo-text-assemble 300ms var(--motion-ease-out) 880ms both;
+}
+
+.iron-logo-svg--static .iron-logo-piece {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes iron-logo-cap-assemble {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iron-logo-beam-assemble {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes iron-logo-column-assemble {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iron-logo-base-assemble {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iron-logo-text-assemble {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ——— Logo intro scene ——— */
 .logo-intro-scene {
   min-height: min(70vh, 440px);
 }
@@ -1335,33 +1449,10 @@ html.telegram-webapp body {
   contain: layout style paint;
 }
 
-.logo-intro-official {
-  display: block;
+.logo-intro-mark {
   width: 100%;
-  height: auto;
   max-width: 200px;
-  object-fit: contain;
-  object-position: center;
-}
-
-.logo-intro-unified {
-  opacity: 0;
-  transform: scale(0.96);
-}
-
-.logo-intro-unified--visible {
-  animation: logo-intro-unified-in var(--motion-duration-slow) var(--motion-ease-out) both;
-}
-
-@keyframes logo-intro-unified-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  margin-inline: auto;
 }
 
 .logo-intro-glint {
@@ -1532,6 +1623,16 @@ html.telegram-webapp body {
 
   .intro-product-card {
     transition: none !important;
+  }
+
+  .iron-logo-svg--animate .iron-logo-cap,
+  .iron-logo-svg--animate .iron-logo-beam,
+  .iron-logo-svg--animate .iron-logo-col,
+  .iron-logo-svg--animate .iron-logo-base,
+  .iron-logo-svg--animate .iron-logo-wordmark {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   .logo-intro-unified--visible,

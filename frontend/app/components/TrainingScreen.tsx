@@ -401,7 +401,7 @@ export default function TrainingScreen({
       )}
 
       <section className="border border-iron-accent-dim/40 bg-iron-panel p-4 rounded-sm space-y-4 min-h-[200px]">
-        <StepTransition stepKey={activeStage} className="space-y-4">
+        <StepTransition stepKey={activeStage} variant="training-stage" className="space-y-4">
         {activeStage === "warmup" && (
           <div className="space-y-4">
             <WarmupChecklist

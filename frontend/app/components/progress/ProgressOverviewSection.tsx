@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedProgressFill from "../../animations/AnimatedProgressFill";
 import { translateGoal, translatePhase } from "../../i18n/labels";
 import { useTranslation } from "../../i18n/useTranslation";
 
@@ -77,10 +78,7 @@ export default function ProgressOverviewSection({
           </span>
         </div>
         <div className="w-full h-4 iron-progress-track mt-2 overflow-hidden rounded-sm">
-          <div
-            className="h-full iron-progress-fill"
-            style={{ width: `${xpProgress}%` }}
-          />
+          <AnimatedProgressFill percent={xpProgress} />
         </div>
       </div>
 
@@ -95,10 +93,7 @@ export default function ProgressOverviewSection({
           <span className="text-iron-gold">{Math.round(pathProgress)}%</span>
         </div>
         <div className="w-full h-4 iron-progress-track mt-2 overflow-hidden rounded-sm">
-          <div
-            className="h-full iron-progress-fill"
-            style={{ width: `${pathProgress}%` }}
-          />
+          <AnimatedProgressFill percent={pathProgress} />
         </div>
       </div>
 

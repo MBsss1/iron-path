@@ -59,7 +59,6 @@ export const ALLOWED_WARMUP_EXERCISE_IDS = new Set([
   "dead_hang",
   "wall_slides",
   "leg_swings",
-  "bird_dog",
   "dead_bug_light",
 ]);
 
@@ -77,7 +76,6 @@ const EXERCISE_LAYER: Record<string, WarmupLayer> = {
   dead_hang: "activation",
   wall_slides: "activation",
   leg_swings: "activation",
-  bird_dog: "activation",
   dead_bug_light: "activation",
 };
 
@@ -95,7 +93,6 @@ const WARMUP_PRESCRIPTIONS: Record<string, LocalizedText> = {
   dead_hang: { en: "20–30 sec", ru: "20–30 сек" },
   wall_slides: { en: "10 reps", ru: "10 повторений" },
   leg_swings: { en: "10 each leg", ru: "10 на каждую ногу" },
-  bird_dog: { en: "8 each side", ru: "8 на сторону" },
   dead_bug_light: { en: "8 each side", ru: "8 на сторону" },
 };
 
@@ -113,7 +110,6 @@ const WARMUP_DURATION_SECONDS: Record<string, number> = {
   dead_hang: 25,
   wall_slides: 45,
   leg_swings: 40,
-  bird_dog: 60,
   dead_bug_light: 60,
 };
 
@@ -155,12 +151,12 @@ const DAY_BLUEPRINTS: Record<DayType, DayBlueprint> = {
   full_body: {
     general: ["marching"],
     joints: ["arm_circles", "shoulder_rolls", "hip_circles", "ankle_rotations"],
-    activation: ["bird_dog"],
+    activation: ["wrist_rotations"],
   },
   mobility: {
     general: ["marching"],
     joints: ["hip_circles", "shoulder_rolls"],
-    activation: ["bird_dog", "dead_bug_light"],
+    activation: ["dead_bug_light"],
   },
 };
 
@@ -175,7 +171,7 @@ const LEVEL_RANK: Record<FitnessLevel, number> = {
 const ACTIVATION_FALLBACKS: Record<string, string[]> = {
   scapular_pulls: ["wall_slides"],
   dead_hang: ["wall_slides"],
-  leg_swings: ["bird_dog", "dead_bug_light"],
+  leg_swings: ["dead_bug_light"],
   wall_slides: ["shoulder_rolls"],
 };
 
@@ -334,25 +330,25 @@ export function buildWarmupExercises(ctx: WarmupBuildContext): GeneratedExercise
   const seen = new Set<string>();
   const layersPresent = new Set<WarmupLayer>();
 
-  const addResolved = (id: string) => {
+  const addResolved = (id: string, slotLayer?: WarmupLayer) => {
     const resolved = tryResolveExercise(ctx, id, seen);
     if (!resolved) return;
     seen.add(resolved);
     ordered.push(resolved);
-    const layer = EXERCISE_LAYER[resolved];
+    const layer = slotLayer ?? EXERCISE_LAYER[resolved];
     if (layer) layersPresent.add(layer);
   };
 
   for (const id of resolveGeneralLayer(ctx, blueprint)) {
-    addResolved(id);
+    addResolved(id, "general");
   }
 
   for (const id of blueprint.joints) {
-    addResolved(id);
+    addResolved(id, "joints");
   }
 
   for (const id of blueprint.activation) {
-    addResolved(id);
+    addResolved(id, "activation");
   }
 
   const layerOrder: WarmupLayer[] = ["general", "joints", "activation"];
@@ -363,7 +359,7 @@ export function buildWarmupExercises(ctx: WarmupBuildContext): GeneratedExercise
         ? ["marching", "brisk_walk"]
         : layer === "joints"
           ? ["arm_circles", "shoulder_rolls", "hip_circles", "ankle_rotations"]
-          : ["bird_dog", "wall_slides", "dead_bug_light"];
+          : ["wall_slides", "dead_bug_light", "elbow_rotations"];
     for (const id of pool) {
       if (layersPresent.has(layer)) break;
       addResolved(id);

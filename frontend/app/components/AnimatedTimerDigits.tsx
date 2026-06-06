@@ -28,12 +28,9 @@ function DigitWheel({
   return (
     <span className="digit-wheel-slot" aria-hidden="true">
       <span
-        className="digit-wheel-strip"
+        className={`digit-wheel-strip ${reduced ? "digit-wheel-strip--static" : ""}`}
         style={{
           transform: `translate3d(0, ${-safe * 10}%, 0)`,
-          transition: reduced
-            ? "none"
-            : "transform var(--motion-duration-normal) var(--motion-ease-out)",
         }}
       >
         {DIGIT_VALUES.map((value) => (

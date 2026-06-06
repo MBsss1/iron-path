@@ -1,5 +1,6 @@
 "use client";
 
+import Stagger from "../animations/Stagger";
 import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
@@ -59,7 +60,7 @@ export default function MoreScreen({
         <p className="mt-2 text-sm text-iron-muted">{t("more.subtitle")}</p>
       </div>
 
-      <div className="mt-8 space-y-4">
+      <Stagger className="mt-8 space-y-4">
         {cards.map((card) => (
           <button
             key={card.title}
@@ -72,7 +73,7 @@ export default function MoreScreen({
             <p className="mt-2 text-sm text-iron-muted">{card.desc}</p>
           </button>
         ))}
-      </div>
+      </Stagger>
     </div>
   );
 }

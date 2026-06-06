@@ -21,6 +21,7 @@ import {
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import Stagger from "../animations/Stagger";
+import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 
 type Props = {
   profile: Profile;
@@ -238,10 +239,7 @@ export default function HeroScreen({
         </div>
 
         <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
-          <div
-            className="h-full iron-progress-fill"
-            style={{ width: `${progress}%` }}
-          />
+          <AnimatedProgressFill percent={progress} />
         </div>
 
         <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-iron-muted">
@@ -301,10 +299,7 @@ export default function HeroScreen({
             </span>
           </div>
           <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
-            <div
-              className="h-full iron-progress-fill"
-              style={{ width: `${xpPercent}%` }}
-            />
+            <AnimatedProgressFill percent={xpPercent} />
           </div>
           <p className="text-xs text-iron-muted mt-2">
             {isMaxRank
@@ -338,9 +333,9 @@ export default function HeroScreen({
                 </p>
                 <p className="text-xs text-iron-muted mt-1 pl-5">{bossProgressLabel}</p>
                 <div className="w-full h-1.5 iron-progress-track mt-2 overflow-hidden">
-                  <div
-                    className="h-full iron-progress-fill iron-progress-fill-danger"
-                    style={{ width: `${bossProgressPercent}%` }}
+                  <AnimatedProgressFill
+                    percent={bossProgressPercent}
+                    variant="danger"
                   />
                 </div>
               </div>

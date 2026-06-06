@@ -304,7 +304,7 @@ export const EXERCISES: Exercise[] = [
     category: "warmup",
     level: "absolute_beginner",
     muscles: ["shoulders", "upper back"],
-    name: { en: "Wall slides", ru: "Скольжение по стене" },
+    name: { en: "Wall slides", ru: "Скольжения у стены" },
     instructions: {
       en: [
         "Back flat to wall, arms in W shape.",
@@ -402,7 +402,7 @@ export const EXERCISES: Exercise[] = [
     category: "warmup",
     level: "absolute_beginner",
     muscles: ["core", "back"],
-    name: { en: "Bird dog", ru: "Собака-птица" },
+    name: { en: "Bird dog", ru: "Баланс на четвереньках" },
     instructions: {
       en: [
         "On all fours, spine neutral.",
@@ -426,7 +426,7 @@ export const EXERCISES: Exercise[] = [
     category: "warmup",
     level: "absolute_beginner",
     muscles: ["core"],
-    name: { en: "Dead bug (light)", ru: "Мёртвый жук (лёгкий)" },
+    name: { en: "Dead bug (light)", ru: "Стабилизация корпуса (лёгкая)" },
     instructions: {
       en: [
         "On back, knees bent, arms up.",
@@ -1044,7 +1044,7 @@ export const EXERCISES: Exercise[] = [
     category: "core",
     level: "absolute_beginner",
     muscles: ["core"],
-    name: { en: "Dead bug", ru: "Мёртвый жук" },
+    name: { en: "Dead bug", ru: "Стабилизация корпуса лёжа" },
     instructions: {
       en: [
         "On back, arms up, knees 90°.",
@@ -1295,7 +1295,7 @@ export const EXERCISES: Exercise[] = [
     category: "cardio",
     level: "novice",
     muscles: ["core", "cardio"],
-    name: { en: "Mountain climbers", ru: "Скалолаз" },
+    name: { en: "Mountain climbers", ru: "Бег в упоре" },
     instructions: {
       en: [
         "High plank, drive knees alternately.",

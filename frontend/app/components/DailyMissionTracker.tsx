@@ -1,3 +1,4 @@
+import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 import { DailyMission } from "../hooks/useDailyMissions";
 
 type Props = {
@@ -38,12 +39,7 @@ export default function DailyMissionTracker({
       </div>
 
       <div className="w-full h-4 iron-progress-track mb-4 overflow-hidden rounded-sm">
-        <div
-          className="h-full iron-progress-fill transition-all duration-300"
-          style={{
-            width: `${progress}%`,
-          }}
-        />
+        <AnimatedProgressFill percent={progress} />
       </div>
 
       <div className="space-y-2">

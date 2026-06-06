@@ -4,8 +4,14 @@
   --background: #0f1113;
   --foreground: #f3efe8;
 
-  --motion-duration-fast: 150ms;
+  --motion-duration-fast: 120ms;
   --motion-duration-normal: 220ms;
+  --motion-duration-screen: 240ms;
+  --motion-duration-stage: 260ms;
+  --motion-duration-stagger: 200ms;
+  --motion-duration-progress: 700ms;
+  --motion-duration-completion: 280ms;
+  --motion-duration-digit: 220ms;
   --motion-duration-slow: 320ms;
   --motion-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
 
@@ -172,23 +178,35 @@ html.telegram-webapp body {
 }
 
 .iron-stagger > * {
-  animation: card-enter 0.32s ease-out both;
+  animation: iron-stagger-reveal var(--motion-duration-stagger) var(--motion-ease-out) both;
 }
 
 .iron-stagger > *:nth-child(1) {
-  animation-delay: 0.03s;
+  animation-delay: 0ms;
 }
 .iron-stagger > *:nth-child(2) {
-  animation-delay: 0.06s;
+  animation-delay: 40ms;
 }
 .iron-stagger > *:nth-child(3) {
-  animation-delay: 0.09s;
+  animation-delay: 80ms;
 }
 .iron-stagger > *:nth-child(4) {
-  animation-delay: 0.12s;
+  animation-delay: 120ms;
 }
 .iron-stagger > *:nth-child(5) {
-  animation-delay: 0.15s;
+  animation-delay: 160ms;
+}
+.iron-stagger > *:nth-child(6) {
+  animation-delay: 200ms;
+}
+.iron-stagger > *:nth-child(n + 7) {
+  animation-delay: 200ms;
+}
+
+.iron-progress-fill-animated {
+  transform-origin: left center;
+  transition: transform var(--motion-duration-progress) var(--motion-ease-out);
+  will-change: transform;
 }
 
 /* ——— Progress ——— */
@@ -201,7 +219,6 @@ html.telegram-webapp body {
 .iron-progress-fill {
   background: var(--iron-accent-dim);
   border-radius: 1px;
-  transition: width 0.45s ease-out;
 }
 
 .iron-progress-fill-danger {
@@ -278,6 +295,84 @@ html.telegram-webapp body {
 }
 
 /* ——— Keyframes (subtle only) ——— */
+@keyframes iron-screen-exit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes iron-screen-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes iron-stage-exit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+}
+
+@keyframes iron-stage-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes iron-step-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes iron-stagger-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes iron-tab-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @keyframes screen-enter {
   from {
     opacity: 0;
@@ -361,6 +456,21 @@ html.telegram-webapp body {
     transform: scale(1.05);
   }
   100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes iron-completion-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
     transform: scale(1);
   }
 }
@@ -471,13 +581,33 @@ html.telegram-webapp body {
   animation: splash-logo 0.5s ease-out both;
 }
 
+.iron-screen-enter {
+  animation: iron-screen-enter var(--motion-duration-screen) var(--motion-ease-out) both;
+}
+
+.iron-screen-exit {
+  animation: iron-screen-exit var(--motion-duration-screen) var(--motion-ease-out) both;
+}
+
+.iron-stage-enter {
+  animation: iron-stage-enter var(--motion-duration-stage) var(--motion-ease-out) both;
+}
+
+.iron-stage-exit {
+  animation: iron-stage-exit var(--motion-duration-stage) var(--motion-ease-out) both;
+}
+
+.iron-step-enter {
+  animation: iron-step-enter var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
 .animate-screen-enter,
 .iron-anim-screen {
-  animation: screen-enter var(--motion-duration-normal) var(--motion-ease-out) both;
+  animation: iron-screen-enter var(--motion-duration-screen) var(--motion-ease-out) both;
 }
 
 .iron-anim-premium-screen {
-  animation: premium-screen-enter var(--motion-duration-slow) var(--motion-ease-out) both;
+  animation: iron-screen-enter var(--motion-duration-screen) var(--motion-ease-out) both;
 }
 
 .iron-anim-section-reveal {
@@ -485,7 +615,7 @@ html.telegram-webapp body {
 }
 
 .iron-anim-step-transition {
-  animation: iron-step-transition var(--motion-duration-normal) var(--motion-ease-out) both;
+  animation: iron-step-enter var(--motion-duration-normal) var(--motion-ease-out) both;
 }
 
 .iron-nav-indicator-slide {
@@ -518,26 +648,34 @@ html.telegram-webapp body {
 }
 
 .iron-done-pop {
-  animation: iron-done-pop var(--motion-duration-fast) var(--motion-ease-out) both;
+  animation: iron-done-pop var(--motion-duration-completion) var(--motion-ease-out) both;
+}
+
+.iron-completion-pop {
+  animation: iron-completion-pop var(--motion-duration-completion) var(--motion-ease-out) both;
+}
+
+.iron-nav-tab-press {
+  animation: iron-tab-press var(--motion-duration-fast) var(--motion-ease-out) both;
 }
 
 .warmup-start-btn {
-  animation: iron-done-pop var(--motion-duration-fast) var(--motion-ease-out) both;
+  animation: iron-completion-pop var(--motion-duration-completion) var(--motion-ease-out) both;
 }
 
 .warmup-complete-moment {
-  animation: iron-done-pop var(--motion-duration-normal) var(--motion-ease-out) both;
+  animation: iron-completion-pop var(--motion-duration-completion) var(--motion-ease-out) both;
+}
+
+.warmup-progress-fill {
+  transform-origin: left center;
+  transition: transform var(--motion-duration-progress) var(--motion-ease-out);
+  will-change: transform;
 }
 
 .iron-skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--iron-panel) 0%,
-    var(--iron-raised) 50%,
-    var(--iron-panel) 100%
-  );
-  background-size: 200% 100%;
-  animation: iron-skeleton-pulse 1.4s ease-in-out infinite;
+  background: var(--iron-panel);
+  animation: iron-skeleton-pulse 1.6s ease-in-out infinite;
 }
 
 .iron-card-tap {
@@ -624,6 +762,11 @@ html.telegram-webapp body {
   flex-direction: column;
   height: 1000%;
   will-change: transform;
+  transition: transform var(--motion-duration-digit) var(--motion-ease-out);
+}
+
+.digit-wheel-strip--static {
+  transition: none;
 }
 
 .digit-wheel-cell {
@@ -867,7 +1010,14 @@ html.telegram-webapp body {
 
   .iron-anim-premium-screen,
   .iron-anim-section-reveal,
-  .iron-anim-step-transition {
+  .iron-anim-step-transition,
+  .iron-screen-enter,
+  .iron-screen-exit,
+  .iron-stage-enter,
+  .iron-stage-exit,
+  .iron-step-enter,
+  .iron-completion-pop,
+  .iron-nav-tab-press {
     animation: none !important;
   }
 
@@ -892,7 +1042,9 @@ html.telegram-webapp body {
   .iron-card-raised,
   .iron-card-panel,
   .iron-stagger > *,
-  .iron-progress-fill {
+  .iron-progress-fill,
+  .iron-progress-fill-animated,
+  .warmup-progress-fill {
     animation: none !important;
     transition: none !important;
   }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Stagger from "../animations/Stagger";
+import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 import WeightProgressScreen from "./WeightProgressScreen";
 import { useNutritionMissions, type NutritionMissionId } from "../hooks/useNutritionMissions";
 import {
@@ -70,7 +72,7 @@ export default function NutritionScreen({ goal }: Props) {
   }
 
   return (
-    <div className={shell}>
+    <Stagger className={shell}>
       <div className="text-center">
         <p className="iron-label">{t("nutrition.dailyDiscipline")}</p>
         <h2 className="iron-heading text-3xl mt-2">{t("nutrition.title")}</h2>
@@ -89,10 +91,7 @@ export default function NutritionScreen({ goal }: Props) {
         </div>
 
         <div className="w-full h-4 iron-progress-track overflow-hidden rounded-sm">
-          <div
-            className="h-full iron-progress-fill transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
+          <AnimatedProgressFill percent={progress} />
         </div>
       </div>
 
@@ -142,6 +141,6 @@ export default function NutritionScreen({ goal }: Props) {
       >
         {t("nutrition.viewWeight")}
       </button>
-    </div>
+    </Stagger>
   );
 }

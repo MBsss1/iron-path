@@ -6,6 +6,7 @@ import {
   getHeroMilestoneGoals,
 } from "../../data/physicalMilestones";
 import type { PathMode } from "../../data/pathMode";
+import AnimatedProgressFill from "../../animations/AnimatedProgressFill";
 import { useTranslation } from "../../i18n/useTranslation";
 
 type Props = {
@@ -61,10 +62,7 @@ export default function NextMilestoneBlock({
               {formatMilestoneGoalText(goal, t)}
             </p>
             <div className="w-full h-1.5 iron-progress-track mt-1.5 overflow-hidden rounded-sm">
-              <div
-                className="h-full iron-progress-fill"
-                style={{ width: `${goal.progressPercent}%` }}
-              />
+              <AnimatedProgressFill percent={goal.progressPercent} />
             </div>
             <p className="text-xs text-iron-muted mt-0.5">
               {t("coaching.nextGoal.progress", { percent: goal.progressPercent })}

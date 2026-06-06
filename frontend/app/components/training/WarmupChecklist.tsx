@@ -1,6 +1,7 @@
 "use client";
 
 import type { GeneratedExercise } from "../../data/workoutGeneratorV2";
+import AnimatedProgressFill from "../../animations/AnimatedProgressFill";
 import { estimateWarmupMinutes } from "../../data/warmupBuilder";
 import { exerciseItemKey } from "../../utils/trainingWorkoutView";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -61,10 +62,7 @@ export default function WarmupChecklist({
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-iron-border/80 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-iron-accent-dim warmup-progress-fill transition-[width] duration-300 ease-out"
-              style={{ width: `${percent}%` }}
-            />
+            <AnimatedProgressFill percent={percent} durationMs={400} />
           </div>
         </div>
       )}
@@ -114,10 +112,7 @@ export default function WarmupChecklist({
       </ul>
 
       {allDone && total > 0 && (
-        <CompletionMoment
-          message={t("training.flow.warmupCompleteHint")}
-          className="warmup-complete-moment"
-        />
+        <CompletionMoment message={t("training.flow.warmupCompleteHint")} />
       )}
     </div>
   );

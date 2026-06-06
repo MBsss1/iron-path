@@ -1,7 +1,9 @@
 "use client";
 
-import { fadeUp } from "../../animations/classes";
+import { useEffect } from "react";
+import { completionPop } from "../../animations/classes";
 import { usePrefersReducedMotion } from "../../animations/usePrefersReducedMotion";
+import { hapticDone } from "../../utils/haptics";
 
 type Props = {
   message: string;
@@ -12,10 +14,14 @@ type Props = {
 export default function CompletionMoment({ message, className = "" }: Props) {
   const reduced = usePrefersReducedMotion();
 
+  useEffect(() => {
+    if (!reduced) hapticDone();
+  }, [reduced]);
+
   return (
     <div
       className={`flex items-center gap-2.5 border border-iron-accent/40 bg-iron-accent/10 rounded-sm px-3 py-2.5 ${
-        reduced ? "" : fadeUp
+        reduced ? "" : completionPop
       } ${className}`}
       role="status"
     >

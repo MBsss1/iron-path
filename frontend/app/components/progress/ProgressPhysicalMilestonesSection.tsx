@@ -5,6 +5,7 @@ import {
   getGoalOrderedMilestones,
 } from "../../data/physicalMilestones";
 import { useFitnessAssessment } from "../../hooks/useFitnessAssessment";
+import AnimatedProgressFill from "../../animations/AnimatedProgressFill";
 import { useTranslation } from "../../i18n/useTranslation";
 
 export default function ProgressPhysicalMilestonesSection() {
@@ -57,10 +58,7 @@ export default function ProgressPhysicalMilestonesSection() {
                 {formatMilestoneGoalText(track, t)}
               </p>
               <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden rounded-sm">
-                <div
-                  className="h-full iron-progress-fill"
-                  style={{ width: `${track.progressPercent}%` }}
-                />
+                <AnimatedProgressFill percent={track.progressPercent} />
               </div>
               <p className="text-xs text-iron-gold mt-1">
                 {t("coaching.milestones.percentToGoal", {

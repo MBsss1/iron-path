@@ -1,4 +1,8 @@
-import type { AssessmentInput, Limitation } from "../fitnessAssessment";
+import {
+  shouldAvoidRunning,
+  type AssessmentInput,
+  type Limitation,
+} from "../fitnessAssessment";
 import type { ActiveFitnessGoal } from "../fitnessGoals";
 import { getExercise, type Exercise } from "../exercises";
 import type { StageExerciseSlot } from "./types";
@@ -71,7 +75,10 @@ export function canUseStageExercise(
     }
   }
 
-  if (ctx.input.cardioAccess === "none" && ["easy_run", "intervals", "light_jog"].includes(slot.exerciseId)) {
+  if (
+    shouldAvoidRunning(ctx.input.cardioAccess, ctx.input.cardioPreference) &&
+    ["easy_run", "intervals", "light_jog"].includes(slot.exerciseId)
+  ) {
     return false;
   }
 

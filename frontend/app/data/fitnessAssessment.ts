@@ -11,6 +11,38 @@ export type CardioPreference = "enjoy" | "neutral" | "dislike";
 
 export type CardioTestType = "run" | "walk" | "skipped";
 
+/** User cannot or prefers not to run (no access, or dislikes running). */
+export function shouldAvoidRunning(
+  cardioAccess: CardioAccess,
+  cardioPreference: CardioPreference
+): boolean {
+  return cardioAccess === "none" || cardioPreference === "dislike";
+}
+
+/** Whether the endurance step may offer a running test. */
+export function canOfferRunningTest(
+  cardioAccess: CardioAccess | null,
+  cardioPreference: CardioPreference | null
+): boolean {
+  if (cardioAccess === null || cardioPreference === null) return false;
+  return !shouldAvoidRunning(cardioAccess, cardioPreference);
+}
+
+/** Endurance wizard step is omitted when regular running is unavailable. */
+export function shouldSkipEnduranceStep(
+  cardioAccess: CardioAccess | null
+): boolean {
+  return cardioAccess === "none";
+}
+
+/** Default endurance test when running is not offered. */
+export function getDefaultCardioTestTypeWhenAvoidingRun(
+  cardioAccess: CardioAccess
+): CardioTestType {
+  if (cardioAccess === "none") return "skipped";
+  return "walk";
+}
+
 export type FitnessLevel =
   | "absolute_beginner"
   | "beginner"
@@ -119,8 +151,16 @@ export function classifyCoreLevel(plankSeconds: number): FitnessLevel {
 }
 
 export function resolveCardioTestType(input: AssessmentInput): CardioTestType {
+  if (input.cardioTestType === "run" && shouldAvoidRunning(input.cardioAccess, input.cardioPreference)) {
+    if (input.walkMinutes !== undefined) return "walk";
+    return "skipped";
+  }
   if (input.cardioTestType) return input.cardioTestType;
   if (input.cardioAccess === "none") return "skipped";
+  if (shouldAvoidRunning(input.cardioAccess, input.cardioPreference)) {
+    if (input.walkMinutes !== undefined) return "walk";
+    return "skipped";
+  }
   if (
     input.run1kmSeconds !== undefined ||
     input.walkRun12MinMeters !== undefined

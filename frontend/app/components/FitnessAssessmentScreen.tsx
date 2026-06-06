@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import type { Profile } from "../hooks/useProfile";
 import {
   assessFitness,
+  canOfferRunningTest,
+  getDefaultCardioTestTypeWhenAvoidingRun,
+  shouldAvoidRunning,
+  shouldSkipEnduranceStep,
   type AssessmentInput,
   type AssessmentResult,
   type CardioAccess,
@@ -93,16 +97,62 @@ export default function FitnessAssessmentScreen({
   const steps = useMemo((): StepId[] => {
     const list: StepId[] = ["equipment", "cardio"];
     if (hasBar) list.push("pullups");
-    list.push("pushups", "squats", "plank", "endurance", "limitations");
+    list.push("pushups", "squats", "plank");
+    if (!shouldSkipEnduranceStep(cardioAccess)) {
+      list.push("endurance");
+    }
+    list.push("limitations");
     return list;
-  }, [hasBar]);
-
-  const { weight: profileWeight } = parseProfileNumbers(profile);
-  const suggestWalkDefault =
-    profileWeight >= 100 || cardioAccess === "none";
+  }, [hasBar, cardioAccess]);
 
   const currentStep = steps[stepIndex] ?? "equipment";
   const totalSteps = steps.length;
+
+  const offerRunningTest = canOfferRunningTest(cardioAccess, cardioPreference);
+  const avoidRunning =
+    cardioAccess !== null &&
+    cardioPreference !== null &&
+    shouldAvoidRunning(cardioAccess, cardioPreference);
+
+  const syncCardioTestFromAnswers = useCallback(
+    (access: CardioAccess, preference: CardioPreference) => {
+      if (shouldSkipEnduranceStep(access)) {
+        setCardioTestType("skipped");
+        setRunMinutes("");
+        setWalkMinutes("");
+        setRunPreset(null);
+        return;
+      }
+      if (shouldAvoidRunning(access, preference)) {
+        setCardioTestType((current) => {
+          if (current === "run" || current === null) {
+            setRunMinutes("");
+            setRunPreset(null);
+            return "walk";
+          }
+          return current;
+        });
+      }
+    },
+    []
+  );
+
+  const resolveEffectiveCardioTestType = (): CardioTestType | null => {
+    if (cardioAccess === null || cardioPreference === null) return null;
+    if (shouldSkipEnduranceStep(cardioAccess)) return "skipped";
+    if (cardioTestType === "run" && shouldAvoidRunning(cardioAccess, cardioPreference)) {
+      return "walk";
+    }
+    if (cardioTestType) return cardioTestType;
+    if (shouldAvoidRunning(cardioAccess, cardioPreference)) {
+      return getDefaultCardioTestTypeWhenAvoidingRun(cardioAccess);
+    }
+    return null;
+  };
+
+  const { weight: profileWeight } = parseProfileNumbers(profile);
+  const suggestWalkDefault =
+    profileWeight >= 100 || avoidRunning || cardioAccess === "none";
 
   const optionClass = (selected: boolean) =>
     `w-full text-left border border-iron-border p-3 font-semibold rounded-sm iron-interactive ${
@@ -127,6 +177,7 @@ export default function FitnessAssessmentScreen({
   };
 
   const buildInput = (): AssessmentInput | null => {
+    const effectiveCardioTestType = resolveEffectiveCardioTestType();
     if (
       hasBar === null ||
       cardioAccess === null ||
@@ -134,7 +185,7 @@ export default function FitnessAssessmentScreen({
       !maxPushUps.trim() ||
       !squatReps.trim() ||
       !plankSeconds.trim() ||
-      cardioTestType === null
+      effectiveCardioTestType === null
     ) {
       return null;
     }
@@ -171,13 +222,13 @@ export default function FitnessAssessmentScreen({
       cardioPreference,
     };
 
-    if (cardioTestType) {
-      input.cardioTestType = cardioTestType;
-      if (cardioTestType === "run") {
+    if (effectiveCardioTestType) {
+      input.cardioTestType = effectiveCardioTestType;
+      if (effectiveCardioTestType === "run") {
         const mins = parseInt(runMinutes, 10);
         if (!Number.isNaN(mins) && mins >= 0) input.runMinutes = mins;
       }
-      if (cardioTestType === "walk") {
+      if (effectiveCardioTestType === "walk") {
         const mins = parseInt(walkMinutes, 10);
         if (!Number.isNaN(mins) && mins >= 0) input.walkMinutes = mins;
       }
@@ -209,13 +260,14 @@ export default function FitnessAssessmentScreen({
         return !Number.isNaN(n) && n >= 0 && n <= 600;
       }
       case "endurance": {
-        if (!cardioTestType) return false;
-        if (cardioTestType === "skipped") return true;
-        if (cardioTestType === "run") {
+        const effective = resolveEffectiveCardioTestType();
+        if (!effective) return false;
+        if (effective === "skipped") return true;
+        if (effective === "run") {
           const n = parseInt(runMinutes, 10);
           return !Number.isNaN(n) && n >= 0 && n <= 180;
         }
-        if (cardioTestType === "walk") {
+        if (effective === "walk") {
           const n = parseInt(walkMinutes, 10);
           return !Number.isNaN(n) && n >= 1 && n <= 180;
         }
@@ -231,6 +283,14 @@ export default function FitnessAssessmentScreen({
   const goNext = () => {
     if (!canAdvance()) return;
     if (stepIndex < totalSteps - 1) {
+      const nextStep = steps[stepIndex + 1];
+      if (
+        nextStep === "endurance" &&
+        cardioAccess !== null &&
+        cardioPreference !== null
+      ) {
+        syncCardioTestFromAnswers(cardioAccess, cardioPreference);
+      }
       setStepIndex((i) => i + 1);
       return;
     }
@@ -446,7 +506,12 @@ export default function FitnessAssessmentScreen({
                     key={value}
                     type="button"
                     className={optionClass(cardioAccess === value)}
-                    onClick={() => setCardioAccess(value)}
+                    onClick={() => {
+                      setCardioAccess(value);
+                      if (cardioPreference !== null) {
+                        syncCardioTestFromAnswers(value, cardioPreference);
+                      }
+                    }}
                   >
                     {t(`assessment.cardio.access.${value}`)}
                   </button>
@@ -463,7 +528,12 @@ export default function FitnessAssessmentScreen({
                     key={value}
                     type="button"
                     className={optionClass(cardioPreference === value)}
-                    onClick={() => setCardioPreference(value)}
+                    onClick={() => {
+                      setCardioPreference(value);
+                      if (cardioAccess !== null) {
+                        syncCardioTestFromAnswers(cardioAccess, value);
+                      }
+                    }}
                   >
                     {t(`assessment.cardio.preference.${value}`)}
                   </button>
@@ -549,22 +619,27 @@ export default function FitnessAssessmentScreen({
           setRunMinutes(values[preset]);
         };
 
+        const displayCardioTestType =
+          resolveEffectiveCardioTestType() ?? cardioTestType;
+
         return (
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-2">
+              {offerRunningTest && (
+                <button
+                  type="button"
+                  className={optionClass(displayCardioTestType === "run")}
+                  onClick={() => {
+                    setCardioTestType("run");
+                    setWalkMinutes("");
+                  }}
+                >
+                  {t("assessment.endurance.modeRun")}
+                </button>
+              )}
               <button
                 type="button"
-                className={optionClass(cardioTestType === "run")}
-                onClick={() => {
-                  setCardioTestType("run");
-                  setWalkMinutes("");
-                }}
-              >
-                {t("assessment.endurance.modeRun")}
-              </button>
-              <button
-                type="button"
-                className={optionClass(cardioTestType === "walk")}
+                className={optionClass(displayCardioTestType === "walk")}
                 onClick={() => {
                   setCardioTestType("walk");
                   setRunMinutes("");
@@ -575,7 +650,7 @@ export default function FitnessAssessmentScreen({
               </button>
               <button
                 type="button"
-                className={optionClass(cardioTestType === "skipped")}
+                className={optionClass(displayCardioTestType === "skipped")}
                 onClick={() => {
                   setCardioTestType("skipped");
                   setRunMinutes("");
@@ -587,13 +662,13 @@ export default function FitnessAssessmentScreen({
               </button>
             </div>
 
-            {suggestWalkDefault && cardioTestType === null && (
+            {suggestWalkDefault && displayCardioTestType === null && (
               <p className="text-sm text-iron-accent border border-iron-accent-dim/40 rounded-sm p-3">
                 {t("assessment.endurance.safetySuggestWalk")}
               </p>
             )}
 
-            {cardioTestType === "run" && (
+            {displayCardioTestType === "run" && (
               <div className="space-y-4">
                 <p className="font-semibold text-iron-text">
                   {t("assessment.endurance.runQuestion")}
@@ -634,7 +709,7 @@ export default function FitnessAssessmentScreen({
               </div>
             )}
 
-            {cardioTestType === "walk" && (
+            {displayCardioTestType === "walk" && (
               <div className="space-y-4">
                 <p className="font-semibold text-iron-text">
                   {t("assessment.endurance.walkQuestion")}

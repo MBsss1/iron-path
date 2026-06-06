@@ -7,9 +7,9 @@ import {
 } from "./exercises";
 import {
   assessFitness,
+  shouldAvoidRunning,
   type AssessmentInput,
   type AssessmentResult,
-  type CardioAccess,
   type FitnessLevel,
   type Limitation,
 } from "./fitnessAssessment";
@@ -178,7 +178,7 @@ export function applyCardioWeekTemplate(
 ): DayType[] {
   let days = [...template];
 
-  if (input.cardioAccess === "none") {
+  if (shouldAvoidRunning(input.cardioAccess, input.cardioPreference)) {
     return days.map((d) => (isRunningDayType(d) ? "full_body" : d));
   }
 
@@ -189,21 +189,6 @@ export function applyCardioWeekTemplate(
       cardioUsed += 1;
       return cardioUsed > 1 ? "full_body" : d;
     });
-  }
-
-  if (input.cardioPreference === "dislike") {
-    const runIndices: number[] = [];
-    days.forEach((d, i) => {
-      if (isRunningDayType(d)) runIndices.push(i);
-    });
-    if (runIndices.length > 1) {
-      const maxKeep =
-        input.cardioAccess === "limited"
-          ? 1
-          : Math.max(1, Math.floor(runIndices.length / 2));
-      const replace = new Set(runIndices.slice(maxKeep));
-      days = days.map((d, i) => (replace.has(i) ? "full_body" : d));
-    }
   }
 
   if (
@@ -225,8 +210,13 @@ export function applyCardioWeekTemplate(
   return days;
 }
 
-function allowsRunningWorkouts(access: CardioAccess): boolean {
-  return access !== "none";
+function allowsRunningWorkouts(
+  input: Pick<AssessmentInput, "cardioAccess" | "cardioPreference">
+): boolean {
+  return (
+    input.cardioAccess !== "none" &&
+    !shouldAvoidRunning(input.cardioAccess, input.cardioPreference)
+  );
 }
 
 function pickNoRunConditioning(ctx: GeneratorContext): GeneratedExercise[] {
@@ -334,7 +324,7 @@ export function selectCooldownExercises(ctx: GeneratorContext): GeneratedExercis
 
   if (
     isRunningDayType(ctx.dayType) &&
-    allowsRunningWorkouts(ctx.input.cardioAccess)
+    allowsRunningWorkouts(ctx.input)
   ) {
     add("walk", "3 min easy", "3 мин спокойно");
   }
@@ -501,14 +491,8 @@ export function selectConditioningExercises(
   const { cardioAccess, cardioPreference } = ctx.input;
 
   if (ctx.dayType === "easy_run") {
-    if (!allowsRunningWorkouts(cardioAccess)) {
+    if (!allowsRunningWorkouts(ctx.input)) {
       return pickNoRunConditioning(ctx);
-    }
-    if (cardioPreference === "dislike") {
-      return [
-        gen("brisk_walk", "12 min", "12 мин", 0),
-        gen("walk", "8 min", "8 мин", 0),
-      ];
     }
     if (cardioAccess === "limited") {
       return [
@@ -544,14 +528,8 @@ export function selectConditioningExercises(
   }
 
   if (ctx.dayType === "intervals") {
-    if (!allowsRunningWorkouts(cardioAccess)) {
+    if (!allowsRunningWorkouts(ctx.input)) {
       return pickNoRunConditioning(ctx);
-    }
-    if (cardioPreference === "dislike") {
-      return [
-        gen("low_impact_conditioning", "3 rounds", "3 круга", 0),
-        gen("brisk_walk", "10 min", "10 мин", 0),
-      ];
     }
     const softIntervals = isSoftCardioLevel(ctx.result.cardioLevel);
     if (isHighImpactBlocked(ctx) || softIntervals) {
@@ -600,7 +578,7 @@ export function selectConditioningExercises(
   }
 
   if (normalizeFitnessGoal(ctx.input.goal) === "weight_loss") {
-    if (!allowsRunningWorkouts(cardioAccess)) {
+    if (!allowsRunningWorkouts(ctx.input)) {
       return pickNoRunConditioning(ctx);
     }
     return [gen("mountain_climbers", "4 × 30 sec", "4 × 30 сек", 60)];

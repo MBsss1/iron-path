@@ -7,8 +7,8 @@ type Props = {
 };
 
 /**
- * Inline temple-style Iron Path mark — cap, beam, columns, base, wordmark.
- * viewBox is fixed; scale via width on the root SVG (120–320px).
+ * Iron Path wordmark — inline SVG matched to official logo geometry.
+ * Scale via width on the root element (120px–320px+); viewBox is fixed.
  */
 export default function AnimatedIronPathLogo({
   className = "",
@@ -18,7 +18,7 @@ export default function AnimatedIronPathLogo({
 
   return (
     <svg
-      viewBox="0 0 280 210"
+      viewBox="0 0 280 196"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-labelledby="iron-path-logo-title"
@@ -27,64 +27,34 @@ export default function AnimatedIronPathLogo({
     >
       <title id="iron-path-logo-title">Iron Path</title>
 
-      <g className="iron-logo-icon" aria-hidden="true">
-        {/* 1 — top cap / roof */}
-        <rect
-          className="iron-logo-piece iron-logo-cap"
-          x="108"
-          y="4"
-          width="64"
-          height="11"
-        />
-
-        {/* 2 — middle beam / architrave */}
-        <rect
-          className="iron-logo-piece iron-logo-beam"
-          x="38"
-          y="22"
-          width="204"
-          height="13"
-        />
-
-        {/* 3 — columns (three stones) */}
-        <rect
-          className="iron-logo-piece iron-logo-col iron-logo-col-1"
-          x="56"
-          y="40"
-          width="22"
-          height="68"
-        />
-        <rect
-          className="iron-logo-piece iron-logo-col iron-logo-col-2"
-          x="129"
-          y="40"
-          width="22"
-          height="68"
-        />
-        <rect
-          className="iron-logo-piece iron-logo-col iron-logo-col-3"
-          x="202"
-          y="40"
-          width="22"
-          height="68"
-        />
-
-        {/* 4 — slanted base / stylobate */}
-        <polygon
-          className="iron-logo-piece iron-logo-base"
-          points="38,118 242,118 242,106 38,98"
-        />
+      {/* 1 — top cap (narrow, centered) */}
+      <g className="iron-logo-piece iron-logo-topBar" aria-hidden="true">
+        <rect x="109" y="0" width="62" height="10" />
       </g>
 
-      {/* Wordmark */}
-      <text
-        className="iron-logo-piece iron-logo-wordmark"
-        x="140"
-        y="162"
-        textAnchor="middle"
-      >
-        IRON PATH
-      </text>
+      {/* 2 — middle beam (widest horizontal) */}
+      <g className="iron-logo-piece iron-logo-middleBar" aria-hidden="true">
+        <rect x="36" y="16" width="208" height="12" />
+      </g>
+
+      {/* 3 — columns (bottoms follow slanted base: left tallest → right shortest) */}
+      <g className="iron-logo-piece iron-logo-columns" aria-hidden="true">
+        <rect x="54" y="32" width="22" height="74" />
+        <rect x="129" y="32" width="22" height="70" />
+        <rect x="204" y="32" width="22" height="66" />
+      </g>
+
+      {/* 4 — slanted base (top edge rises left → right) */}
+      <g className="iron-logo-piece iron-logo-bottomBar" aria-hidden="true">
+        <polygon points="36,116 244,116 244,96 36,108" />
+      </g>
+
+      {/* 5 — wordmark */}
+      <g className="iron-logo-piece iron-logo-text">
+        <text x="140" y="156" textAnchor="middle">
+          IRON PATH
+        </text>
+      </g>
     </svg>
   );
 }

@@ -17,7 +17,7 @@ const TAGLINE_KEYS = [
 
 /** Mount-only timeline — must not cancel on unrelated state updates. */
 const TIMELINE_MS = {
-  glint: 1180,
+  glint: 1200,
   tagline1: 1750,
   tagline2: 2150,
   tagline3: 2550,

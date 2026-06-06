@@ -82,6 +82,13 @@ import {
 } from "./utils/progressionState";
 import type { AssessmentInput } from "./data/fitnessAssessment";
 import { STORAGE_KEYS } from "./utils/storageKeys";
+import {
+  buildWeekPlanForProfile,
+  loadTrainingCalendarState,
+  resetCalendarForNewWeek,
+  saveTrainingCalendarState,
+} from "./utils/trainingCalendar";
+import { canAdvanceProgramWeek, isWorkoutLoggedToday } from "./utils/workoutGuards";
 
 const MORE_SUB_SCREENS = ["progress", "settings", "profile", "bosses"];
 
@@ -441,7 +448,7 @@ function HomeContent() {
   );
 
   const completeWorkout = useCallback(() => {
-    if (isMissionCompleted("workout")) return;
+    if (isMissionCompleted("workout") || isWorkoutLoggedToday()) return;
 
     const reward = applyClassXpBonus(
       getWorkoutXp(program.phase),
@@ -878,7 +885,15 @@ function HomeContent() {
                 onStartAssessment={handleStartAssessment}
                 onCompleteWorkout={completeWorkout}
                 onCompleteWeek={() => {
+                  const calendarState = loadTrainingCalendarState(program.week);
+                  const weekPlan = buildWeekPlanForProfile(profile);
+                  if (!canAdvanceProgramWeek(calendarState, weekPlan)) {
+                    return;
+                  }
                   nextWeek();
+                  saveTrainingCalendarState(
+                    resetCalendarForNewWeek(Math.min(program.week + 1, 24))
+                  );
                   setShowWeekPopup(true);
                 }}
                 assessmentInput={assessmentInput}

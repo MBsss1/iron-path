@@ -752,6 +752,18 @@ const ru = {
     logWorkoutReward: "+{{xp}} опыта за запись",
     logWorkoutDone: "Тренировка записана сегодня",
     completeWeek: "Завершить неделю",
+    startTraining: "Начать тренировку",
+    reviewWorkout: "Просмотреть тренировку",
+    backToOverview: "К плану недели",
+    guard: {
+      workoutAlreadyLoggedTitle: "Тренировка уже записана сегодня",
+      workoutAlreadyLoggedDescription:
+        "Возвращайтесь завтра. Прогресс строится по дням, а не по кликам.",
+      weekTooEarlyTitle: "Неделю ещё рано завершать",
+      weekNotEnoughWorkoutsTitle: "Неделю ещё рано завершать",
+      weekBlockedDescription:
+        "Выполните тренировки по плану. Курс нельзя пройти за один день.",
+    },
     weekPlanTitle: "План недели",
     todayTitle: "Сегодня",
     estimatedMinutes: "~{{minutes}} мин",

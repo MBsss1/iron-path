@@ -620,8 +620,8 @@ html.telegram-webapp body {
 
 .iron-nav-indicator-slide {
   transition:
-    transform var(--motion-duration-slow) cubic-bezier(0.33, 1, 0.68, 1),
-    opacity var(--motion-duration-fast) var(--motion-ease-out);
+    transform 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    width 250ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .iron-nav-tab-icon,

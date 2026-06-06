@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { safeGet, safeSet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
+import { getLocalDateKey } from "../utils/localDate";
 
 export type DailyMission = {
   id: "workout" | "deepwork" | "protein" | "sleep";
@@ -22,9 +23,14 @@ function loadDailyMissions(): DailyMission[] {
     STORAGE_KEYS.dailyMissions,
     null
   );
-  const today = new Date().toDateString();
+  const todayKey = getLocalDateKey();
 
-  if (saved?.date === today && saved.missions) {
+  if (saved?.date === todayKey && saved.missions) {
+    return saved.missions;
+  }
+
+  // Legacy missions stored with Date.toDateString()
+  if (saved?.date === new Date().toDateString() && saved.missions) {
     return saved.missions;
   }
 
@@ -46,8 +52,10 @@ export function useDailyMissions() {
   useEffect(() => {
     if (!loaded) return;
 
-    const today = new Date().toDateString();
-    safeSet(STORAGE_KEYS.dailyMissions, { date: today, missions });
+    safeSet(STORAGE_KEYS.dailyMissions, {
+      date: getLocalDateKey(),
+      missions,
+    });
   }, [missions, loaded]);
 
   const completeMission = (id: "workout" | "deepwork" | "protein" | "sleep") => {

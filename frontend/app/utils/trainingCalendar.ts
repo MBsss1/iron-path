@@ -20,6 +20,7 @@ import {
 import { safeGet, safeSet } from "./storage";
 import { STORAGE_KEYS } from "./storageKeys";
 import { loadFitnessAssessment } from "./fitnessAssessmentStorage";
+import { getLocalDateKey } from "./localDate";
 
 export type WeekdayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -36,6 +37,8 @@ export type TrainingCalendarState = {
   seasonWeek: number;
   completedDayIndexes: number[];
   activeDayIndex: WeekdayIndex;
+  /** Local YYYY-MM-DD when the current program week started. */
+  weekStartedDateKey?: string;
 };
 
 const CALENDAR_KEY = STORAGE_KEYS.trainingCalendar;
@@ -104,17 +107,23 @@ export function loadTrainingCalendarState(seasonWeek: number): TrainingCalendarS
   const stored = safeGet<TrainingCalendarState | null>(CALENDAR_KEY, null);
 
   if (!stored || stored.seasonWeek !== seasonWeek) {
-    return {
-      seasonWeek,
-      completedDayIndexes: [],
-      activeDayIndex: 0,
-    };
+    return resetCalendarForNewWeek(seasonWeek);
   }
 
   return {
     seasonWeek: stored.seasonWeek,
     completedDayIndexes: [...stored.completedDayIndexes],
     activeDayIndex: clampDayIndex(stored.activeDayIndex),
+    weekStartedDateKey: stored.weekStartedDateKey ?? getLocalDateKey(),
+  };
+}
+
+export function resetCalendarForNewWeek(seasonWeek: number): TrainingCalendarState {
+  return {
+    seasonWeek,
+    completedDayIndexes: [],
+    activeDayIndex: 0,
+    weekStartedDateKey: getLocalDateKey(),
   };
 }
 
@@ -174,8 +183,13 @@ export function getTodayWorkout(
 }
 
 export function advanceAfterWorkoutLogged(
-  state: TrainingCalendarState
+  state: TrainingCalendarState,
+  options?: { skipIfAlreadyLoggedToday?: boolean }
 ): TrainingCalendarState {
+  if (options?.skipIfAlreadyLoggedToday) {
+    return state;
+  }
+
   const active = resolveActiveDayIndex(state.completedDayIndexes);
   const completed = state.completedDayIndexes.includes(active)
     ? state.completedDayIndexes

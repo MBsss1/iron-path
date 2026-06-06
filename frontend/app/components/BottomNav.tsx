@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { tabIndicatorMotion, tabPress } from "../animations/classes";
 import { hapticTab } from "../utils/haptics";
 import { useTranslation } from "../i18n/useTranslation";
@@ -18,14 +18,44 @@ const NAV_ITEMS = [
   { id: "more", labelKey: "nav.more", icon: "☰" },
 ] as const;
 
+type IndicatorMetrics = {
+  x: number;
+  width: number;
+};
+
 export default function BottomNav({ screen, setScreen }: Props) {
   const { t } = useTranslation();
   const [pressedId, setPressedId] = useState<string | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [indicator, setIndicator] = useState<IndicatorMetrics>({ x: 0, width: 0 });
 
   const activeIndex = useMemo(
     () => Math.max(0, NAV_ITEMS.findIndex((item) => item.id === screen)),
     [screen]
   );
+
+  const measureIndicator = () => {
+    const nav = navRef.current;
+    const btn = itemRefs.current[activeIndex];
+    if (!nav || !btn) return;
+    const navRect = nav.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    setIndicator({
+      x: btnRect.left - navRect.left,
+      width: btnRect.width,
+    });
+  };
+
+  useLayoutEffect(() => {
+    measureIndicator();
+  }, [activeIndex, screen, t]);
+
+  useLayoutEffect(() => {
+    const onResize = () => measureIndicator();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [activeIndex, screen, t]);
 
   const handleSelect = (name: string) => {
     if (screen === name) return;
@@ -35,30 +65,34 @@ export default function BottomNav({ screen, setScreen }: Props) {
     window.setTimeout(() => setPressedId(null), 120);
   };
 
-  const tabWidthPercent = 100 / NAV_ITEMS.length;
-
   return (
     <nav
       className="fixed bottom-0 left-0 w-full z-40 iron-nav-glass pb-[env(safe-area-inset-bottom)]"
       aria-label={t("nav.ariaLabel")}
     >
-      <div className="relative max-w-md mx-auto flex justify-around items-stretch px-1">
+      <div
+        ref={navRef}
+        className="relative max-w-md mx-auto flex justify-around items-stretch px-1"
+      >
         <span
-          className={`pointer-events-none absolute top-0 h-0.5 rounded-full bg-iron-accent iron-nav-active-indicator ${tabIndicatorMotion}`}
+          className={`pointer-events-none absolute top-0 left-0 h-0.5 rounded-full bg-iron-accent iron-nav-active-indicator ${tabIndicatorMotion}`}
           style={{
-            width: `${tabWidthPercent}%`,
-            left: `${activeIndex * tabWidthPercent}%`,
+            width: indicator.width,
+            transform: `translateX(${indicator.x}px)`,
           }}
           aria-hidden="true"
         />
 
-        {NAV_ITEMS.map(({ id, labelKey, icon }) => {
+        {NAV_ITEMS.map(({ id, labelKey, icon }, index) => {
           const isActive = screen === id;
           const isPressed = pressedId === id;
 
           return (
             <button
               key={id}
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
               type="button"
               onClick={() => handleSelect(id)}
               aria-current={isActive ? "page" : undefined}

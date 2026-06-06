@@ -752,6 +752,18 @@ const en = {
     logWorkoutReward: "+{{xp}} XP when logged",
     logWorkoutDone: "Workout logged today",
     completeWeek: "Complete week",
+    startTraining: "Start training",
+    reviewWorkout: "Review today's workout",
+    backToOverview: "Back to week overview",
+    guard: {
+      workoutAlreadyLoggedTitle: "Workout already logged today",
+      workoutAlreadyLoggedDescription:
+        "Come back tomorrow. Progress is built by days, not clicks.",
+      weekTooEarlyTitle: "Too early to complete this week",
+      weekNotEnoughWorkoutsTitle: "Too early to complete this week",
+      weekBlockedDescription:
+        "Complete workouts according to the plan. You can't finish the course in one day.",
+    },
     weekPlanTitle: "Week plan",
     todayTitle: "Today",
     estimatedMinutes: "~{{minutes}} min",

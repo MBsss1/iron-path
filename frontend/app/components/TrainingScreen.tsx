@@ -30,6 +30,11 @@ import {
 import { getWorkoutMainItems } from "../utils/trainingWorkoutView";
 import { safeGet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
+import { getLocalDateKey } from "../utils/localDate";
+import {
+  getWeekCompletionStatus,
+  isWorkoutLoggedToday,
+} from "../utils/workoutGuards";
 import { getExerciseInfo } from "../data/exerciseLibrary";
 import type { AssessmentInput, AssessmentResult } from "../data/fitnessAssessment";
 import TrainingReasoningBlock from "./coaching/TrainingReasoningBlock";
@@ -61,14 +66,26 @@ type Props = {
   onDismissReassessment?: () => void;
 };
 
-function isWorkoutMissionCompletedToday(): boolean {
-  const saved = safeGet<{ date: string; missions: { id: string; completed: boolean }[] } | null>(
-    STORAGE_KEYS.dailyMissions,
-    null
+function sessionHasProgress(session: ActiveTrainingSession): boolean {
+  return (
+    session.completedWarmupExerciseIds.length > 0 ||
+    session.completedWorkoutExerciseIds.length > 0 ||
+    session.activeStage === "workout" ||
+    session.workoutTimerElapsedSeconds > 0 ||
+    session.workoutTimerIsRunning
   );
-  const today = new Date().toDateString();
-  if (saved?.date !== today || !saved.missions) return false;
-  return saved.missions.find((m) => m.id === "workout")?.completed ?? false;
+}
+
+function sessionMatchesScope(
+  session: ActiveTrainingSession,
+  scope: SessionScope
+): boolean {
+  return (
+    session.date === scope.date &&
+    session.week === scope.week &&
+    session.dayIndex === scope.dayIndex &&
+    session.workoutId === scope.workoutId
+  );
 }
 
 type Lang = "en" | "ru";
@@ -196,7 +213,7 @@ export default function TrainingScreen({
   const { t, locale } = useTranslation();
   const lang = pickLang(locale);
   const seasonWeek = program.week;
-  const todayDate = new Date().toDateString();
+  const todayDate = getLocalDateKey();
 
   const [detailExerciseId, setDetailExerciseId] = useState<string | null>(null);
   const detailExercise = detailExerciseId
@@ -209,20 +226,23 @@ export default function TrainingScreen({
   );
   const [workoutLoggedToday, setWorkoutLoggedToday] = useState(false);
   const [session, setSession] = useState<ActiveTrainingSession | null>(null);
+  const [trainingMode, setTrainingMode] = useState(false);
+  const [dailyGuardVisible, setDailyGuardVisible] = useState(false);
+  const [weekGuardVisible, setWeekGuardVisible] = useState(false);
 
   useEffect(() => {
     setProfile(migrateProfile());
-    setWorkoutLoggedToday(isWorkoutMissionCompletedToday());
+    setWorkoutLoggedToday(isWorkoutLoggedToday());
   }, []);
 
   useEffect(() => {
     let state = loadTrainingCalendarState(seasonWeek);
-    if (isWorkoutMissionCompletedToday()) {
+    if (isWorkoutLoggedToday()) {
       state = syncCalendarIfWorkoutMissionDone(state, true);
       saveTrainingCalendarState(state);
     }
     setCalendarState(state);
-    setWorkoutLoggedToday(isWorkoutMissionCompletedToday());
+    setWorkoutLoggedToday(isWorkoutLoggedToday());
   }, [seasonWeek]);
 
   const weekPlan = useMemo(
@@ -251,8 +271,24 @@ export default function TrainingScreen({
   );
 
   useEffect(() => {
-    setSession(loadActiveTrainingSession(sessionScope));
+    const stored = safeGet<ActiveTrainingSession | null>(
+      STORAGE_KEYS.activeTrainingSession,
+      null
+    );
+    if (
+      stored &&
+      sessionMatchesScope(stored, sessionScope) &&
+      sessionHasProgress(stored)
+    ) {
+      setSession(stored);
+      setTrainingMode(true);
+    }
   }, [sessionScope]);
+
+  const weekCompletionStatus = useMemo(
+    () => getWeekCompletionStatus(calendarState, weekPlan),
+    [calendarState, weekPlan]
+  );
 
   const patchSession = useCallback(
     (patch: Partial<ActiveTrainingSession>) => {
@@ -338,8 +374,26 @@ export default function TrainingScreen({
     [patchSession]
   );
 
+  const handleStartTraining = useCallback(() => {
+    const next = loadActiveTrainingSession(sessionScope);
+    setSession(next);
+    setTrainingMode(true);
+    setDailyGuardVisible(false);
+  }, [sessionScope]);
+
+  const handleBackToOverview = useCallback(() => {
+    if (session && !sessionHasProgress(session)) {
+      clearActiveTrainingSession();
+      setSession(null);
+    }
+    setTrainingMode(false);
+  }, [session]);
+
   const handleLogWorkout = useCallback(() => {
-    if (workoutLoggedToday) return;
+    if (workoutLoggedToday || isWorkoutLoggedToday()) {
+      setDailyGuardVisible(true);
+      return;
+    }
     onCompleteWorkout();
     const next = advanceAfterWorkoutLogged(calendarState);
     saveTrainingCalendarState(next);
@@ -347,11 +401,17 @@ export default function TrainingScreen({
     setWorkoutLoggedToday(true);
     clearActiveTrainingSession();
     setSession(null);
+    setTrainingMode(false);
   }, [workoutLoggedToday, onCompleteWorkout, calendarState]);
 
   const handleCompleteWeek = useCallback(() => {
+    if (!weekCompletionStatus.allowed) {
+      setWeekGuardVisible(true);
+      return;
+    }
+    setWeekGuardVisible(false);
     onCompleteWeek();
-  }, [onCompleteWeek]);
+  }, [onCompleteWeek, weekCompletionStatus.allowed]);
 
   const activeSlot = calendarState.activeDayIndex + 1;
 
@@ -369,6 +429,87 @@ export default function TrainingScreen({
         >
           {t("training.startAssessment")}
         </button>
+      </div>
+    );
+  }
+
+  if (!trainingMode) {
+    return (
+      <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-28 space-y-4">
+        <Stagger className="space-y-4">
+          <div className="text-center">
+            <p className="iron-label text-iron-accent">{t("training.screenTitle")}</p>
+            <h2 className="iron-heading text-2xl sm:text-3xl mt-1">{todayTitle}</h2>
+            <p className="mt-2 text-sm text-iron-muted">
+              {t("training.planSlot", { current: activeSlot, total: 7 })}
+              {" · "}
+              {t("training.phaseContext", {
+                phase: translatePhase(program.phase, t),
+                week: program.week,
+              })}
+            </p>
+          </div>
+
+          {workoutLoggedToday && (
+            <p className="text-center text-sm font-semibold text-iron-accent py-3 border border-iron-border rounded-sm bg-iron-raised">
+              {t("training.logWorkoutDone")}
+            </p>
+          )}
+
+          <section className="border border-iron-border p-4 iron-card-raised rounded-sm">
+            <h3 className="iron-heading text-lg mb-1">{t("training.planProgressTitle")}</h3>
+            <p className="text-xs text-iron-muted mb-3">{t("training.planProgressHint")}</p>
+            <PlanTimeline days={calendarDays} t={t} />
+          </section>
+
+          {weekGuardVisible && (
+            <div
+              className="border border-iron-border rounded-sm p-4 bg-iron-panel/80 space-y-1"
+              role="status"
+            >
+              <p className="text-sm font-semibold text-iron-text">
+                {weekCompletionStatus.reason === "not_enough_workouts"
+                  ? t("training.guard.weekNotEnoughWorkoutsTitle")
+                  : t("training.guard.weekTooEarlyTitle")}
+              </p>
+              <p className="text-xs text-iron-muted leading-relaxed">
+                {t("training.guard.weekBlockedDescription")}
+              </p>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleCompleteWeek}
+            className={`iron-interactive w-full py-3 text-sm font-semibold rounded-sm ${
+              weekCompletionStatus.allowed
+                ? "iron-btn-secondary"
+                : "border border-iron-border text-iron-muted"
+            }`}
+          >
+            {t("training.completeWeek")}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleStartTraining}
+            className="iron-interactive iron-btn-primary w-full py-4 text-base font-semibold min-h-[52px] rounded-sm"
+          >
+            {workoutLoggedToday
+              ? t("training.reviewWorkout")
+              : t("training.startTraining")}
+          </button>
+        </Stagger>
+
+        {(showReassessmentPrompt || showAdaptationHint) &&
+          onRetakeAssessment &&
+          onDismissReassessment && (
+          <ReassessmentPromptBlock
+            variant={showAdaptationHint && !showReassessmentPrompt ? "adaptation" : "default"}
+            onRetake={onRetakeAssessment}
+            onDismiss={onDismissReassessment}
+          />
+        )}
       </div>
     );
   }
@@ -394,6 +535,13 @@ export default function TrainingScreen({
             ? t("training.flow.stageWarmup")
             : t("training.flow.stageWorkout")}
         </p>
+        <button
+          type="button"
+          onClick={handleBackToOverview}
+          className="mt-3 text-xs font-semibold text-iron-muted underline underline-offset-2 iron-interactive"
+        >
+          {t("training.backToOverview")}
+        </button>
       </div>
 
       {activeStage === "workout" && (
@@ -465,6 +613,20 @@ export default function TrainingScreen({
 
             {!workoutLoggedToday && (
               <div className="space-y-3 pt-2 border-t border-iron-border">
+                {dailyGuardVisible && (
+                  <div
+                    className="border border-iron-border rounded-sm p-3 bg-iron-panel/80 space-y-1"
+                    role="status"
+                  >
+                    <p className="text-sm font-semibold text-iron-text">
+                      {t("training.guard.workoutAlreadyLoggedTitle")}
+                    </p>
+                    <p className="text-xs text-iron-muted leading-relaxed">
+                      {t("training.guard.workoutAlreadyLoggedDescription")}
+                    </p>
+                  </div>
+                )}
+
                 {allWorkoutDone ? (
                   <p className="text-sm text-iron-muted leading-relaxed">
                     {t("training.flow.workoutCompleteHint")}
@@ -498,9 +660,17 @@ export default function TrainingScreen({
             )}
 
             {workoutLoggedToday && (
-              <p className="text-center text-sm font-semibold text-iron-accent py-3 border border-iron-border rounded-sm bg-iron-raised">
-                {t("training.logWorkoutDone")}
-              </p>
+              <div
+                className="border border-iron-border rounded-sm p-3 bg-iron-panel/80 space-y-1"
+                role="status"
+              >
+                <p className="text-sm font-semibold text-iron-text">
+                  {t("training.guard.workoutAlreadyLoggedTitle")}
+                </p>
+                <p className="text-xs text-iron-muted leading-relaxed">
+                  {t("training.guard.workoutAlreadyLoggedDescription")}
+                </p>
+              </div>
             )}
           </>
         )}
@@ -549,19 +719,6 @@ export default function TrainingScreen({
         />
       )}
 
-      <section className="border border-iron-border p-4 iron-card-raised rounded-sm">
-        <h3 className="iron-heading text-lg mb-1">{t("training.planProgressTitle")}</h3>
-        <p className="text-xs text-iron-muted mb-3">{t("training.planProgressHint")}</p>
-        <PlanTimeline days={calendarDays} t={t} />
-      </section>
-
-      <button
-        type="button"
-        onClick={handleCompleteWeek}
-        className="iron-interactive iron-btn-secondary w-full py-3 text-sm font-semibold rounded-sm"
-      >
-        {t("training.completeWeek")}
-      </button>
     </div>
   );
 }

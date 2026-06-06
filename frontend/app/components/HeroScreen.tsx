@@ -1,8 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { getRank, getNextRank } from "../data/ranks";
 import { getAvatar } from "../data/avatar";
 import { getPathModeFromProfile } from "../data/pathMode";
+import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
+import { applyClassXpBonus } from "../utils/classBonuses";
 import type { AssessmentInput } from "../data/fitnessAssessment";
 import type { BossDefinition } from "../data/bosses";
 import type { Profile } from "../hooks/useProfile";
@@ -22,6 +25,9 @@ import {
 import { useTranslation } from "../i18n/useTranslation";
 import Stagger from "../animations/Stagger";
 import AnimatedProgressFill from "../animations/AnimatedProgressFill";
+import PlayerHud from "./rpg/PlayerHud";
+import QuestCard from "./rpg/QuestCard";
+import RewardChip from "./rpg/RewardChip";
 
 type Props = {
   profile: Profile;
@@ -56,6 +62,32 @@ type Props = {
   onRetakeAssessment?: () => void;
   onDismissReassessment?: () => void;
 };
+
+const MISSION_ICONS: Record<DailyMission["id"], string> = {
+  workout: "💪",
+  deepwork: "🎯",
+  protein: "🥩",
+  sleep: "😴",
+};
+
+function sideMissionXp(
+  id: DailyMission["id"],
+  classId: Profile["classId"],
+  level: number,
+  phase: string
+): number {
+  if (id === "workout") {
+    return applyClassXpBonus(getWorkoutXp(phase), classId, "workout", level);
+  }
+  const base =
+    id === "deepwork"
+      ? MISSION_XP.deepWork
+      : id === "protein"
+        ? MISSION_XP.protein
+        : MISSION_XP.sleep;
+  const bonusType = id === "deepwork" ? "deepWork" : "mission";
+  return applyClassXpBonus(base, classId, bonusType, level);
+}
 
 export default function HeroScreen({
   profile,
@@ -108,13 +140,29 @@ export default function HeroScreen({
     ? translateBossProgressLabel(currentBoss, bossProgressContext, t)
     : "";
 
+  const workoutXp = useMemo(
+    () => sideMissionXp("workout", profile.classId, level, program.phase),
+    [profile.classId, level, program.phase]
+  );
+
   const mainCta = workoutMissionCompleted
     ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
     : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
 
+  const hud = (
+    <PlayerHud
+      level={level}
+      xp={xp}
+      maxXp={maxXp}
+      streak={streak}
+      rank={rank}
+    />
+  );
+
   if (!assessmentComplete) {
     return (
       <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
+        {hud}
         <section className="flex gap-3 items-center border-b border-iron-border pb-3">
           <img
             src={getAvatar(level, profile.avatarId)}
@@ -129,20 +177,14 @@ export default function HeroScreen({
           </div>
         </section>
 
-        <section className="iron-card-accent p-4 border border-iron-accent-dim/40">
-          <h3 className="iron-heading text-lg">{t("hero.pathNotFormedTitle")}</h3>
-          <p className="text-sm text-iron-text mt-2 leading-relaxed whitespace-pre-line">
-            {t("hero.pathNotFormedBody")}
-          </p>
-        </section>
-
-        <button
-          type="button"
-          onClick={onStartAssessment}
-          className="iron-interactive iron-btn-primary w-full py-3 text-sm font-semibold rounded-sm"
-        >
-          {t("hero.startAssessment")}
-        </button>
+        <QuestCard
+          variant="main"
+          icon="🗺️"
+          title={t("hero.pathNotFormedTitle")}
+          subtitle={t("hero.pathNotFormedBody")}
+          actionLabel={t("hero.startAssessment")}
+          onAction={onStartAssessment}
+        />
       </div>
     );
   }
@@ -150,6 +192,7 @@ export default function HeroScreen({
   if (isNewUser) {
     return (
       <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
+        {hud}
         <section className="flex gap-3 items-center border-b border-iron-border pb-3">
           <img
             src={getAvatar(level, profile.avatarId)}
@@ -164,23 +207,20 @@ export default function HeroScreen({
           </div>
         </section>
 
-        <section className="iron-card-accent p-4 border border-iron-accent-dim/40">
-          <p className="iron-label">{t("hero.firstStepTitle")}</p>
-          <p className="text-sm font-semibold text-iron-accent mt-2">
-            {t("hero.firstStepStepLabel")}
-          </p>
-          <p className="text-sm text-iron-text mt-2 leading-relaxed">
-            {t("hero.firstStepBodyTraining")}
-          </p>
-        </section>
-
-        <button
-          type="button"
-          onClick={mainCta.action}
-          className="iron-interactive iron-btn-primary w-full py-3 text-sm font-semibold rounded-sm"
-        >
-          {mainCta.label}
-        </button>
+        <QuestCard
+          variant="main"
+          icon="⚔️"
+          title={t("hero.firstStepTitle")}
+          subtitle={t("hero.firstStepBodyTraining")}
+          meta={
+            <p className="text-sm font-semibold text-iron-accent">
+              {t("hero.firstStepStepLabel")}
+            </p>
+          }
+          reward={<RewardChip amount={workoutXp} />}
+          actionLabel={mainCta.label}
+          onAction={mainCta.action}
+        />
 
         {assessmentInput && (
           <NextMilestoneBlock
@@ -193,8 +233,12 @@ export default function HeroScreen({
     );
   }
 
+  const sideMissions = missions.filter((mission) => mission.id !== "workout");
+
   return (
     <Stagger className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-3">
+      {hud}
+
       <section className="flex gap-3 items-center border-b border-iron-border pb-3">
         <img
           src={getAvatar(level, profile.avatarId)}
@@ -230,40 +274,63 @@ export default function HeroScreen({
         </div>
       </section>
 
-      <section className="iron-card-raised p-3">
-        <div className="flex justify-between items-baseline gap-2">
+      <section className="space-y-3">
+        <div className="flex justify-between items-baseline gap-2 px-0.5">
           <h3 className="iron-heading text-sm">{t("hero.todayTitle")}</h3>
           <span className="text-xs text-iron-muted">
             {completedCount} / {totalCount}
           </span>
         </div>
 
-        <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
+        <div className="w-full h-2 iron-progress-track overflow-hidden rounded-sm">
           <AnimatedProgressFill percent={progress} />
         </div>
 
-        <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-iron-muted">
-          {missions.map((mission) => (
-            <li key={mission.id} className="flex items-center gap-1.5 min-w-0">
-              <span
-                className={
-                  mission.completed ? "text-iron-accent" : "text-iron-border-strong"
-                }
-              >
-                {mission.completed ? "✓" : "□"}
+        <QuestCard
+          variant="main"
+          icon={MISSION_ICONS.workout}
+          title={t("mission.workout")}
+          subtitle={t("hero.streakWeek", { streak, week })}
+          reward={
+            <RewardChip
+              amount={workoutXp}
+              variant={workoutMissionCompleted ? "muted" : "gold"}
+            />
+          }
+          status={workoutMissionCompleted ? "neutral" : "available"}
+          meta={
+            workoutMissionCompleted ? (
+              <span className="text-iron-accent font-semibold">
+                {t("today.statusDone")}
               </span>
-              <span className="truncate">{t(`mission.${mission.id}`)}</span>
-            </li>
-          ))}
-        </ul>
+            ) : undefined
+          }
+          progress={progress}
+          actionLabel={mainCta.label}
+          onAction={mainCta.action}
+        />
 
-        <button
-          type="button"
-          onClick={mainCta.action}
-          className="iron-interactive iron-btn-primary w-full mt-3 py-3 text-sm font-semibold rounded-sm"
-        >
-          {mainCta.label}
-        </button>
+        <div className="space-y-2">
+          {sideMissions.map((mission) => (
+            <QuestCard
+              key={mission.id}
+              icon={MISSION_ICONS[mission.id]}
+              title={t(`mission.${mission.id}`)}
+              reward={
+                <RewardChip
+                  amount={sideMissionXp(
+                    mission.id,
+                    profile.classId,
+                    level,
+                    program.phase
+                  )}
+                  variant={mission.completed ? "muted" : "gold"}
+                />
+              }
+              status={mission.completed ? "completed" : "available"}
+            />
+          ))}
+        </div>
       </section>
 
       {assessmentInput && (

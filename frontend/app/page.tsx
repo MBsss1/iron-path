@@ -586,6 +586,10 @@ function HomeContent() {
                 program={program}
                 classId={classId}
                 level={level}
+                xp={xp}
+                maxXp={MAX_XP_PER_LEVEL}
+                streak={loginStreak}
+                rank={rank}
                 missions={missions}
                 assessmentComplete={assessmentComplete}
                 onStartAssessment={handleStartAssessment}

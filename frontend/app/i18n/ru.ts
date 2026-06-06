@@ -625,6 +625,7 @@ const ru = {
   },
   hero: {
     profileLabel: "Профиль",
+    hudLevel: "Ур.{{level}}",
     levelRank: "Уровень {{level}} · {{rank}}",
     pathModeLine: "Режим пути: {{mode}}",
     classStats:

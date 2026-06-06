@@ -18,11 +18,18 @@ import {
 import TodayPersonalTasksBlock from "./today/TodayPersonalTasksBlock";
 import TodayHabitControlBlock from "./today/TodayHabitControlBlock";
 import Stagger from "../animations/Stagger";
+import PlayerHud from "./rpg/PlayerHud";
+import QuestCard from "./rpg/QuestCard";
+import RewardChip from "./rpg/RewardChip";
 
 type Props = {
   program: { phase: string; week: number };
   classId?: ClassId | string | null;
   level: number;
+  xp: number;
+  maxXp: number;
+  streak: number;
+  rank: string;
   missions: DailyMission[];
   onCompleteDeepWork: () => void;
   onCompleteProtein: () => void;
@@ -32,10 +39,20 @@ type Props = {
   onGoToTraining: () => void;
 };
 
+const HABIT_ICONS: Record<"deepwork" | "protein" | "sleep", string> = {
+  deepwork: "🎯",
+  protein: "🥩",
+  sleep: "😴",
+};
+
 export default function TodayScreen({
   program,
   classId,
   level,
+  xp,
+  maxXp,
+  streak,
+  rank,
   missions,
   onCompleteDeepWork,
   onCompleteProtein,
@@ -100,21 +117,51 @@ export default function TodayScreen({
     action();
   };
 
-  const taskClass = (id: DailyMission["id"]) =>
-    `iron-interactive w-full border border-iron-border p-4 sm:p-5 flex justify-between font-semibold cursor-pointer min-h-[52px] rounded-sm ${
-      isCompleted(id)
-        ? "bg-iron-raised text-iron-muted opacity-60"
-        : "iron-card-panel hover:border-iron-accent-dim/50"
-    }`;
-
   const deepWorkDone = isCompleted("deepwork");
   const proteinDone = isCompleted("protein");
   const sleepDone = isCompleted("sleep");
   const workoutDone = isCompleted("workout");
 
+  const workoutMeta = (
+    <div className="space-y-1.5 text-xs sm:text-sm">
+      <div className="flex justify-between gap-3 border-b border-iron-border pb-1.5">
+        <span className="text-iron-muted">{t("today.dayTypeLabel")}</span>
+        <span className="text-iron-text font-semibold text-right">{dayTypeLabel}</span>
+      </div>
+      <div className="flex justify-between gap-3 border-b border-iron-border pb-1.5">
+        <span className="text-iron-muted">{t("today.durationLabel")}</span>
+        <span className="text-iron-text font-semibold">
+          {t("training.estimatedMinutes", {
+            minutes: todayWorkout.estimatedMinutes,
+          })}
+        </span>
+      </div>
+      <div className="flex justify-between gap-3">
+        <span className="text-iron-muted">{t("today.statusLabel")}</span>
+        <span
+          className={
+            workoutDone
+              ? "text-iron-accent font-semibold"
+              : "text-iron-text font-semibold"
+          }
+        >
+          {workoutDone ? t("today.statusDone") : t("today.statusNotDone")}
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <div className="mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24">
-      <h2 className="iron-heading text-3xl text-center">{t("today.title")}</h2>
+      <PlayerHud
+        level={level}
+        xp={xp}
+        maxXp={maxXp}
+        streak={streak}
+        rank={rank}
+      />
+
+      <h2 className="iron-heading text-3xl text-center mt-2">{t("today.title")}</h2>
 
       <div className="mt-4 text-center text-sm text-iron-muted">
         <p className="font-semibold text-iron-accent">
@@ -124,143 +171,91 @@ export default function TodayScreen({
       </div>
 
       <Stagger className="mt-6 space-y-4">
-      {assessmentComplete ? (
-        <div className="mt-6 border border-iron-border p-4 iron-card-raised rounded-sm space-y-3">
-          <div className="flex justify-between items-baseline gap-2">
-            <p className="iron-label">{t("today.todayWorkoutTitle")}</p>
-            <span className="text-xs text-iron-gold">
-              +{workoutXp} {t("common.xp")}
-            </span>
-          </div>
+        {assessmentComplete ? (
+          <QuestCard
+            variant="main"
+            icon="💪"
+            title={t("today.todayWorkoutTitle")}
+            meta={workoutMeta}
+            reward={
+              <RewardChip
+                amount={workoutXp}
+                variant={workoutDone ? "muted" : "gold"}
+              />
+            }
+            status={workoutDone ? "completed" : "available"}
+            actionLabel={workoutDone ? undefined : t("today.goToTraining")}
+            onAction={workoutDone ? undefined : onGoToTraining}
+          />
+        ) : (
+          <QuestCard
+            variant="main"
+            icon="🗺️"
+            title={t("hero.pathNotFormedTitle")}
+            subtitle={t("today.assessmentRequired")}
+            actionLabel={t("hero.startAssessment")}
+            onAction={onStartAssessment}
+          />
+        )}
 
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between gap-3 border-b border-iron-border pb-2">
-              <span className="text-iron-muted">{t("today.dayTypeLabel")}</span>
-              <span className="text-iron-text font-semibold text-right">
-                {dayTypeLabel}
-              </span>
-            </div>
-            <div className="flex justify-between gap-3 border-b border-iron-border pb-2">
-              <span className="text-iron-muted">{t("today.durationLabel")}</span>
-              <span className="text-iron-text font-semibold">
-                {t("training.estimatedMinutes", {
-                  minutes: todayWorkout.estimatedMinutes,
-                })}
-              </span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-iron-muted">{t("today.statusLabel")}</span>
-              <span
-                className={
-                  workoutDone
-                    ? "text-iron-accent font-semibold"
-                    : "text-iron-text font-semibold"
-                }
-              >
-                {workoutDone
-                  ? t("today.statusDone")
-                  : t("today.statusNotDone")}
-              </span>
-            </div>
-          </div>
+        <p className="iron-label text-center">{t("today.habitsTitle")}</p>
 
-          {!workoutDone && (
-            <button
-              type="button"
-              onClick={onGoToTraining}
-              className="iron-interactive iron-btn-primary w-full mt-1 py-2.5 text-sm font-semibold rounded-sm"
-            >
-              {t("today.goToTraining")}
-            </button>
-          )}
+        <div className="space-y-3">
+          <QuestCard
+            icon={HABIT_ICONS.deepwork}
+            title={deepWorkDone ? t("today.deepWorkDone") : t("today.deepWork")}
+            reward={
+              <RewardChip
+                amount={deepWorkXp}
+                variant={deepWorkDone ? "muted" : "gold"}
+              />
+            }
+            status={deepWorkDone ? "completed" : "available"}
+            onAction={() => tryComplete("deepwork", onCompleteDeepWork)}
+            disabled={deepWorkDone}
+          />
+
+          <QuestCard
+            icon={HABIT_ICONS.protein}
+            title={proteinDone ? t("today.proteinDone") : t("today.protein")}
+            reward={
+              <RewardChip
+                amount={proteinXp}
+                variant={proteinDone ? "muted" : "gold"}
+              />
+            }
+            status={proteinDone ? "completed" : "available"}
+            onAction={() => tryComplete("protein", onCompleteProtein)}
+            disabled={proteinDone}
+          />
+
+          <QuestCard
+            icon={HABIT_ICONS.sleep}
+            title={sleepDone ? t("today.sleepDone") : t("today.sleep")}
+            reward={
+              <RewardChip
+                amount={sleepXp}
+                variant={sleepDone ? "muted" : "gold"}
+              />
+            }
+            status={sleepDone ? "completed" : "available"}
+            onAction={() => tryComplete("sleep", onCompleteSleep)}
+            disabled={sleepDone}
+          />
         </div>
-      ) : (
-        <div className="mt-6 border border-iron-accent-dim/60 bg-iron-panel p-4 rounded-sm">
-          <p className="text-sm text-iron-text leading-relaxed">
-            {t("today.assessmentRequired")}
-          </p>
-          <button
-            type="button"
-            onClick={onStartAssessment}
-            className="iron-interactive iron-btn-primary w-full mt-3 py-2.5 text-sm font-semibold rounded-sm"
-          >
-            {t("hero.startAssessment")}
-          </button>
-        </div>
-      )}
 
-      <p className="mt-4 iron-label text-center">{t("today.habitsTitle")}</p>
-
-      <div className="mt-3 space-y-3">
-        {assessmentComplete && (
-          <div
-            className={`w-full border border-iron-border p-4 sm:p-5 flex justify-between font-semibold min-h-[52px] rounded-sm ${
-              workoutDone
-                ? "bg-iron-raised text-iron-muted opacity-60"
-                : "iron-card-panel"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <span className={workoutDone ? "text-iron-accent" : "text-iron-border-strong"}>
-                {workoutDone ? "✓" : "□"}
-              </span>
-              <span>
-                {workoutDone
-                  ? t("today.workoutHabitDone")
-                  : t("today.workoutHabit")}
-              </span>
-            </span>
-            <span className="text-iron-gold text-xs">
-              {t("today.workoutHabitNote")}
-            </span>
+        {pathMode === "self_development" && (
+          <div className="mt-6 space-y-4">
+            <TodayPersonalTasksBlock />
+            <TodayHabitControlBlock />
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => tryComplete("deepwork", onCompleteDeepWork)}
-          disabled={deepWorkDone}
-          className={taskClass("deepwork")}
-        >
-          <span>
-            {deepWorkDone ? t("today.deepWorkDone") : t("today.deepWork")}
-          </span>
-          <span className="text-iron-gold">+{deepWorkXp} {t("common.xp")}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => tryComplete("protein", onCompleteProtein)}
-          disabled={proteinDone}
-          className={taskClass("protein")}
-        >
-          <span>{proteinDone ? t("today.proteinDone") : t("today.protein")}</span>
-          <span className="text-iron-gold">+{proteinXp} {t("common.xp")}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => tryComplete("sleep", onCompleteSleep)}
-          disabled={sleepDone}
-          className={taskClass("sleep")}
-        >
-          <span>{sleepDone ? t("today.sleepDone") : t("today.sleep")}</span>
-          <span className="text-iron-gold">+{sleepXp} {t("common.xp")}</span>
-        </button>
-      </div>
-
-      {pathMode === "self_development" && (
-        <div className="mt-6 space-y-4">
-          <TodayPersonalTasksBlock />
-          <TodayHabitControlBlock />
-        </div>
-      )}
-
-      {pathMode === "balance" && (
-        <div className="mt-6">
-          <TodayPersonalTasksBlock compact />
-        </div>
-      )}
+        {pathMode === "balance" && (
+          <div className="mt-6">
+            <TodayPersonalTasksBlock compact />
+          </div>
+        )}
       </Stagger>
     </div>
   );

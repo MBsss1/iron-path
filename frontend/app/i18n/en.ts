@@ -625,6 +625,7 @@ const en = {
   },
   hero: {
     profileLabel: "Profile",
+    hudLevel: "Lv.{{level}}",
     levelRank: "Level {{level}} · {{rank}}",
     pathModeLine: "Path mode: {{mode}}",
     classStats:

@@ -262,16 +262,16 @@ export default function FitnessAssessmentScreen({
 
   const levelLabel = (level: FitnessLevel) => t(`assessment.level.${level}`);
 
-  const patternRow = (
+  const valueRow = (
     labelKey: string,
-    level: FitnessLevel
+    value: string
   ) => (
     <div
       key={labelKey}
       className="flex justify-between items-center border-b border-iron-border py-3 last:border-0"
     >
       <span className="font-semibold text-iron-text">{t(labelKey)}</span>
-      <span className="text-iron-accent font-semibold">{levelLabel(level)}</span>
+      <span className="text-iron-accent font-semibold">{value}</span>
     </div>
   );
 
@@ -322,11 +322,41 @@ export default function FitnessAssessmentScreen({
         </div>
 
         <div className="iron-card-panel p-4 mb-4">
-          {patternRow("assessment.results.pull", previewResult.upperPullLevel)}
-          {patternRow("assessment.results.push", previewResult.upperPushLevel)}
-          {patternRow("assessment.results.legs", previewResult.legsLevel)}
-          {patternRow("assessment.results.core", previewResult.coreLevel)}
-          {patternRow("assessment.results.cardioLevel", previewResult.cardioLevel)}
+          {previewInput &&
+            valueRow(
+              "assessment.results.pull",
+              `${previewInput.maxPullUps} ${t("coaching.milestone.unitReps")}`
+            )}
+          {previewInput &&
+            valueRow(
+              "assessment.results.push",
+              `${previewInput.maxPushUps} ${t("coaching.milestone.unitReps")}`
+            )}
+          {previewInput &&
+            valueRow(
+              "assessment.results.legs",
+              `${previewInput.squatReps2Min} ${t("coaching.milestone.unitReps")}`
+            )}
+          {previewInput &&
+            valueRow(
+              "assessment.results.core",
+              `${previewInput.plankSeconds} ${t("coaching.milestone.unitSeconds")}`
+            )}
+          {previewInput?.cardioTestType === "run" &&
+            valueRow(
+              "assessment.results.cardioLevel",
+              `${previewInput.runMinutes ?? 0} ${t("coaching.milestone.unitMinutes")}`
+            )}
+          {previewInput?.cardioTestType === "walk" &&
+            valueRow(
+              "assessment.results.cardioLevel",
+              `${previewInput.walkMinutes ?? 0} ${t("coaching.milestone.unitMinutes")}`
+            )}
+          {previewInput?.cardioTestType === "skipped" &&
+            valueRow(
+              "assessment.results.cardioLevel",
+              t("coaching.debrief.cardioSkippedNote")
+            )}
         </div>
 
         <div className="iron-card-panel p-4 mb-4">
@@ -455,51 +485,25 @@ export default function FitnessAssessmentScreen({
         );
       case "pushups":
         return (
-          <div className="space-y-4">
-            <AssessmentTimer
-              key="pushups"
-              timerKey="pushups"
-              durationSeconds={120}
-              label={t("assessment.timer.startTest")}
-            />
-            <div>
-              <p className="text-xs text-iron-muted mb-2">
-                {t("assessment.timer.manualEntry")}
-              </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={maxPushUps}
-                onChange={(e) => setMaxPushUps(e.target.value)}
-                placeholder={t("assessment.pushups.placeholder")}
-                className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
-              />
-            </div>
-          </div>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={maxPushUps}
+            onChange={(e) => setMaxPushUps(e.target.value)}
+            placeholder={t("assessment.pushups.placeholder")}
+            className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
+          />
         );
       case "squats":
         return (
-          <div className="space-y-4">
-            <AssessmentTimer
-              key="squats"
-              timerKey="squats"
-              durationSeconds={120}
-              label={t("assessment.timer.startTest")}
-            />
-            <div>
-              <p className="text-xs text-iron-muted mb-2">
-                {t("assessment.timer.manualEntry")}
-              </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={squatReps}
-                onChange={(e) => setSquatReps(e.target.value)}
-                placeholder={t("assessment.squats.placeholder")}
-                className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
-              />
-            </div>
-          </div>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={squatReps}
+            onChange={(e) => setSquatReps(e.target.value)}
+            placeholder={t("assessment.squats.placeholder")}
+            className="w-full border border-iron-border p-3 bg-iron-panel text-iron-text min-h-[48px] rounded-sm"
+          />
         );
       case "plank":
         return (
@@ -694,6 +698,11 @@ export default function FitnessAssessmentScreen({
   const stepWarnKey = `assessment.${currentStep}.warn` as const;
   const isLimitationsStep = currentStep === "limitations";
   const isEnduranceStep = currentStep === "endurance";
+  const isRepsStep =
+    currentStep === "pullups" ||
+    currentStep === "pushups" ||
+    currentStep === "squats";
+  const isPlankStep = currentStep === "plank";
 
   return (
     <ScreenShell
@@ -716,15 +725,30 @@ export default function FitnessAssessmentScreen({
 
       {!isLimitationsStep && (
         <>
-          <p className="mt-4 text-sm text-iron-muted">
-            <span className="text-iron-accent font-semibold">ⓘ </span>
-            {t(stepTipKey)}
-          </p>
-          {(isEnduranceStep || t(stepWarnKey)) && (
+          {isRepsStep && (
+            <p className="mt-4 text-sm text-iron-muted border border-iron-border/60 rounded-sm p-3 leading-relaxed">
+              {t("assessment.repsTechniqueHint")}
+            </p>
+          )}
+          {!isRepsStep && (
+            <p className="mt-4 text-sm text-iron-muted">
+              <span className="text-iron-accent font-semibold">ⓘ </span>
+              {t(stepTipKey)}
+            </p>
+          )}
+          {isPlankStep && (
+            <p className="mt-2 text-sm text-iron-muted">
+              {t(stepTipKey)}
+            </p>
+          )}
+          {isEnduranceStep && (
             <p className="mt-2 text-sm text-iron-danger/90">
-              {isEnduranceStep
-                ? t("assessment.endurance.warn")
-                : t(stepWarnKey)}
+              {t("assessment.endurance.warn")}
+            </p>
+          )}
+          {!isRepsStep && !isPlankStep && !isEnduranceStep && t(stepWarnKey) && (
+            <p className="mt-2 text-sm text-iron-danger/90">
+              {t(stepWarnKey)}
             </p>
           )}
         </>

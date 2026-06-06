@@ -254,3 +254,92 @@ export function getGoalOrderedMilestones(
   const byId = new Map(tracks.map((t) => [t.id, t]));
   return order.map((id) => byId.get(id)!).filter(Boolean);
 }
+
+export type TrackTitleKey =
+  | "coaching.milestone.trackPull"
+  | "coaching.milestone.trackPush"
+  | "coaching.milestone.trackLegs"
+  | "coaching.milestone.trackCore"
+  | "coaching.milestone.trackEndurance"
+  | "coaching.milestone.trackWalking";
+
+export function getTrackTitleKey(track: MilestoneProgress): TrackTitleKey {
+  if (track.id === "pullups") return "coaching.milestone.trackPull";
+  if (track.id === "pushups") return "coaching.milestone.trackPush";
+  if (track.id === "squats") return "coaching.milestone.trackLegs";
+  if (track.id === "plank") return "coaching.milestone.trackCore";
+  if (track.id === "running" && track.cardioMode === "walk") {
+    return "coaching.milestone.trackWalking";
+  }
+  return "coaching.milestone.trackEndurance";
+}
+
+function pluralRu(
+  count: number,
+  one: string,
+  few: string,
+  many: string
+): string {
+  const abs = Math.abs(count);
+  const n10 = abs % 10;
+  const n100 = abs % 100;
+  if (n10 === 1 && n100 !== 11) return one;
+  if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return few;
+  return many;
+}
+
+function formatRepsValue(
+  count: number,
+  trackId: PhysicalMetricId,
+  locale: "en" | "ru"
+): string {
+  if (locale === "ru") {
+    if (trackId === "pullups") {
+      return `${count} ${pluralRu(count, "подтягивание", "подтягивания", "подтягиваний")}`;
+    }
+    if (trackId === "pushups") {
+      return `${count} ${pluralRu(count, "отжимание", "отжимания", "отжиманий")}`;
+    }
+    return `${count} ${pluralRu(count, "приседание", "приседания", "приседаний")}`;
+  }
+
+  const noun =
+    trackId === "pullups"
+      ? count === 1
+        ? "pull-up"
+        : "pull-ups"
+      : trackId === "pushups"
+        ? count === 1
+          ? "push-up"
+          : "push-ups"
+        : count === 1
+          ? "squat"
+          : "squats";
+  return `${count} ${noun}`;
+}
+
+function formatSecondsValue(count: number, locale: "en" | "ru"): string {
+  return locale === "ru" ? `${count} сек` : `${count} sec`;
+}
+
+function formatMinutesValue(count: number, locale: "en" | "ru"): string {
+  return locale === "ru" ? `${count} мин` : `${count} min`;
+}
+
+/** Human-readable metric value for a track (current or goal). */
+export function formatTrackMetricValue(
+  track: MilestoneProgress,
+  value: number,
+  locale: "en" | "ru"
+): string {
+  if (track.id === "running" && track.cardioMode === "skipped") {
+    return locale === "ru" ? "ходьба" : "walking";
+  }
+  if (track.id === "plank") {
+    return formatSecondsValue(value, locale);
+  }
+  if (track.id === "running") {
+    return formatMinutesValue(value, locale);
+  }
+  return formatRepsValue(value, track.id, locale);
+}

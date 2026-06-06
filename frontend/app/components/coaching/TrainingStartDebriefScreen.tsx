@@ -2,7 +2,6 @@
 
 import type { AssessmentInput, AssessmentResult } from "../../data/fitnessAssessment";
 import {
-  formatMilestoneGoalText,
   getGoalOrderedMilestones,
 } from "../../data/physicalMilestones";
 import { resolveCardioTestType } from "../../data/fitnessAssessment";
@@ -10,6 +9,7 @@ import { getStartDebriefFocusKeys } from "../../data/trainingCoaching";
 import { useTranslation } from "../../i18n/useTranslation";
 import ScreenShell from "../ScreenShell";
 import IronButton from "../IronButton";
+import PhysicalTrackGoalCard from "../progress/PhysicalTrackGoalCard";
 
 type Props = {
   input: AssessmentInput;
@@ -100,13 +100,11 @@ export default function TrainingStartDebriefScreen({
       </div>
 
       {stageGoals.length > 0 && (
-        <div className="iron-card-accent p-4 border border-iron-accent-dim/40 rounded-sm">
-          <p className="iron-label">{t("coaching.debrief.stagesTitle")}</p>
-          <ul className="mt-3 space-y-2 text-sm text-iron-text">
-            {stageGoals.map((goal) => (
-              <li key={goal.id}>{formatMilestoneGoalText(goal, t)}</li>
-            ))}
-          </ul>
+        <div className="space-y-3">
+          <p className="iron-label">{t("coaching.debrief.goalsTitle")}</p>
+          {stageGoals.map((goal) => (
+            <PhysicalTrackGoalCard key={goal.id} track={goal} compact />
+          ))}
         </div>
       )}
 

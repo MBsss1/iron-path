@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ACHIEVEMENTS,
   type AchievementDefinition,
   type AchievementId,
 } from "../data/achievements";
 import { MAX_XP_PER_LEVEL } from "../data/xpRewards";
+import {
+  clearFirstWorkoutDone,
+  persistFirstWorkoutDone,
+  readFirstWorkoutDone,
+} from "../utils/firstWorkoutDone";
 import { safeGet, safeSet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 
@@ -61,6 +66,16 @@ function loadStoredPlayerSnapshot(): StoredPlayerSnapshot {
   };
 }
 
+function syncFirstWorkoutAchievement(
+  achievements: AchievementId[],
+  firstWorkoutDone: boolean
+): AchievementId[] {
+  if (!firstWorkoutDone || achievements.includes("first_workout")) {
+    return achievements;
+  }
+  return [...achievements, "first_workout"];
+}
+
 export function usePlayer() {
   const [xp, setXp] = useState(DEFAULT_PLAYER.xp);
   const [level, setLevel] = useState(DEFAULT_PLAYER.level);
@@ -74,10 +89,20 @@ export function usePlayer() {
   const [highestLevel, setHighestLevel] = useState(DEFAULT_PLAYER.highestLevel);
   const [achievementsUnlocked, setAchievementsUnlocked] = useState<AchievementId[]>([]);
   const [pendingAchievement, setPendingAchievement] = useState<AchievementDefinition | null>(null);
+  const [firstWorkoutDone, setFirstWorkoutDone] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const firstWorkoutDoneRef = useRef(false);
 
   useEffect(() => {
     const { player, achievements } = loadStoredPlayerSnapshot();
+    const done = readFirstWorkoutDone(player.workoutCount);
+    firstWorkoutDoneRef.current = done;
+    const syncedAchievements = syncFirstWorkoutAchievement(achievements, done);
+
+    if (done) {
+      persistFirstWorkoutDone();
+    }
+
     queueMicrotask(() => {
       setXp(player.xp);
       setLevel(player.level);
@@ -88,7 +113,8 @@ export function usePlayer() {
       setTotalXp(player.totalXp);
       setWorkoutCount(player.workoutCount);
       setHighestLevel(player.highestLevel);
-      setAchievementsUnlocked(achievements);
+      setAchievementsUnlocked(syncedAchievements);
+      setFirstWorkoutDone(done);
       setLoaded(true);
     });
   }, []);
@@ -102,6 +128,13 @@ export function usePlayer() {
   };
 
   const unlockAchievement = useCallback((id: AchievementId) => {
+    if (id === "first_workout" && firstWorkoutDoneRef.current) {
+      setAchievementsUnlocked((current) =>
+        current.includes(id) ? current : [...current, id]
+      );
+      return;
+    }
+
     setAchievementsUnlocked((current) => {
       if (current.includes(id)) return current;
 
@@ -109,14 +142,21 @@ export function usePlayer() {
       if (!achievement) return current;
 
       setPendingAchievement(achievement);
+
+      if (id === "first_workout") {
+        firstWorkoutDoneRef.current = true;
+        persistFirstWorkoutDone();
+        queueMicrotask(() => setFirstWorkoutDone(true));
+      }
+
       return [...current, id];
     });
   }, []);
 
-  const recordWorkout = () => {
+  const recordWorkout = useCallback(() => {
     setWorkoutCount((count) => count + 1);
     unlockAchievement("first_workout");
-  };
+  }, [unlockAchievement]);
 
   const clearPendingAchievement = () => {
     setPendingAchievement(null);
@@ -196,6 +236,7 @@ export function usePlayer() {
   };
 
   const resetPlayer = () => {
+    firstWorkoutDoneRef.current = false;
     setXp(DEFAULT_PLAYER.xp);
     setLevel(DEFAULT_PLAYER.level);
     setWeek(DEFAULT_PLAYER.week);
@@ -207,6 +248,8 @@ export function usePlayer() {
     setWorkoutCount(DEFAULT_PLAYER.workoutCount);
     setHighestLevel(DEFAULT_PLAYER.highestLevel);
     setAchievementsUnlocked([]);
+    setFirstWorkoutDone(false);
+    clearFirstWorkoutDone();
     safeSet(STORAGE_KEYS.player, DEFAULT_PLAYER);
     safeSet(STORAGE_KEYS.achievements, []);
   };
@@ -228,6 +271,7 @@ export function usePlayer() {
     highestLevel,
     achievementsUnlocked,
     pendingAchievement,
+    firstWorkoutDone,
     addXp,
     addBody,
     addMind,

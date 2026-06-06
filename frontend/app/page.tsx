@@ -154,6 +154,7 @@ function HomeContent() {
     resetPlayer,
     recordWorkout,
     pendingAchievement,
+    firstWorkoutDone,
     clearPendingAchievement,
     achievementsUnlocked,
     unlockAchievement,
@@ -463,6 +464,8 @@ function HomeContent() {
   const [pendingDailyComplete, setPendingDailyComplete] = useState(false);
 
   useEffect(() => {
+    if (questOverlayActive) return;
+
     const allComplete = completedCount === totalCount && totalCount > 0;
     if (allComplete && !allQuestsCompleteRef.current) {
       if (showPopup) {
@@ -472,15 +475,21 @@ function HomeContent() {
       }
     }
     allQuestsCompleteRef.current = allComplete;
-  }, [completedCount, totalCount, showPopup]);
+  }, [completedCount, totalCount, showPopup, questOverlayActive]);
+
+  useEffect(() => {
+    if (firstWorkoutDone && pendingAchievement?.id === "first_workout") {
+      clearPendingAchievement();
+    }
+  }, [firstWorkoutDone, pendingAchievement, clearPendingAchievement]);
 
   const handleCloseWorkoutPopup = useCallback(() => {
     setShowPopup(false);
-    if (pendingDailyComplete) {
+    if (pendingDailyComplete && !questOverlayActive) {
       setShowDailyComplete(true);
       setPendingDailyComplete(false);
     }
-  }, [pendingDailyComplete, setShowPopup]);
+  }, [pendingDailyComplete, questOverlayActive, setShowPopup]);
 
   const handleOnboardingFinish = useCallback(
     (data: Profile) => {
@@ -826,6 +835,7 @@ function HomeContent() {
               rank={rank}
               onCloseLevelUp={clearLevelUp}
               pendingAchievement={pendingAchievement}
+              firstWorkoutDone={firstWorkoutDone}
               onCloseAchievement={clearPendingAchievement}
               pendingTrial={pendingTrial}
               onCompleteBossTrial={handleCompleteBossTrial}

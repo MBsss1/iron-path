@@ -19,6 +19,7 @@ export const STORAGE_KEYS = {
   progressionState: "iron-path-progression-state",
   activeTrainingSession: "iron-path-active-training-session",
   introSeen: "iron-path-intro-seen",
+  firstWorkoutDone: "iron-path-first-workout-done",
 } as const;
 
 export function clearAllGameData(): void {

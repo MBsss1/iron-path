@@ -37,6 +37,7 @@ type FloatingProps = {
   rank: string;
   onCloseLevelUp: () => void;
   pendingAchievement: AchievementDefinition | null;
+  firstWorkoutDone: boolean;
   onCloseAchievement: () => void;
   pendingTrial: BossTrialId | null;
   onCompleteBossTrial: () => void;
@@ -66,6 +67,11 @@ export default function AppPopups(props: Props) {
     ? getBossTrialByWeek(props.week)
     : null;
 
+  const firstWorkoutAchievement =
+    props.pendingAchievement?.id === "first_workout" && props.firstWorkoutDone
+      ? null
+      : props.pendingAchievement;
+
   return (
     <>
       <WeekCompletePopup
@@ -91,8 +97,8 @@ export default function AppPopups(props: Props) {
       />
 
       <AchievementPopup
-        isOpen={Boolean(props.pendingAchievement)}
-        achievement={props.pendingAchievement}
+        isOpen={Boolean(firstWorkoutAchievement)}
+        achievement={firstWorkoutAchievement}
         onClose={props.onCloseAchievement}
       />
 

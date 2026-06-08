@@ -1019,9 +1019,8 @@ const ru = {
     progress: "Вопрос {{current}} из {{total}}",
     resultEyebrow: "Ваш уровень",
     resultContinue: "К питанию",
-    resultRecommendationBefore:
-      "Для получения конкретных рекомендаций по питанию перейдите в раздел «",
-    resultRecommendationAfter: "».",
+    resultNextStep: "Следующий шаг:",
+    resultInfoLink: "Информация по набору веса",
     questions: {
       meals_per_day: {
         title: "Сколько раз в день ты обычно ешь?",

@@ -1019,9 +1019,8 @@ const en = {
     progress: "Question {{current}} of {{total}}",
     resultEyebrow: "Your level",
     resultContinue: "Go to nutrition",
-    resultRecommendationBefore:
-      "For specific nutrition guidance, open the ",
-    resultRecommendationAfter: " section.",
+    resultNextStep: "Next step:",
+    resultInfoLink: "Mass gain information",
     questions: {
       meals_per_day: {
         title: "How many times a day do you usually eat?",

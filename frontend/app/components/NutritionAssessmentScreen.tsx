@@ -83,18 +83,19 @@ export default function NutritionAssessmentScreen({ onComplete }: Props) {
           title={t(`nutritionAssessment.levels.${resultLevel}.title`)}
           subtitle={t(`nutritionAssessment.levels.${resultLevel}.description`)}
         >
-          <p className="text-sm text-iron-muted leading-relaxed text-center px-1">
-            {t("nutritionAssessment.resultRecommendationBefore")}
+          <div className="text-center px-1 space-y-1">
+            <p className="text-sm text-iron-muted">
+              {t("nutritionAssessment.resultNextStep")}
+            </p>
             <a
               href={NUTRITION_INFO_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center min-h-[44px] text-iron-accent font-semibold underline underline-offset-[5px] decoration-iron-accent-dim hover:text-iron-text hover:decoration-iron-accent transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] text-sm text-iron-accent font-semibold underline underline-offset-[5px] decoration-iron-accent-dim hover:text-iron-text hover:decoration-iron-accent transition-colors"
             >
-              {t("nutrition.sectionInfoLink")}
+              {t("nutritionAssessment.resultInfoLink")}
             </a>
-            {t("nutritionAssessment.resultRecommendationAfter")}
-          </p>
+          </div>
 
           <IronButton
             type="button"

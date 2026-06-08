@@ -13,6 +13,8 @@ import IronButton from "./IronButton";
 import { useTranslation } from "../i18n/useTranslation";
 import StepTransition from "../animations/StepTransition";
 
+const NUTRITION_INFO_URL = "https://t.me/+8hucRbt1aLVhMGNi";
+
 type Props = {
   onComplete: (answers: NutritionAssessmentAnswers) => void;
 };
@@ -81,6 +83,19 @@ export default function NutritionAssessmentScreen({ onComplete }: Props) {
           title={t(`nutritionAssessment.levels.${resultLevel}.title`)}
           subtitle={t(`nutritionAssessment.levels.${resultLevel}.description`)}
         >
+          <p className="text-sm text-iron-muted leading-relaxed text-center px-1">
+            {t("nutritionAssessment.resultRecommendationBefore")}
+            <a
+              href={NUTRITION_INFO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center min-h-[44px] text-iron-accent font-semibold underline underline-offset-[5px] decoration-iron-accent-dim hover:text-iron-text hover:decoration-iron-accent transition-colors"
+            >
+              {t("nutrition.sectionInfoLink")}
+            </a>
+            {t("nutritionAssessment.resultRecommendationAfter")}
+          </p>
+
           <IronButton
             type="button"
             variant="primary"

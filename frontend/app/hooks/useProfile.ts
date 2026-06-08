@@ -21,6 +21,8 @@ export type Profile = {
   classChangedAt?: string | null;
   pathMode?: PathMode;
   pathModeChangedAt?: string | null;
+  nutritionLevel?: "undereating" | "basic" | "good" | "advanced";
+  nutritionAssessmentCompletedAt?: string | null;
 };
 
 export function useProfile() {

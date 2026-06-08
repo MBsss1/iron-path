@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   activeTrainingSession: "iron-path-active-training-session",
   introSeen: "iron-path-intro-seen",
   firstWorkoutDone: "iron-path-first-workout-done",
+  nutritionAssessment: "iron-path-nutrition-assessment",
 } as const;
 
 export function clearAllGameData(): void {

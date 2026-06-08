@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getNutritionMissionIdsForLevel,
+  type NutritionLevel,
+} from "../data/nutritionAssessment";
 import { safeGet, safeSet } from "../utils/storage";
 import { STORAGE_KEYS } from "../utils/storageKeys";
 
@@ -16,45 +20,85 @@ export type NutritionMission = {
   completed: boolean;
 };
 
-const DEFAULT_MISSIONS: NutritionMission[] = [
-  { id: "protein_target", name: "Protein Target", completed: false },
-  { id: "meals_3_plus", name: "Eat 3+ Meals", completed: false },
-  { id: "water_2l", name: "Drink 2L Water", completed: false },
-  { id: "no_junk", name: "No Junk Food", completed: false },
-];
+const MISSION_NAMES: Record<NutritionMissionId, string> = {
+  protein_target: "Protein Target",
+  meals_3_plus: "Eat 3+ Meals",
+  water_2l: "Drink 2L Water",
+  no_junk: "No Junk Food",
+};
 
-function loadNutritionMissions(): NutritionMission[] {
-  const saved = safeGet<{ date: string; missions: NutritionMission[] } | null>(
-    STORAGE_KEYS.nutritionMissions,
-    null
-  );
-  const today = new Date().toDateString();
-
-  if (saved?.date === today && saved.missions) {
-    return saved.missions;
-  }
-
-  return DEFAULT_MISSIONS;
+function buildDefaultMissions(
+  ids: NutritionMissionId[]
+): NutritionMission[] {
+  return ids.map((id) => ({
+    id,
+    name: MISSION_NAMES[id],
+    completed: false,
+  }));
 }
 
-export function useNutritionMissions() {
-  const [missions, setMissions] = useState<NutritionMission[]>(DEFAULT_MISSIONS);
+function loadNutritionMissions(
+  missionIds: NutritionMissionId[]
+): NutritionMission[] {
+  const saved = safeGet<{
+    date: string;
+    level: NutritionLevel | null;
+    missions: NutritionMission[];
+  } | null>(STORAGE_KEYS.nutritionMissions, null);
+  const today = new Date().toDateString();
+  const defaultMissions = buildDefaultMissions(missionIds);
+
+  if (saved?.date !== today) {
+    return defaultMissions;
+  }
+
+  const allowed = new Set(missionIds);
+  const restored = (saved.missions ?? []).filter((mission) =>
+    allowed.has(mission.id)
+  );
+
+  for (const id of missionIds) {
+    if (!restored.some((mission) => mission.id === id)) {
+      restored.push({
+        id,
+        name: MISSION_NAMES[id],
+        completed: false,
+      });
+    }
+  }
+
+  return restored;
+}
+
+export function useNutritionMissions(nutritionLevel?: NutritionLevel | null) {
+  const missionIds = useMemo(
+    () => getNutritionMissionIdsForLevel(nutritionLevel),
+    [nutritionLevel]
+  );
+
+  const [missions, setMissions] = useState<NutritionMission[]>(() =>
+    buildDefaultMissions(missionIds)
+  );
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = loadNutritionMissions();
+    const stored = loadNutritionMissions(missionIds);
     queueMicrotask(() => {
       setMissions(stored);
       setLoaded(true);
     });
-  }, []);
+  }, [missionIds]);
 
   useEffect(() => {
     if (!loaded) return;
 
     const today = new Date().toDateString();
-    safeSet(STORAGE_KEYS.nutritionMissions, { date: today, missions });
-  }, [missions, loaded]);
+    safeSet(STORAGE_KEYS.nutritionMissions, {
+      date: today,
+      level: nutritionLevel ?? null,
+      missions,
+    });
+  }, [missions, loaded, nutritionLevel]);
 
   const completeMission = (id: NutritionMissionId) => {
     setMissions((current) =>
@@ -74,5 +118,6 @@ export function useNutritionMissions() {
     completedCount,
     totalCount,
     progress,
+    loaded,
   };
 }

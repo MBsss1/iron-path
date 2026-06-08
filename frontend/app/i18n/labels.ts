@@ -5,6 +5,7 @@ import type { BossTrialId } from "../data/bossTrials";
 import type { DayType } from "../data/workoutGeneratorV2";
 import type { AvatarId } from "../data/avatar";
 import type { ClassId } from "../data/classes";
+import type { NutritionLevel } from "../data/nutritionAssessment";
 import type { NutritionMissionId } from "../hooks/useNutritionMissions";
 import {
   getRequirementProgress,
@@ -80,8 +81,16 @@ export function translateClassBonuses(classId: ClassId, t: TranslateFn): string[
 
 export function translateNutritionMission(
   id: NutritionMissionId,
-  t: TranslateFn
+  t: TranslateFn,
+  level?: NutritionLevel | null
 ): string {
+  if (level) {
+    const levelKey = `nutrition.missionLevel.${level}.${id}`;
+    const levelLabel = t(levelKey);
+    if (levelLabel !== levelKey) {
+      return levelLabel;
+    }
+  }
   return t(`nutrition.mission.${id}`);
 }
 

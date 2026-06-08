@@ -23,6 +23,7 @@ import {
   translateRank,
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
+import { useTelegramUser } from "../hooks/useTelegramUser";
 import Stagger from "../animations/Stagger";
 import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 import PlayerHud from "./rpg/PlayerHud";
@@ -123,6 +124,10 @@ export default function HeroScreen({
   onDismissReassessment,
 }: Props) {
   const { t } = useTranslation();
+  const telegramUser = useTelegramUser();
+  const profileTitle = telegramUser.isTelegramUser
+    ? telegramUser.displayName
+    : t("hero.profileLabel");
   const pathMode = getPathModeFromProfile(profile);
   const pathModeLabel = pathMode ? t(`pathMode.${pathMode}.title`) : "";
   const titleLabel = translateBossRewardTitleById(equippedTitle, t);
@@ -170,7 +175,7 @@ export default function HeroScreen({
             className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
           />
           <div className="flex-1 min-w-0">
-            <p className="iron-label">{t("hero.profileLabel")}</p>
+            <p className="iron-label truncate">{profileTitle}</p>
             <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
               {t("hero.levelRank", { level, rank })}
             </h2>
@@ -200,7 +205,7 @@ export default function HeroScreen({
             className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
           />
           <div className="flex-1 min-w-0">
-            <p className="iron-label">{t("hero.profileLabel")}</p>
+            <p className="iron-label truncate">{profileTitle}</p>
             <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
               {t("hero.levelRank", { level, rank })}
             </h2>
@@ -247,7 +252,7 @@ export default function HeroScreen({
           className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
         />
         <div className="flex-1 min-w-0">
-          <p className="iron-label">{t("hero.profileLabel")}</p>
+          <p className="iron-label truncate">{profileTitle}</p>
           <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
             {t("hero.levelRank", { level, rank })}
           </h2>

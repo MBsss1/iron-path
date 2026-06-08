@@ -722,7 +722,11 @@ function HomeContent() {
               assessmentLoaded &&
               profile && hasPathModeSelected(profile) &&
               screen === "nutrition" && (
-              <NutritionScreen goal={profile?.goal} />
+              <NutritionScreen
+                goal={profile?.goal}
+                profile={profile}
+                onProfileUpdate={saveProfile}
+              />
             )}
 
             {storageReady &&

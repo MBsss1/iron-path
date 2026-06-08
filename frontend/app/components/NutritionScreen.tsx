@@ -4,8 +4,12 @@ import { useState } from "react";
 import Stagger from "../animations/Stagger";
 import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 import WeightProgressScreen from "./WeightProgressScreen";
+import NutritionAssessmentScreen from "./NutritionAssessmentScreen";
 import { normalizeFitnessGoal } from "../data/fitnessGoals";
+import type { NutritionAssessmentAnswers } from "../data/nutritionAssessment";
+import { useNutritionAssessment } from "../hooks/useNutritionAssessment";
 import { useNutritionMissions, type NutritionMissionId } from "../hooks/useNutritionMissions";
+import type { Profile } from "../hooks/useProfile";
 import {
   getTranslatedNutritionTips,
   translateGoal,
@@ -17,6 +21,8 @@ const NUTRITION_INFO_URL = "https://t.me/+8hucRbt1aLVhMGNi";
 
 type Props = {
   goal?: string;
+  profile: Profile | null;
+  onProfileUpdate: (profile: Profile) => void;
 };
 
 function getMissionIcon(id: NutritionMissionId): string {
@@ -34,13 +40,25 @@ function getMissionIcon(id: NutritionMissionId): string {
   }
 }
 
-export default function NutritionScreen({ goal }: Props) {
+export default function NutritionScreen({
+  goal,
+  profile,
+  onProfileUpdate,
+}: Props) {
   const { t } = useTranslation();
   const [view, setView] = useState<"nutrition" | "weight">("nutrition");
-  const { missions, completeMission, completedCount, totalCount, progress } =
-    useNutritionMissions();
-
   const isMassGain = normalizeFitnessGoal(goal) === "mass_gain";
+
+  const {
+    loaded: assessmentLoaded,
+    isComplete: assessmentComplete,
+    level: nutritionLevel,
+    complete: completeAssessment,
+  } = useNutritionAssessment(profile);
+
+  const { missions, completeMission, completedCount, totalCount, progress } =
+    useNutritionMissions(isMassGain ? nutritionLevel : null);
+
   const tips = getTranslatedNutritionTips(goal, t);
   const goalLabel = translateGoal(goal, t);
 
@@ -52,6 +70,23 @@ export default function NutritionScreen({ goal }: Props) {
     }`;
 
   const shell = "mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24";
+
+  const handleAssessmentComplete = (answers: NutritionAssessmentAnswers) => {
+    const result = completeAssessment(answers);
+    if (profile) {
+      onProfileUpdate({
+        ...profile,
+        nutritionLevel: result.level,
+        nutritionAssessmentCompletedAt: new Date().toISOString(),
+      });
+    }
+  };
+
+  if (isMassGain && assessmentLoaded && !assessmentComplete) {
+    return (
+      <NutritionAssessmentScreen onComplete={handleAssessmentComplete} />
+    );
+  }
 
   if (view === "weight") {
     return (
@@ -134,7 +169,11 @@ export default function NutritionScreen({ goal }: Props) {
               </span>
               <span className="truncate sm:whitespace-normal">
                 {mission.completed ? "✓ " : ""}
-                {translateNutritionMission(mission.id, t)}
+                {translateNutritionMission(
+                  mission.id,
+                  t,
+                  isMassGain ? nutritionLevel : null
+                )}
               </span>
             </span>
             <span className="text-xs shrink-0 text-iron-gold">

@@ -23,10 +23,22 @@ export type TelegramBackButton = {
   offClick: (callback: () => void) => void;
 };
 
+export type TelegramWebAppInitUser = {
+  id?: number;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  language_code?: string;
+};
+
 export type TelegramWebApp = {
   ready: () => void;
   expand: () => void;
   themeParams?: Record<string, string | undefined>;
+  initDataUnsafe?: {
+    user?: TelegramWebAppInitUser;
+  };
   HapticFeedback?: TelegramHapticFeedback;
   BackButton?: TelegramBackButton;
   onEvent?: (eventType: string, eventHandler: () => void) => void;

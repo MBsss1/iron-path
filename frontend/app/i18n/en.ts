@@ -941,6 +941,32 @@ const en = {
       water_2l: "Drink 2L water",
       no_junk: "No junk food",
     },
+    missionLevel: {
+      undereating: {
+        protein_target: "Protein at least once a day",
+        meals_3_plus: "3 meals — don't skip",
+        water_2l: "1+ L water",
+        no_junk: "No junk food",
+      },
+      basic: {
+        protein_target: "Protein 1–2 times a day",
+        meals_3_plus: "3 meals a day",
+        water_2l: "1.5+ L water",
+        no_junk: "No junk food",
+      },
+      good: {
+        protein_target: "Protein 3+ times a day",
+        meals_3_plus: "3+ full meals",
+        water_2l: "2 L water",
+        no_junk: "No junk food",
+      },
+      advanced: {
+        protein_target: "Protein every meal",
+        meals_3_plus: "4+ meals a day",
+        water_2l: "2+ L water",
+        no_junk: "No junk food",
+      },
+    },
     tip: {
       default: {
         "0": "Eat protein at each meal to support recovery.",
@@ -983,6 +1009,92 @@ const en = {
         "1": "Eat a solid meal a few hours before hard training when possible.",
         "2": "Recovery nutrition: protein after sessions.",
         "3": "Sleep and food support training together.",
+      },
+    },
+  },
+  nutritionAssessment: {
+    eyebrow: "Nutrition check",
+    title: "Fuel for mass gain",
+    subtitle: "Six quick questions — we'll tailor daily habits to your level.",
+    progress: "Question {{current}} of {{total}}",
+    resultEyebrow: "Your level",
+    resultContinue: "Go to nutrition",
+    questions: {
+      meals_per_day: {
+        title: "How many times a day do you usually eat?",
+        options: {
+          a: "A) 1–2 times",
+          b: "B) 3 times",
+          c: "C) 4 times",
+          d: "D) 5 or more times",
+        },
+      },
+      protein_frequency: {
+        title: "How often does your food include a protein source?",
+        options: {
+          a: "A) Less than once a day",
+          b: "B) 1–2 times a day",
+          c: "C) 3–4 times a day",
+          d: "D) Almost every meal",
+        },
+      },
+      portion_size: {
+        title: "What best describes your portion sizes?",
+        options: {
+          a: "A) I eat little and get full quickly",
+          b: "B) Normal portions",
+          c: "C) Large portions",
+          d: "D) Very large portions, often seconds",
+        },
+      },
+      skip_meals: {
+        title: "How often do you skip meals?",
+        options: {
+          a: "A) Almost every day",
+          b: "B) Several times a week",
+          c: "C) Rarely",
+          d: "D) Almost never",
+        },
+      },
+      snacks: {
+        title: "What do you usually eat between main meals?",
+        options: {
+          a: "A) Nothing",
+          b: "B) Tea or coffee",
+          c: "C) Fruit or a light snack",
+          d: "D) A full snack",
+        },
+      },
+      water: {
+        title: "How much water do you drink per day?",
+        options: {
+          a: "A) Less than 1 liter",
+          b: "B) 1–1.5 liters",
+          c: "C) 1.5–2 liters",
+          d: "D) More than 2 liters",
+        },
+      },
+    },
+    levels: {
+      undereating: {
+        title: "Under-fueling",
+        description:
+          "Priority now: steady meals, protein, and water. Gains start with consistency, not extremes.",
+      },
+      basic: {
+        title: "Basic level",
+        description:
+          "You have a foundation with room to grow. We'll lock in protein, three meals, and daily water.",
+      },
+      good: {
+        title: "Good level",
+        description:
+          "Your nutrition already supports mass gain. Keep the rhythm: more protein, full meals, and 2 L water.",
+      },
+      advanced: {
+        title: "Advanced level",
+        description:
+          "Strong base for building mass. Focus on density: frequent meals, protein every time, water, and no junk food.",
       },
     },
   },

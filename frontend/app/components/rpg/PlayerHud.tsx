@@ -36,7 +36,17 @@ export default function PlayerHud({
             </span>
           </div>
           <div
-            className={`iron-player-hud-streak shrink-0 ${streak > 0 ? "iron-streak-active" : ""}`}
+            className={[
+              "iron-player-hud-streak shrink-0",
+              streak > 0 ? "iron-streak-active" : "",
+              streak > 30
+                ? "iron-profile-streak--legend"
+                : streak > 7
+                  ? "iron-profile-streak--glow"
+                  : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
             title={t("statsScreen.summaryStreak")}
           >
             <span aria-hidden="true">🔥</span>

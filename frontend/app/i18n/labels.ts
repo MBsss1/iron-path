@@ -6,6 +6,7 @@ import type { DayType } from "../data/workoutGeneratorV2";
 import type { AvatarId } from "../data/avatar";
 import type { ClassId } from "../data/classes";
 import type { NutritionLevel } from "../data/nutritionAssessment";
+import type { PlayerRankId } from "../data/playerRanks";
 import type { NutritionMissionId } from "../hooks/useNutritionMissions";
 import {
   getRequirementProgress,
@@ -49,6 +50,10 @@ function tr(
 export function translateRank(rankEn: string, t: TranslateFn): string {
   const key = RANK_KEY_BY_EN[rankEn];
   return key ? t(key) : rankEn;
+}
+
+export function translatePlayerRank(rankId: PlayerRankId, t: TranslateFn): string {
+  return t(`playerRank.${rankId}`);
 }
 
 export function translateGoal(goal: string | undefined, t: TranslateFn): string {

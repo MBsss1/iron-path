@@ -26,12 +26,17 @@ import { useTranslation } from "../i18n/useTranslation";
 import ScreenShell from "./ScreenShell";
 import IronCard from "./IronCard";
 import IronButton from "./IronButton";
+import PlayerProfileCard from "./rpg/PlayerProfileCard";
+import ProfileWeightSection from "./ProfileWeightSection";
+import { MAX_XP_PER_LEVEL } from "../data/xpRewards";
 
 const EXPERIENCE_OPTIONS = ["beginner", "returning", "trained"] as const;
 
 type Props = {
   profile: Profile;
   level: number;
+  xp: number;
+  streak: number;
   onSave: (profile: Profile) => void;
   onBack: () => void;
   equippedTitle: string | null;
@@ -43,6 +48,8 @@ type Props = {
 export default function ProfileScreen({
   profile,
   level,
+  xp,
+  streak,
   onSave,
   onBack,
   equippedTitle,
@@ -129,6 +136,19 @@ export default function ProfileScreen({
       subtitle={t("profileScreen.subtitle")}
       onBack={onBack}
     >
+      <PlayerProfileCard
+        profile={profile}
+        level={level}
+        xp={xp}
+        maxXp={MAX_XP_PER_LEVEL}
+        streak={streak}
+        titleLabel={translateBossRewardTitleById(equippedTitle, t)}
+        pathModeLabel={t(`pathMode.${currentPathMode}.title`)}
+        showStats={false}
+      />
+
+      <ProfileWeightSection />
+
       <IronCard>
         <p className="uppercase text-xs font-bold tracking-widest mb-3">
           {t("profileScreen.avatar")}

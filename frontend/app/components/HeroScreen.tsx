@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getRank, getNextRank } from "../data/ranks";
-import { getAvatar } from "../data/avatar";
+import { getPlayerRank } from "../data/playerRanks";
 import { getPathModeFromProfile } from "../data/pathMode";
 import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
 import { applyClassXpBonus } from "../utils/classBonuses";
@@ -20,13 +19,14 @@ import {
   translateBossRewardTitleById,
   translateGoal,
   translatePhase,
-  translateRank,
+  translatePlayerRank,
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
-import { useTelegramUser } from "../hooks/useTelegramUser";
 import Stagger from "../animations/Stagger";
 import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 import PlayerHud from "./rpg/PlayerHud";
+import PlayerProfileCard from "./rpg/PlayerProfileCard";
+import StreakWarningCard from "./rpg/StreakWarningCard";
 import QuestCard from "./rpg/QuestCard";
 import RewardChip from "./rpg/RewardChip";
 
@@ -124,19 +124,12 @@ export default function HeroScreen({
   onDismissReassessment,
 }: Props) {
   const { t } = useTranslation();
-  const telegramUser = useTelegramUser();
-  const profileTitle = telegramUser.isTelegramUser
-    ? telegramUser.displayName
-    : t("hero.profileLabel");
   const pathMode = getPathModeFromProfile(profile);
   const pathModeLabel = pathMode ? t(`pathMode.${pathMode}.title`) : "";
   const titleLabel = translateBossRewardTitleById(equippedTitle, t);
-  const rank = translateRank(getRank(level), t);
-  const nextRankEn = getNextRank(level);
-  const nextRank = translateRank(nextRankEn, t);
+  const rank = translatePlayerRank(getPlayerRank(level), t);
   const xpPercent = maxXp > 0 ? Math.min(100, Math.round((xp / maxXp) * 100)) : 0;
   const bossRequirementMet = bossProgressPercent >= 100;
-  const isMaxRank = nextRankEn === "MAX RANK";
   const isNewUser = workoutCount === 0;
   const showNextReward = workoutCount > 0 || xp > 0;
   const showBossBlock = workoutCount > 0;
@@ -154,6 +147,24 @@ export default function HeroScreen({
     ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
     : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
 
+  const showStreakWarning = assessmentComplete && !workoutMissionCompleted;
+
+  const profileCard = (
+    <PlayerProfileCard
+      profile={profile}
+      level={level}
+      xp={xp}
+      maxXp={maxXp}
+      streak={streak}
+      titleLabel={titleLabel}
+      pathModeLabel={pathModeLabel || undefined}
+      body={body}
+      mind={mind}
+      work={work}
+      week={week}
+    />
+  );
+
   const hud = (
     <PlayerHud
       level={level}
@@ -168,19 +179,7 @@ export default function HeroScreen({
     return (
       <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
         {hud}
-        <section className="flex gap-3 items-center border-b border-iron-border pb-3">
-          <img
-            src={getAvatar(level, profile.avatarId)}
-            alt=""
-            className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="iron-label truncate">{profileTitle}</p>
-            <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
-              {t("hero.levelRank", { level, rank })}
-            </h2>
-          </div>
-        </section>
+        {profileCard}
 
         <QuestCard
           variant="main"
@@ -198,19 +197,7 @@ export default function HeroScreen({
     return (
       <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
         {hud}
-        <section className="flex gap-3 items-center border-b border-iron-border pb-3">
-          <img
-            src={getAvatar(level, profile.avatarId)}
-            alt=""
-            className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="iron-label truncate">{profileTitle}</p>
-            <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
-              {t("hero.levelRank", { level, rank })}
-            </h2>
-          </div>
-        </section>
+        {profileCard}
 
         <QuestCard
           variant="main"
@@ -245,40 +232,14 @@ export default function HeroScreen({
     <Stagger className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-3">
       {hud}
 
-      <section className="flex gap-3 items-center border-b border-iron-border pb-3">
-        <img
-          src={getAvatar(level, profile.avatarId)}
-          alt=""
-          className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
+      {profileCard}
+
+      {showStreakWarning && (
+        <StreakWarningCard
+          onAction={mainCta.action}
+          actionLabel={mainCta.label}
         />
-        <div className="flex-1 min-w-0">
-          <p className="iron-label truncate">{profileTitle}</p>
-          <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
-            {t("hero.levelRank", { level, rank })}
-          </h2>
-          {titleLabel && (
-            <p className="text-sm text-iron-accent mt-0.5 truncate">{titleLabel}</p>
-          )}
-          {pathMode && (
-            <p className="text-sm text-iron-muted mt-0.5">
-              {t("hero.pathModeLine", { mode: pathModeLabel })}
-            </p>
-          )}
-          <p className="text-sm text-iron-muted mt-0.5">
-            {t("hero.classStats", {
-              bodyLabel: t("stat.body"),
-              body,
-              mindLabel: t("stat.mind"),
-              mind,
-              workLabel: t("stat.work"),
-              work,
-            })}
-          </p>
-          <p className="text-xs text-iron-muted mt-1">
-            {t("hero.streakWeek", { streak, week })}
-          </p>
-        </div>
-      </section>
+      )}
 
       <section className="space-y-3">
         <div className="flex justify-between items-baseline gap-2 px-0.5">
@@ -375,11 +336,6 @@ export default function HeroScreen({
           <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
             <AnimatedProgressFill percent={xpPercent} />
           </div>
-          <p className="text-xs text-iron-muted mt-2">
-            {isMaxRank
-              ? t("hero.maxRank", { level })
-              : t("hero.nextRank", { nextRank, level: level + 1 })}
-          </p>
         </section>
       )}
 

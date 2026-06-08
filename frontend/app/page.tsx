@@ -49,6 +49,7 @@ import {
 } from "./utils/telegram";
 import LanguageProvider from "./i18n/LanguageProvider";
 import { translateRank } from "./i18n/labels";
+import { track } from "./utils/analytics";
 import { useTranslation } from "./i18n/useTranslation";
 import LanguageSelectionScreen from "./components/LanguageSelectionScreen";
 import FitnessAssessmentScreen from "./components/FitnessAssessmentScreen";
@@ -430,10 +431,10 @@ function HomeContent() {
     nav?.();
   }, []);
 
-  const onStartTrainingQuest = useCallback(
-    () => withQuestStart(handleStartTraining),
-    [withQuestStart, handleStartTraining]
-  );
+  const onStartTrainingQuest = useCallback(() => {
+    track("workout_started");
+    withQuestStart(handleStartTraining);
+  }, [withQuestStart, handleStartTraining]);
 
   const onOpenTodayQuest = useCallback(
     () => withQuestStart(handleOpenToday),
@@ -455,6 +456,7 @@ function HomeContent() {
         setPendingDailyComplete(true);
       } else {
         setShowDailyComplete(true);
+        track("day_completed");
       }
     }
     allQuestsCompleteRef.current = allComplete;
@@ -470,6 +472,7 @@ function HomeContent() {
     setShowPopup(false);
     if (pendingDailyComplete && !questOverlayActive) {
       setShowDailyComplete(true);
+      track("day_completed");
       setPendingDailyComplete(false);
     }
   }, [pendingDailyComplete, questOverlayActive, setShowPopup]);
@@ -477,9 +480,15 @@ function HomeContent() {
   const handleOnboardingFinish = useCallback(
     (data: Profile) => {
       saveProfile(data);
+      track("onboarding_completed");
     },
     [saveProfile]
   );
+
+  const handleCompleteWorkout = useCallback(() => {
+    track("workout_completed");
+    completeWorkout();
+  }, [completeWorkout]);
 
   const handleConfirmPathMode = useCallback(
     (selected: PathMode) => {
@@ -692,7 +701,7 @@ function HomeContent() {
                 level={level}
                 assessmentComplete={assessmentComplete}
                 onStartAssessment={handleStartAssessment}
-                onCompleteWorkout={completeWorkout}
+                onCompleteWorkout={handleCompleteWorkout}
                 onCompleteWeek={handleCompleteWeek}
                 assessmentInput={assessmentInput}
                 assessmentResult={assessmentResult}
@@ -746,6 +755,7 @@ function HomeContent() {
               screen === "more" && (
               <MoreScreen
                 onSelectProfile={() => setScreen("profile")}
+                onSelectWeight={() => setScreen("profile")}
                 onSelectProgress={() => setScreen("progress")}
                 onSelectStages={() => setScreen("bosses")}
                 onSelectSettings={() => setScreen("settings")}
@@ -756,6 +766,8 @@ function HomeContent() {
               <ProfileScreen
                 profile={profile}
                 level={level}
+                xp={xp}
+                streak={loginStreak}
                 onSave={saveProfile}
                 onBack={goBackToMore}
                 equippedTitle={equippedTitle}

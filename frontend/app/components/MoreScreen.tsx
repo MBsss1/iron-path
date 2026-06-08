@@ -5,6 +5,7 @@ import { useTranslation } from "../i18n/useTranslation";
 
 type Props = {
   onSelectProfile: () => void;
+  onSelectWeight: () => void;
   onSelectProgress: () => void;
   onSelectStages: () => void;
   onSelectSettings: () => void;
@@ -15,6 +16,7 @@ const menuBtn =
 
 export default function MoreScreen({
   onSelectProfile,
+  onSelectWeight,
   onSelectProgress,
   onSelectStages,
   onSelectSettings,
@@ -28,6 +30,13 @@ export default function MoreScreen({
       label: t("more.profile.label"),
       title: t("more.profile.title"),
       desc: t("more.profile.desc"),
+    },
+    {
+      onClick: onSelectWeight,
+      className: "iron-card-panel border-iron-border-strong text-iron-text",
+      label: t("more.weight.label"),
+      title: t("more.weight.title"),
+      desc: t("more.weight.desc"),
     },
     {
       onClick: onSelectProgress,

@@ -17,6 +17,7 @@ import {
   translateNutritionMission,
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
+import { track } from "../utils/analytics";
 
 const MASS_GAIN_INFO_URL = "https://t.me/+8hucRbt1aLVhMGNi";
 const WEIGHT_LOSS_INFO_URL = "https://t.me/+LIUoCz3TJbY5NGFi";
@@ -80,6 +81,10 @@ export default function NutritionScreen({
     answers: MassGainAssessmentAnswers | WeightLossAssessmentAnswers
   ) => {
     const result = completeAssessment(answers);
+    track("nutrition_test_completed", {
+      level: result.level,
+      diagnosis: result.diagnosis,
+    });
     if (profile) {
       onProfileUpdate({
         ...profile,

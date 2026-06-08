@@ -6,7 +6,7 @@ import {
   type TelegramWebAppInitUser,
 } from "../utils/telegram";
 
-const FALLBACK_DISPLAY_NAME = "Профиль";
+const FALLBACK_DISPLAY_NAME = "Путник";
 
 export type TelegramUser = {
   id?: number;
@@ -27,11 +27,6 @@ function trimValue(value: string | undefined): string | undefined {
 export function getTelegramDisplayName(
   user: TelegramWebAppInitUser | null | undefined
 ): string {
-  const username = trimValue(user?.username);
-  if (username) {
-    return username.startsWith("@") ? username : `@${username}`;
-  }
-
   const firstName = trimValue(user?.first_name);
   const lastName = trimValue(user?.last_name);
 
@@ -41,6 +36,11 @@ export function getTelegramDisplayName(
 
   if (firstName) {
     return firstName;
+  }
+
+  const username = trimValue(user?.username);
+  if (username) {
+    return username.startsWith("@") ? username : `@${username}`;
   }
 
   return FALLBACK_DISPLAY_NAME;

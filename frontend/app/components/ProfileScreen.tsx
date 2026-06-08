@@ -144,7 +144,6 @@ export default function ProfileScreen({
         streak={streak}
         titleLabel={translateBossRewardTitleById(equippedTitle, t)}
         pathModeLabel={t(`pathMode.${currentPathMode}.title`)}
-        showStats={false}
       />
 
       <ProfileWeightSection />

@@ -1901,20 +1901,54 @@ html.telegram-webapp body {
   }
 }
 
-/* Player profile — streak emphasis */
-.iron-profile-streak {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--iron-border);
-  border-radius: 2px;
-  background: var(--iron-panel);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--iron-text);
+/* Unified player profile card */
+.iron-player-profile-card {
+  border: 1px solid var(--iron-border-strong);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--iron-panel) 92%, #000);
+  padding: 0.75rem 0.875rem;
+  box-shadow: var(--iron-shadow-card);
 }
 
+.iron-player-profile-xp {
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--iron-border) 70%, transparent);
+}
+
+.iron-player-streak-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+  padding: 0.12rem 0.4rem;
+  border-radius: 2px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--iron-muted);
+  background: color-mix(in srgb, var(--iron-raised) 65%, transparent);
+}
+
+.iron-player-streak-chip--glow {
+  color: var(--iron-text);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--iron-gold) 14%, transparent);
+}
+
+.iron-player-streak-chip--legend {
+  color: var(--iron-gold);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--iron-gold) 20%, transparent);
+}
+
+.iron-player-streak-chip-badge {
+  margin-left: 0.1rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--iron-gold);
+}
+
+/* Legacy streak classes — still used by PlayerHud on Today */
 .iron-profile-streak--glow {
   border-color: color-mix(in srgb, var(--iron-gold) 45%, var(--iron-border));
   box-shadow: 0 0 14px color-mix(in srgb, var(--iron-gold) 18%, transparent);
@@ -1923,18 +1957,6 @@ html.telegram-webapp body {
 .iron-profile-streak--legend {
   border-color: color-mix(in srgb, var(--iron-gold) 60%, var(--iron-border));
   box-shadow: 0 0 18px color-mix(in srgb, var(--iron-gold) 24%, transparent);
-}
-
-.iron-profile-streak-badge {
-  margin-left: 0.15rem;
-  padding: 0.1rem 0.45rem;
-  border: 1px solid color-mix(in srgb, var(--iron-gold) 50%, var(--iron-border));
-  border-radius: 2px;
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--iron-gold);
 }
 
 .iron-streak-warning-card {

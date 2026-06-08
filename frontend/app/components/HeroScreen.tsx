@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { getPlayerRank } from "../data/playerRanks";
 import { getPathModeFromProfile } from "../data/pathMode";
 import { getWorkoutXp, MISSION_XP } from "../data/xpRewards";
 import { applyClassXpBonus } from "../utils/classBonuses";
@@ -19,12 +18,10 @@ import {
   translateBossRewardTitleById,
   translateGoal,
   translatePhase,
-  translatePlayerRank,
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 import Stagger from "../animations/Stagger";
 import AnimatedProgressFill from "../animations/AnimatedProgressFill";
-import PlayerHud from "./rpg/PlayerHud";
 import PlayerProfileCard from "./rpg/PlayerProfileCard";
 import StreakWarningCard from "./rpg/StreakWarningCard";
 import QuestCard from "./rpg/QuestCard";
@@ -127,11 +124,8 @@ export default function HeroScreen({
   const pathMode = getPathModeFromProfile(profile);
   const pathModeLabel = pathMode ? t(`pathMode.${pathMode}.title`) : "";
   const titleLabel = translateBossRewardTitleById(equippedTitle, t);
-  const rank = translatePlayerRank(getPlayerRank(level), t);
-  const xpPercent = maxXp > 0 ? Math.min(100, Math.round((xp / maxXp) * 100)) : 0;
   const bossRequirementMet = bossProgressPercent >= 100;
   const isNewUser = workoutCount === 0;
-  const showNextReward = workoutCount > 0 || xp > 0;
   const showBossBlock = workoutCount > 0;
   const phaseLabel = translatePhase(program.phase, t);
   const bossProgressLabel = currentBoss
@@ -158,30 +152,16 @@ export default function HeroScreen({
       streak={streak}
       titleLabel={titleLabel}
       pathModeLabel={pathModeLabel || undefined}
-      body={body}
-      mind={mind}
-      work={work}
-      week={week}
-    />
-  );
-
-  const hud = (
-    <PlayerHud
-      level={level}
-      xp={xp}
-      maxXp={maxXp}
-      streak={streak}
-      rank={rank}
     />
   );
 
   if (!assessmentComplete) {
     return (
-      <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
-        {hud}
+      <div className="mt-3 sm:mt-5 iron-shell-card p-3.5 mb-5 space-y-2.5">
         {profileCard}
 
         <QuestCard
+          className="mt-0.5"
           variant="main"
           icon="🗺️"
           title={t("hero.pathNotFormedTitle")}
@@ -195,8 +175,7 @@ export default function HeroScreen({
 
   if (isNewUser) {
     return (
-      <div className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-4">
-        {hud}
+      <div className="mt-3 sm:mt-5 iron-shell-card p-3.5 mb-5 space-y-2.5">
         {profileCard}
 
         <QuestCard
@@ -229,9 +208,7 @@ export default function HeroScreen({
   const sideMissions = missions.filter((mission) => mission.id !== "workout");
 
   return (
-    <Stagger className="mt-4 sm:mt-6 iron-shell-card p-4 mb-5 space-y-3">
-      {hud}
-
+    <Stagger className="mt-3 sm:mt-5 iron-shell-card p-3.5 mb-5 space-y-2.5">
       {profileCard}
 
       {showStreakWarning && (
@@ -323,20 +300,6 @@ export default function HeroScreen({
           onRetake={onRetakeAssessment}
           onDismiss={onDismissReassessment}
         />
-      )}
-
-      {showNextReward && (
-        <section className="iron-card-surface p-3">
-          <div className="flex justify-between items-baseline gap-2">
-            <h3 className="iron-heading text-sm">{t("hero.nextReward")}</h3>
-            <span className="text-xs text-iron-muted">
-              {t("hero.xpProgress", { xp, maxXp })}
-            </span>
-          </div>
-          <div className="w-full h-2 iron-progress-track mt-2 overflow-hidden">
-            <AnimatedProgressFill percent={xpPercent} />
-          </div>
-        </section>
       )}
 
       {showBossBlock && (

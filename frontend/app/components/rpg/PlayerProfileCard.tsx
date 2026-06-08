@@ -9,6 +9,7 @@ import { translatePlayerRank } from "../../i18n/labels";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTelegramUser } from "../../hooks/useTelegramUser";
 import type { Profile } from "../../hooks/useProfile";
+import AnimatedXpBar from "./AnimatedXpBar";
 import RankAvatar from "./RankAvatar";
 
 type Props = {
@@ -19,17 +20,12 @@ type Props = {
   streak: number;
   titleLabel?: string | null;
   pathModeLabel?: string;
-  body?: number;
-  mind?: number;
-  work?: number;
-  week?: number;
-  showStats?: boolean;
 };
 
-function streakClass(streak: number): string {
-  if (streak > 30) return "iron-profile-streak iron-profile-streak--legend";
-  if (streak > 7) return "iron-profile-streak iron-profile-streak--glow";
-  return "iron-profile-streak";
+function streakChipClass(streak: number): string {
+  if (streak > 30) return "iron-player-streak-chip iron-player-streak-chip--legend";
+  if (streak > 7) return "iron-player-streak-chip iron-player-streak-chip--glow";
+  return "iron-player-streak-chip";
 }
 
 export default function PlayerProfileCard({
@@ -40,17 +36,10 @@ export default function PlayerProfileCard({
   streak,
   titleLabel,
   pathModeLabel,
-  body,
-  mind,
-  work,
-  week,
-  showStats = true,
 }: Props) {
   const { t } = useTranslation();
   const telegramUser = useTelegramUser();
-  const profileTitle = telegramUser.isTelegramUser
-    ? telegramUser.displayName
-    : t("hero.profileLabel");
+  const profileTitle = telegramUser.displayName;
 
   const currentRankId = getPlayerRank(level);
   const nextRankId = getNextPlayerRank(level);
@@ -59,74 +48,68 @@ export default function PlayerProfileCard({
   const xpToNextRank = getXpToNextRank(level, xp, maxXp);
 
   return (
-    <section className="space-y-3 border-b border-iron-border pb-3">
-      <div className="flex gap-3 items-center">
+    <section className="iron-player-profile-card">
+      <div className="flex gap-3 items-start">
         <RankAvatar
           level={level}
           avatarId={profile.avatarId}
-          className="w-16 h-20 sm:w-[4.5rem] sm:h-[5.5rem] object-cover iron-avatar-frame shrink-0"
+          className="w-14 h-[4.25rem] sm:w-16 sm:h-20 object-cover iron-avatar-frame shrink-0"
         />
-        <div className="flex-1 min-w-0">
-          <p className="iron-label truncate">{profileTitle}</p>
-          <h2 className="iron-heading text-xl sm:text-2xl mt-0.5">
-            {currentRank}
-          </h2>
-          <p className="text-sm text-iron-muted mt-0.5">
-            {t("playerRank.levelLabel", { level })}
+        <div className="flex-1 min-w-0 pt-0.5">
+          <p className="text-sm font-semibold text-iron-text truncate leading-tight">
+            {profileTitle}
           </p>
+          <p className="text-sm text-iron-muted mt-1 leading-snug">
+            {t("playerRank.rankLevelLine", {
+              rank: currentRank,
+              level,
+            })}
+          </p>
+          <span className={streakChipClass(streak)}>
+            <span aria-hidden="true">🔥</span>
+            <span>{t("playerRank.streak", { streak })}</span>
+            {streak > 30 && (
+              <span className="iron-player-streak-chip-badge">
+                {t("playerRank.streakBadge")}
+              </span>
+            )}
+          </span>
           {titleLabel && (
-            <p className="text-sm text-iron-accent mt-0.5 truncate">{titleLabel}</p>
+            <p className="text-xs text-iron-accent mt-1.5 truncate">{titleLabel}</p>
           )}
           {pathModeLabel && (
-            <p className="text-sm text-iron-muted mt-0.5">
+            <p className="text-xs text-iron-muted mt-1 truncate">
               {t("hero.pathModeLine", { mode: pathModeLabel })}
             </p>
           )}
         </div>
       </div>
 
-      <div className={streakClass(streak)}>
-        <span aria-hidden="true">🔥</span>
-        <span>{t("playerRank.streak", { streak })}</span>
-        {streak > 30 && (
-          <span className="iron-profile-streak-badge">{t("playerRank.streakBadge")}</span>
-        )}
+      <div className="iron-player-profile-xp mt-3">
+        <div className="flex items-baseline justify-between gap-2 text-xs">
+          <span className="text-iron-muted font-semibold uppercase tracking-wide">
+            {t("playerRank.xpLabel")}
+          </span>
+          <span className="text-iron-muted tabular-nums shrink-0">
+            {t("playerRank.xpRow", { level, xp, maxXp })}
+          </span>
+        </div>
+        <AnimatedXpBar xp={xp} maxXp={maxXp} className="mt-1.5" />
       </div>
 
-      {showStats && body !== undefined && mind !== undefined && work !== undefined && (
-        <p className="text-sm text-iron-muted">
-          {t("hero.classStats", {
-            bodyLabel: t("stat.body"),
-            body,
-            mindLabel: t("stat.mind"),
-            mind,
-            workLabel: t("stat.work"),
-            work,
-          })}
-        </p>
-      )}
-
-      {week !== undefined && (
-        <p className="text-xs text-iron-muted">
-          {t("hero.streakWeek", { streak, week })}
-        </p>
-      )}
-
-      <div className="iron-card-panel p-3 space-y-1.5">
-        <p className="text-xs text-iron-muted">
-          {t("playerRank.currentRank", { rank: currentRank })}
-        </p>
+      <div className="mt-2.5 text-xs leading-relaxed">
         {nextRank ? (
-          <>
-            <p className="text-sm text-iron-text">
-              {t("playerRank.nextRank", { rank: nextRank })}
-            </p>
-            <p className="text-sm font-semibold text-iron-accent">
-              {t("playerRank.xpToNextRank", { xp: xpToNextRank })}
-            </p>
-          </>
+          <p className="text-iron-muted">
+            <span className="text-iron-muted">{t("playerRank.nextRankLabel")}</span>{" "}
+            <span className="text-iron-text">
+              {t("playerRank.nextRankPreview", {
+                rank: nextRank,
+                xp: xpToNextRank,
+              })}
+            </span>
+          </p>
         ) : (
-          <p className="text-sm text-iron-muted">{t("playerRank.maxRank")}</p>
+          <p className="text-iron-muted">{t("playerRank.maxRank")}</p>
         )}
       </div>
     </section>

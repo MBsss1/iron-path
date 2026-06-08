@@ -905,6 +905,9 @@ const en = {
     dailyDiscipline: "Daily discipline",
     title: "Nutrition",
     subtitle: "Simple habits. No calorie math.",
+    subtitleMassGain:
+      "Simple habits for gaining mass — no calorie counting.",
+    sectionInfoLink: "Section information",
     goalLabel: "Goal: {{goal}}",
     checklist: "Today's checklist",
     coachTips: "Coach tips",

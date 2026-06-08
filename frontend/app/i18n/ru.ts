@@ -905,6 +905,9 @@ const ru = {
     dailyDiscipline: "Дисциплина дня",
     title: "Питание",
     subtitle: "Простые привычки. Без подсчёта калорий.",
+    subtitleMassGain:
+      "Простые привычки для набора массы без подсчёта калорий.",
+    sectionInfoLink: "Информация по разделу",
     goalLabel: "Цель: {{goal}}",
     checklist: "Чеклист на сегодня",
     coachTips: "Заметки тренера",

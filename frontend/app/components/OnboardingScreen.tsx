@@ -20,7 +20,6 @@ type FieldErrors = {
 };
 
 const EXPERIENCE_OPTIONS = ["beginner", "returning", "trained"] as const;
-const WATCH_OPTIONS = ["apple_watch", "android_watch", "none"] as const;
 
 function parseWholeNumber(value: string): number | null {
   const trimmed = value.trim();
@@ -76,7 +75,6 @@ export default function OnboardingScreen({ onFinish }: Props) {
   const [weight, setWeight] = useState("");
   const [goal, setGoal] = useState<ActiveFitnessGoal>("mass_gain");
   const [experience, setExperience] = useState<string>("returning");
-  const [watchType, setWatchType] = useState<string>("none");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrors, setShowErrors] = useState(false);
 
@@ -116,7 +114,6 @@ export default function OnboardingScreen({ onFinish }: Props) {
       weight: weight.trim(),
       goal,
       experience,
-      watchType,
       avatarId: "rookie",
     });
   };
@@ -186,22 +183,6 @@ export default function OnboardingScreen({ onFinish }: Props) {
               className={optionClass(experience === value)}
             >
               {t(`experience.${value}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <h3 className="iron-heading text-lg">{t("onboarding.smartwatch")}</h3>
-        <div className="grid grid-cols-1 gap-3 mt-3">
-          {WATCH_OPTIONS.map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setWatchType(value)}
-              className={optionClass(watchType === value)}
-            >
-              {t(`watch.${value}`)}
             </button>
           ))}
         </div>

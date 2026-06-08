@@ -14,7 +14,6 @@ export type Profile = {
   weight: string;
   goal: string;
   experience: string;
-  watchType: string;
   avatarId?: string;
   /** Legacy; kept for XP bonuses. Synced from pathMode on save. */
   classId?: ClassId;

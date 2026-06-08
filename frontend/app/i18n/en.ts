@@ -233,11 +233,6 @@ const en = {
     returning: "Returning After Break",
     trained: "Training Regularly",
   },
-  watch: {
-    apple_watch: "Apple Watch",
-    android_watch: "Android Watch",
-    none: "No Watch",
-  },
   onboarding: {
     welcome: "Welcome",
     subtitle: "Build your iron path",
@@ -246,7 +241,6 @@ const en = {
     weight: "Weight, kg",
     goal: "Goal",
     experience: "Experience",
-    smartwatch: "Smartwatch",
     beginJourney: "Begin Journey",
     errors: {
       ageRequired: "Enter your age",

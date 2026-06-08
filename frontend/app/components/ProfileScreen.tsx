@@ -28,7 +28,6 @@ import IronCard from "./IronCard";
 import IronButton from "./IronButton";
 
 const EXPERIENCE_OPTIONS = ["beginner", "returning", "trained"] as const;
-const WATCH_OPTIONS = ["apple_watch", "android_watch", "none"] as const;
 
 type Props = {
   profile: Profile;
@@ -59,7 +58,6 @@ export default function ProfileScreen({
     coerceToActiveGoal(profile.goal)
   );
   const [experience, setExperience] = useState(profile.experience);
-  const [watchType, setWatchType] = useState(profile.watchType);
   const [avatarId, setAvatarId] = useState(profile.avatarId ?? "rookie");
   const [pathMode, setPathMode] = useState<PathMode>(
     getPathModeFromProfile(profile) ?? "balance"
@@ -80,7 +78,6 @@ export default function ProfileScreen({
     weight,
     goal,
     experience,
-    watchType,
     avatarId,
   });
 
@@ -310,18 +307,6 @@ export default function ProfileScreen({
             {EXPERIENCE_OPTIONS.map((value) => (
               <option key={value} value={value}>
                 {t(`experience.${value}`)}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={watchType}
-            onChange={(e) => setWatchType(e.target.value)}
-            className={inputClass}
-          >
-            {WATCH_OPTIONS.map((value) => (
-              <option key={value} value={value}>
-                {t(`watch.${value}`)}
               </option>
             ))}
           </select>

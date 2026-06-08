@@ -7,7 +7,6 @@ type Profile = {
   weight: string;
   goal: string;
   experience: string;
-  watchType: string;
 };
 
 export function generateProgram(profile: Profile | null, week: number) {

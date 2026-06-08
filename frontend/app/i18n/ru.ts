@@ -233,11 +233,6 @@ const ru = {
     returning: "Возвращение после перерыва",
     trained: "Регулярные тренировки",
   },
-  watch: {
-    apple_watch: "Apple Watch",
-    android_watch: "Android Watch",
-    none: "Без часов",
-  },
   onboarding: {
     welcome: "Добро пожаловать",
     subtitle: "Короткая настройка — потом первый шаг",
@@ -246,7 +241,6 @@ const ru = {
     weight: "Вес, кг",
     goal: "Цель",
     experience: "Опыт",
-    smartwatch: "Смарт-часы",
     beginJourney: "Начать путь",
     errors: {
       ageRequired: "Укажите возраст",

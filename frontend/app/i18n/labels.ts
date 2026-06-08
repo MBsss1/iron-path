@@ -59,10 +59,6 @@ export function translateExperience(value: string, t: TranslateFn): string {
   return t(`experience.${value}`);
 }
 
-export function translateWatch(value: string, t: TranslateFn): string {
-  return t(`watch.${value}`);
-}
-
 export function translateClassName(classId: ClassId, t: TranslateFn): string {
   return t(`class.${classId}.name`);
 }

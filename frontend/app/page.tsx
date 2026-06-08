@@ -33,6 +33,7 @@ import HeroScreen from "./components/HeroScreen";
 import AppPopups from "./components/AppPopups";
 import SplashScreen from "./components/SplashScreen";
 import IntroExperience from "./components/IntroExperience";
+import IntroVideo from "./components/IntroVideo";
 import ScreenTransition from "./components/ScreenTransition";
 import { ScreenLoadingSkeleton } from "./components/ui/Skeleton";
 import { hasIntroSeen } from "./utils/introStorage";
@@ -99,9 +100,21 @@ function HomeContent() {
   );
   const [showSplash, setShowSplash] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
+  const [showIntroVideo, setShowIntroVideo] = useState(false);
 
   const handleSplashComplete = useCallback(() => setShowSplash(false), []);
   const handleIntroComplete = useCallback(() => setShowIntro(false), []);
+  const handleIntroVideoComplete = useCallback(() => {
+    setShowIntroVideo(false);
+    if (hasIntroSeen()) {
+      setShowIntro(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!languageLoaded) return;
+    setShowIntroVideo(!hasIntroSeen());
+  }, [languageLoaded]);
 
   /** Intro first (no splash) for new users; splash only when intro was already seen. */
   useEffect(() => {
@@ -511,6 +524,8 @@ function HomeContent() {
 
   return (
     <>
+      {showIntroVideo && <IntroVideo onComplete={handleIntroVideoComplete} />}
+
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
       {showIntro && !showSplash && languageChosen && (

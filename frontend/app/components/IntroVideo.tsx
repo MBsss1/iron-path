@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { IntroVideoResult } from "../hooks/useIntroFlow";
+import { useTranslation } from "../i18n/useTranslation";
 import { markIntroSeen } from "../utils/introStorage";
 
 const INTRO_VIDEO_URL = "https://ironpath.icu/videos/intro.mp4";
@@ -8,7 +10,7 @@ const INTRO_VIDEO_URL = "https://ironpath.icu/videos/intro.mp4";
 type Phase = "fade-in" | "playing" | "fade-out" | "done";
 
 type Props = {
-  onComplete: () => void;
+  onComplete: (result: IntroVideoResult) => void;
 };
 
 function prefersReducedMotion(): boolean {
@@ -16,47 +18,51 @@ function prefersReducedMotion(): boolean {
 }
 
 export default function IntroVideo({ onComplete }: Props) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const { t } = useTranslation();
   const finishedRef = useRef(false);
   const [phase, setPhase] = useState<Phase>("fade-in");
-  const [skipped, setSkipped] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   const finish = useCallback(
-    (persistSeen: boolean) => {
+    (result: IntroVideoResult, persistSeen: boolean) => {
       if (finishedRef.current) return;
       finishedRef.current = true;
       if (persistSeen) {
         markIntroSeen();
       }
       setPhase("done");
-      onComplete();
+      setHidden(true);
+      onComplete(result);
     },
     [onComplete]
   );
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) {
-      setSkipped(true);
-      finish(false);
+      finish("fallback", false);
     }
   }, [finish]);
 
   useEffect(() => {
     if (phase !== "fade-out") return;
 
-    const timer = window.setTimeout(() => finish(true), 500);
+    const timer = window.setTimeout(() => finish("completed", true), 500);
     return () => window.clearTimeout(timer);
   }, [phase, finish]);
+
+  const handleSkip = () => {
+    finish("skipped", true);
+  };
 
   const handleVideoEnded = () => {
     setPhase("fade-out");
   };
 
   const handleVideoError = () => {
-    finish(true);
+    finish("fallback", false);
   };
 
-  if (phase === "done" || skipped) {
+  if (hidden || phase === "done") {
     return null;
   }
 
@@ -65,8 +71,15 @@ export default function IntroVideo({ onComplete }: Props) {
       className={`intro-video-overlay intro-video-overlay--${phase}`}
       aria-hidden="true"
     >
+      <button
+        type="button"
+        onClick={handleSkip}
+        className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4 z-10 iron-interactive text-sm font-semibold text-iron-muted hover:text-iron-text px-3 py-2 rounded-sm border border-iron-border bg-iron-panel/90"
+      >
+        {t("intro.skip")}
+      </button>
+
       <video
-        ref={videoRef}
         className="intro-video-player"
         src={INTRO_VIDEO_URL}
         autoPlay

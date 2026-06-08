@@ -1864,6 +1864,7 @@ html.telegram-webapp body {
   z-index: 110;
   background: #000;
   opacity: 1;
+  overflow: hidden;
 }
 
 .intro-video-overlay--fade-in {

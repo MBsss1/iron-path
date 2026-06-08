@@ -34,9 +34,9 @@ import AppPopups from "./components/AppPopups";
 import SplashScreen from "./components/SplashScreen";
 import IntroExperience from "./components/IntroExperience";
 import IntroVideo from "./components/IntroVideo";
+import { useIntroFlow } from "./hooks/useIntroFlow";
 import ScreenTransition from "./components/ScreenTransition";
 import { ScreenLoadingSkeleton } from "./components/ui/Skeleton";
-import { hasIntroSeen } from "./utils/introStorage";
 import XpFloatAnimation from "./components/XpFloatAnimation";
 import QuestStartOverlay from "./components/rpg/QuestStartOverlay";
 import CompletionCelebration from "./components/rpg/CompletionCelebration";
@@ -98,45 +98,15 @@ function HomeContent() {
   const [debriefVariant, setDebriefVariant] = useState<"initial" | "reassessment">(
     "initial"
   );
-  const [showSplash, setShowSplash] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
-  const [showIntroVideo, setShowIntroVideo] = useState(false);
-
-  const handleSplashComplete = useCallback(() => setShowSplash(false), []);
-  const handleIntroComplete = useCallback(() => setShowIntro(false), []);
-  const handleIntroVideoComplete = useCallback(() => {
-    setShowIntroVideo(false);
-    if (hasIntroSeen()) {
-      setShowIntro(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!languageLoaded) return;
-    setShowIntroVideo(!hasIntroSeen());
-  }, [languageLoaded]);
-
-  /** Intro first (no splash) for new users; splash only when intro was already seen. */
-  useEffect(() => {
-    if (!languageLoaded) return;
-
-    if (!languageChosen) {
-      setShowIntro(false);
-      setShowSplash(false);
-      return;
-    }
-
-    if (!hasIntroSeen()) {
-      setShowSplash(false);
-      setShowIntro(true);
-      return;
-    }
-
-    setShowIntro(false);
-    setShowSplash(true);
-    const splashTimer = window.setTimeout(() => setShowSplash(false), 1600);
-    return () => window.clearTimeout(splashTimer);
-  }, [languageLoaded, languageChosen]);
+  const {
+    showIntroVideo,
+    showFallbackIntro,
+    showSplash,
+    introBlocking,
+    handleVideoComplete,
+    handleFallbackComplete,
+    handleSplashComplete,
+  } = useIntroFlow(languageLoaded, languageChosen);
 
   useEffect(() => {
     telegramReady();
@@ -359,7 +329,7 @@ function HomeContent() {
     storageReady,
     canShowDailyReward,
     showSplash,
-    showIntro,
+    showIntro: introBlocking,
     clearProfile,
   });
 
@@ -524,20 +494,20 @@ function HomeContent() {
 
   return (
     <>
-      {showIntroVideo && <IntroVideo onComplete={handleIntroVideoComplete} />}
+      {showIntroVideo && <IntroVideo onComplete={handleVideoComplete} />}
 
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
-      {showIntro && !showSplash && languageChosen && (
-        <IntroExperience onComplete={handleIntroComplete} />
+      {showFallbackIntro && !showSplash && languageChosen && (
+        <IntroExperience onComplete={handleFallbackComplete} />
       )}
 
-      {!showSplash && !showIntro && languageLoaded && !languageChosen && (
+      {!showSplash && !introBlocking && languageLoaded && !languageChosen && (
         <LanguageSelectionScreen onSelect={setLocale} />
       )}
 
       {!showSplash &&
-        !showIntro &&
+        !introBlocking &&
         languageLoaded &&
         languageChosen &&
         !storageReady && (
@@ -601,7 +571,7 @@ function HomeContent() {
         />
       )}
 
-      {languageChosen && !showIntro && (
+      {languageChosen && !introBlocking && (
       <main className="min-h-screen iron-page flex flex-col items-center px-4 sm:px-6 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <div className="w-full max-w-md">
           <div className="text-center mt-4 sm:mt-6 iron-page-header">

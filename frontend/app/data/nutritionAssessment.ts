@@ -2,13 +2,24 @@ import type { NutritionMissionId } from "../hooks/useNutritionMissions";
 
 export type NutritionAnswerScore = 1 | 2 | 3 | 4;
 
-export type NutritionQuestionId =
+export type NutritionAssessmentGoal = "mass_gain" | "weight_loss";
+
+export type MassGainQuestionId =
   | "meals_per_day"
   | "protein_frequency"
   | "portion_size"
   | "skip_meals"
   | "snacks"
-  | "water";
+  | "water"
+  | "weight_trend"
+  | "weigh_frequency";
+
+export type MassGainDiagnosisId =
+  | "calorie_deficit"
+  | "low_protein"
+  | "lack_of_consistency"
+  | "tracking_problem"
+  | "strong_foundation";
 
 export type NutritionLevel =
   | "undereating"
@@ -16,18 +27,20 @@ export type NutritionLevel =
   | "good"
   | "advanced";
 
-export type NutritionAssessmentAnswers = Record<
-  NutritionQuestionId,
+export type MassGainAssessmentAnswers = Record<
+  MassGainQuestionId,
   NutritionAnswerScore
 >;
 
-export const NUTRITION_QUESTION_IDS: NutritionQuestionId[] = [
+export const MASS_GAIN_QUESTION_IDS: MassGainQuestionId[] = [
   "meals_per_day",
   "protein_frequency",
   "portion_size",
   "skip_meals",
   "snacks",
   "water",
+  "weight_trend",
+  "weigh_frequency",
 ];
 
 export const NUTRITION_MISSIONS_BY_LEVEL: Record<
@@ -40,10 +53,24 @@ export const NUTRITION_MISSIONS_BY_LEVEL: Record<
   advanced: ["protein_target", "meals_3_plus", "water_2l", "no_junk"],
 };
 
+export type NutritionAssessmentResult = {
+  averageScore: number;
+  level: NutritionLevel;
+  diagnosis: MassGainDiagnosisId;
+};
+
+function severity(score: NutritionAnswerScore): number {
+  return 5 - score;
+}
+
+function averageSeverity(scores: NutritionAnswerScore[]): number {
+  return scores.reduce((sum, score) => sum + severity(score), 0) / scores.length;
+}
+
 export function calculateNutritionAverageScore(
-  answers: NutritionAssessmentAnswers
+  answers: MassGainAssessmentAnswers
 ): number {
-  const scores = NUTRITION_QUESTION_IDS.map((id) => answers[id]);
+  const scores = MASS_GAIN_QUESTION_IDS.map((id) => answers[id]);
   if (scores.some((score) => score < 1 || score > 4)) {
     return 1;
   }
@@ -58,13 +85,63 @@ export function resolveNutritionLevel(averageScore: number): NutritionLevel {
   return "advanced";
 }
 
-export function assessNutritionAnswers(
-  answers: NutritionAssessmentAnswers
-): { averageScore: number; level: NutritionLevel } {
+export function resolveMassGainDiagnosis(
+  answers: MassGainAssessmentAnswers
+): MassGainDiagnosisId {
+  const issueScores: { id: MassGainDiagnosisId; severity: number }[] = [
+    {
+      id: "calorie_deficit",
+      severity: averageSeverity([
+        answers.meals_per_day,
+        answers.portion_size,
+        answers.snacks,
+        answers.weight_trend,
+      ]),
+    },
+    {
+      id: "low_protein",
+      severity: severity(answers.protein_frequency),
+    },
+    {
+      id: "lack_of_consistency",
+      severity: severity(answers.skip_meals),
+    },
+    {
+      id: "tracking_problem",
+      severity: severity(answers.weigh_frequency),
+    },
+  ];
+
+  const priority: MassGainDiagnosisId[] = [
+    "calorie_deficit",
+    "low_protein",
+    "lack_of_consistency",
+    "tracking_problem",
+  ];
+
+  const maxSeverity = Math.max(...issueScores.map((issue) => issue.severity));
+  if (maxSeverity < 1.75) {
+    return "strong_foundation";
+  }
+
+  const topSeverity = issueScores.filter((issue) => issue.severity === maxSeverity);
+  for (const id of priority) {
+    if (topSeverity.some((issue) => issue.id === id)) {
+      return id;
+    }
+  }
+
+  return "calorie_deficit";
+}
+
+export function assessMassGainAnswers(
+  answers: MassGainAssessmentAnswers
+): NutritionAssessmentResult {
   const averageScore = calculateNutritionAverageScore(answers);
   return {
     averageScore,
     level: resolveNutritionLevel(averageScore),
+    diagnosis: resolveMassGainDiagnosis(answers),
   };
 }
 
@@ -75,4 +152,18 @@ export function getNutritionMissionIdsForLevel(
     return NUTRITION_MISSIONS_BY_LEVEL.basic;
   }
   return NUTRITION_MISSIONS_BY_LEVEL[level];
+}
+
+/** @deprecated Use MassGainAssessmentAnswers */
+export type NutritionAssessmentAnswers = MassGainAssessmentAnswers;
+
+/** @deprecated Use MASS_GAIN_QUESTION_IDS */
+export const NUTRITION_QUESTION_IDS = MASS_GAIN_QUESTION_IDS;
+
+/** @deprecated Use assessMassGainAnswers */
+export function assessNutritionAnswers(
+  answers: MassGainAssessmentAnswers
+): { averageScore: number; level: NutritionLevel } {
+  const result = assessMassGainAnswers(answers);
+  return { averageScore: result.averageScore, level: result.level };
 }

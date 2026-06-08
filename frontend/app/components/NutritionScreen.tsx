@@ -6,7 +6,8 @@ import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 import WeightProgressScreen from "./WeightProgressScreen";
 import NutritionAssessmentScreen from "./NutritionAssessmentScreen";
 import { normalizeFitnessGoal } from "../data/fitnessGoals";
-import type { NutritionAssessmentAnswers } from "../data/nutritionAssessment";
+import type { MassGainAssessmentAnswers } from "../data/nutritionAssessment";
+import type { WeightLossAssessmentAnswers } from "../data/nutritionWeightLossAssessment";
 import { useNutritionAssessment } from "../hooks/useNutritionAssessment";
 import { useNutritionMissions, type NutritionMissionId } from "../hooks/useNutritionMissions";
 import type { Profile } from "../hooks/useProfile";
@@ -17,7 +18,8 @@ import {
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
 
-const NUTRITION_INFO_URL = "https://t.me/+8hucRbt1aLVhMGNi";
+const MASS_GAIN_INFO_URL = "https://t.me/+8hucRbt1aLVhMGNi";
+const WEIGHT_LOSS_INFO_URL = "https://t.me/+LIUoCz3TJbY5NGFi";
 
 type Props = {
   goal?: string;
@@ -47,17 +49,20 @@ export default function NutritionScreen({
 }: Props) {
   const { t } = useTranslation();
   const [view, setView] = useState<"nutrition" | "weight">("nutrition");
-  const isMassGain = normalizeFitnessGoal(goal) === "mass_gain";
+  const normalizedGoal = normalizeFitnessGoal(goal);
+  const isMassGain = normalizedGoal === "mass_gain";
+  const isWeightLoss = normalizedGoal === "weight_loss";
+  const needsAssessment = isMassGain || isWeightLoss;
 
   const {
     loaded: assessmentLoaded,
     isComplete: assessmentComplete,
     level: nutritionLevel,
     complete: completeAssessment,
-  } = useNutritionAssessment(profile);
+  } = useNutritionAssessment(profile, goal);
 
   const { missions, completeMission, completedCount, totalCount, progress } =
-    useNutritionMissions(isMassGain ? nutritionLevel : null);
+    useNutritionMissions(needsAssessment ? nutritionLevel : null);
 
   const tips = getTranslatedNutritionTips(goal, t);
   const goalLabel = translateGoal(goal, t);
@@ -71,7 +76,9 @@ export default function NutritionScreen({
 
   const shell = "mt-8 sm:mt-10 iron-shell-card p-5 sm:p-6 mb-24";
 
-  const handleAssessmentComplete = (answers: NutritionAssessmentAnswers) => {
+  const handleAssessmentComplete = (
+    answers: MassGainAssessmentAnswers | WeightLossAssessmentAnswers
+  ) => {
     const result = completeAssessment(answers);
     if (profile) {
       onProfileUpdate({
@@ -82,9 +89,12 @@ export default function NutritionScreen({
     }
   };
 
-  if (isMassGain && assessmentLoaded && !assessmentComplete) {
+  if (needsAssessment && assessmentLoaded && !assessmentComplete) {
     return (
-      <NutritionAssessmentScreen onComplete={handleAssessmentComplete} />
+      <NutritionAssessmentScreen
+        variant={isMassGain ? "mass_gain" : "weight_loss"}
+        onComplete={handleAssessmentComplete}
+      />
     );
   }
 
@@ -113,7 +123,7 @@ export default function NutritionScreen({
   return (
     <Stagger className={shell}>
       <div className="text-center">
-        {!isMassGain && (
+        {!needsAssessment && (
           <p className="iron-label">{t("nutrition.dailyDiscipline")}</p>
         )}
         <h2
@@ -124,19 +134,31 @@ export default function NutritionScreen({
         <p className="mt-2 text-sm text-iron-muted leading-relaxed px-1">
           {isMassGain
             ? t("nutrition.subtitleMassGain")
-            : t("nutrition.subtitle")}
+            : isWeightLoss
+              ? t("nutrition.subtitleWeightLoss")
+              : t("nutrition.subtitle")}
         </p>
         <p className="mt-3 text-xs font-semibold text-iron-accent">
           {t("nutrition.goalLabel", { goal: goalLabel })}
         </p>
         {isMassGain && (
           <a
-            href={NUTRITION_INFO_URL}
+            href={MASS_GAIN_INFO_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="iron-nutrition-info-link inline-flex items-center justify-center min-h-[44px] mt-2 px-2 text-sm font-semibold text-iron-accent underline underline-offset-[5px] decoration-iron-accent-dim hover:text-iron-text hover:decoration-iron-accent transition-colors"
           >
-            {t("nutrition.sectionInfoLink")}
+            {t("nutrition.sectionInfoLinkMassGain")}
+          </a>
+        )}
+        {isWeightLoss && (
+          <a
+            href={WEIGHT_LOSS_INFO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="iron-nutrition-info-link inline-flex items-center justify-center min-h-[44px] mt-2 px-2 text-sm font-semibold text-iron-accent underline underline-offset-[5px] decoration-iron-accent-dim hover:text-iron-text hover:decoration-iron-accent transition-colors"
+          >
+            {t("nutrition.sectionInfoLinkWeightLoss")}
           </a>
         )}
       </div>
@@ -172,7 +194,7 @@ export default function NutritionScreen({
                 {translateNutritionMission(
                   mission.id,
                   t,
-                  isMassGain ? nutritionLevel : null
+                  needsAssessment ? nutritionLevel : null
                 )}
               </span>
             </span>
@@ -183,7 +205,7 @@ export default function NutritionScreen({
         ))}
       </div>
 
-      {!isMassGain && (
+      {!needsAssessment && (
         <div className="mt-6 iron-card-panel p-4">
           <h3 className="iron-heading text-lg text-iron-accent">
             {t("nutrition.coachTips")}

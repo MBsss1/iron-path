@@ -907,7 +907,10 @@ const en = {
     subtitle: "Simple habits. No calorie math.",
     subtitleMassGain:
       "Simple habits for gaining mass — no calorie counting.",
-    sectionInfoLink: "Section information",
+    subtitleWeightLoss:
+      "Simple habits for fat loss — no calorie counting.",
+    sectionInfoLinkMassGain: "Weight gain information",
+    sectionInfoLinkWeightLoss: "Weight loss information",
     goalLabel: "Goal: {{goal}}",
     checklist: "Today's checklist",
     coachTips: "Coach tips",
@@ -1015,56 +1018,59 @@ const en = {
   nutritionAssessment: {
     eyebrow: "Nutrition check",
     title: "Fuel for mass gain",
-    subtitle: "Six quick questions — we'll tailor daily habits to your level.",
+    subtitle: "Eight quick questions — we'll identify your main nutrition gap.",
     progress: "Question {{current}} of {{total}}",
-    resultEyebrow: "Your level",
+    resultEyebrow: "Your result",
+    resultPrimaryIssue: "Primary issue",
+    resultRecommendedActions: "Recommended actions",
+    resultGuidance: "For detailed nutrition guidance, open",
     resultContinue: "Go to nutrition",
-    resultNextStep: "Next step:",
-    resultInfoLink: "Mass gain information",
+    resultInfoLink: "Weight gain information",
     questions: {
       meals_per_day: {
-        title: "How many times a day do you usually eat?",
+        title: "How many times per day do you usually eat?",
         options: {
           a: "A) 1–2 times",
           b: "B) 3 times",
           c: "C) 4 times",
-          d: "D) 5 or more times",
+          d: "D) 5+ times",
         },
       },
       protein_frequency: {
-        title: "How often does your food include a protein source?",
+        title:
+          "How often do you consume protein sources (meat, fish, eggs, dairy, cottage cheese)?",
         options: {
-          a: "A) Less than once a day",
-          b: "B) 1–2 times a day",
-          c: "C) 3–4 times a day",
+          a: "A) Less than once per day",
+          b: "B) 1–2 times per day",
+          c: "C) 3–4 times per day",
           d: "D) Almost every meal",
         },
       },
       portion_size: {
-        title: "What best describes your portion sizes?",
+        title: "Which best describes your portion sizes?",
         options: {
-          a: "A) I eat little and get full quickly",
+          a: "A) Small portions, I get full quickly",
           b: "B) Normal portions",
           c: "C) Large portions",
-          d: "D) Very large portions, often seconds",
+          d: "D) Very large portions, often take seconds",
         },
       },
       skip_meals: {
         title: "How often do you skip meals?",
         options: {
           a: "A) Almost every day",
-          b: "B) Several times a week",
+          b: "B) Several times per week",
           c: "C) Rarely",
           d: "D) Almost never",
         },
       },
       snacks: {
-        title: "What do you usually eat between main meals?",
+        title: "What do you usually eat between meals?",
         options: {
           a: "A) Nothing",
-          b: "B) Tea or coffee",
-          c: "C) Fruit or a light snack",
-          d: "D) A full snack",
+          b: "B) Tea/coffee only",
+          c: "C) Fruit or small snack",
+          d: "D) Full snack (nuts, yogurt, sandwich, cottage cheese, etc.)",
         },
       },
       water: {
@@ -1076,27 +1082,204 @@ const en = {
           d: "D) More than 2 liters",
         },
       },
+      weight_trend: {
+        title: "What has happened to your body weight over the last 3 months?",
+        options: {
+          a: "A) Losing weight",
+          b: "B) Staying the same",
+          c: "C) Slowly gaining",
+          d: "D) Consistently gaining",
+        },
+      },
+      weigh_frequency: {
+        title: "Do you weigh yourself regularly?",
+        options: {
+          a: "A) Never",
+          b: "B) Less than once per month",
+          c: "C) Once per week",
+          d: "D) Several times per week",
+        },
+      },
     },
-    levels: {
-      undereating: {
-        title: "Under-fueling",
-        description:
-          "Priority now: steady meals, protein, and water. Gains start with consistency, not extremes.",
+    diagnoses: {
+      calorie_deficit: {
+        title: "CALORIE DEFICIT",
+        primaryIssue: "You likely eat too little to gain weight.",
+        actions: {
+          action1: "Add breakfast",
+          action2: "Add one daily snack",
+          action3: "Increase meal size",
+        },
       },
-      basic: {
-        title: "Basic level",
-        description:
-          "You have a foundation with room to grow. We'll lock in protein, three meals, and daily water.",
+      low_protein: {
+        title: "LOW PROTEIN INTAKE",
+        primaryIssue:
+          "Protein intake is probably limiting recovery and muscle growth.",
+        actions: {
+          action1: "Include protein in every meal",
+          action2: "Add eggs, dairy, fish or meat daily",
+          action3: "Use high-protein snacks",
+        },
       },
-      good: {
-        title: "Good level",
-        description:
-          "Your nutrition already supports mass gain. Keep the rhythm: more protein, full meals, and 2 L water.",
+      lack_of_consistency: {
+        title: "LACK OF CONSISTENCY",
+        primaryIssue: "Meal timing is inconsistent.",
+        actions: {
+          action1: "Stop skipping meals",
+          action2: "Eat at roughly the same times",
+          action3: "Prepare food in advance",
+        },
       },
-      advanced: {
-        title: "Advanced level",
-        description:
-          "Strong base for building mass. Focus on density: frequent meals, protein every time, water, and no junk food.",
+      tracking_problem: {
+        title: "TRACKING PROBLEM",
+        primaryIssue: "You are not monitoring progress.",
+        actions: {
+          action1: "Weigh yourself weekly",
+          action2: "Track body weight trends",
+          action3: "Adjust food intake every 2–3 weeks",
+        },
+      },
+      strong_foundation: {
+        title: "STRONG FOUNDATION",
+        primaryIssue: "Your nutrition habits already support mass gain.",
+        actions: {
+          action1: "Keep consistent meal frequency",
+          action2: "Maintain protein at every meal",
+          action3: "Track weight weekly to stay on course",
+        },
+      },
+    },
+  },
+  nutritionWeightLossAssessment: {
+    eyebrow: "Nutrition check",
+    title: "Fuel for fat loss",
+    subtitle: "Eight quick questions — we'll identify your main nutrition gap.",
+    progress: "Question {{current}} of {{total}}",
+    resultEyebrow: "Your result",
+    resultPrimaryIssue: "Primary issue",
+    resultRecommendedActions: "Recommended actions",
+    resultGuidance: "For detailed fat loss guidance, open",
+    resultContinue: "Go to nutrition",
+    resultInfoLink: "Weight loss information",
+    questions: {
+      sugary_beverages: {
+        title: "How often do you drink sugary beverages?",
+        options: {
+          a: "A) Several times daily",
+          b: "B) Daily",
+          c: "C) Few times per week",
+          d: "D) Rarely or never",
+        },
+      },
+      sweets_fast_food: {
+        title: "How often do you eat sweets, pastries or fast food?",
+        options: {
+          a: "A) Daily",
+          b: "B) Several times per week",
+          c: "C) Occasionally",
+          d: "D) Rarely",
+        },
+      },
+      overeating: {
+        title: "How often do you overeat?",
+        options: {
+          a: "A) Almost every day",
+          b: "B) Several times per week",
+          c: "C) Occasionally",
+          d: "D) Rarely",
+        },
+      },
+      vegetables: {
+        title: "How many servings of vegetables do you eat daily?",
+        options: {
+          a: "A) Almost none",
+          b: "B) 1 serving",
+          c: "C) 2–3 servings",
+          d: "D) 4+ servings",
+        },
+      },
+      daily_activity: {
+        title: "How active are you during a typical day?",
+        options: {
+          a: "A) Mostly sitting",
+          b: "B) Light activity",
+          c: "C) Moderately active",
+          d: "D) Very active",
+        },
+      },
+      water: {
+        title: "How much water do you drink daily?",
+        options: {
+          a: "A) Less than 1 liter",
+          b: "B) 1–1.5 liters",
+          c: "C) 1.5–2 liters",
+          d: "D) More than 2 liters",
+        },
+      },
+      weight_trend: {
+        title: "What has happened to your weight over the last 3 months?",
+        options: {
+          a: "A) Gained weight",
+          b: "B) Stayed the same",
+          c: "C) Slowly losing",
+          d: "D) Consistently losing",
+        },
+      },
+      weight_monitoring: {
+        title: "Do you monitor your body weight?",
+        options: {
+          a: "A) Never",
+          b: "B) Rarely",
+          c: "C) Weekly",
+          d: "D) Multiple times per week",
+        },
+      },
+    },
+    diagnoses: {
+      excess_calories: {
+        title: "EXCESS CALORIES",
+        primaryIssue: "You are likely consuming more calories than you burn.",
+        actions: {
+          action1: "Reduce liquid calories",
+          action2: "Control portion sizes",
+          action3: "Avoid unnecessary snacks",
+        },
+      },
+      high_processed_food: {
+        title: "HIGH ULTRA-PROCESSED FOOD INTAKE",
+        primaryIssue: "Too many calorie-dense foods.",
+        actions: {
+          action1: "Reduce sweets",
+          action2: "Reduce fast food",
+          action3: "Prioritize whole foods",
+        },
+      },
+      low_activity: {
+        title: "LOW DAILY ACTIVITY",
+        primaryIssue: "Energy expenditure is low.",
+        actions: {
+          action1: "Increase daily walking",
+          action2: "Take movement breaks",
+          action3: "Add regular cardio",
+        },
+      },
+      no_progress_tracking: {
+        title: "NO PROGRESS TRACKING",
+        primaryIssue: "You are not monitoring results.",
+        actions: {
+          action1: "Weigh yourself weekly",
+          action2: "Track waist measurements",
+          action3: "Adjust habits based on progress",
+        },
+      },
+      on_track: {
+        title: "ON TRACK",
+        primaryIssue: "Your habits already support steady fat loss.",
+        actions: {
+          action1: "Keep portions controlled",
+          action2: "Stay active throughout the day",
+          action3: "Weigh yourself weekly to confirm progress",
+        },
       },
     },
   },

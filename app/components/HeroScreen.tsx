@@ -16,10 +16,18 @@ import {
   translateBossProgressLabel,
   translateBossRequirement,
   translateBossRewardTitleById,
+  translateDayType,
   translateGoal,
   translatePhase,
 } from "../i18n/labels";
 import { useTranslation } from "../i18n/useTranslation";
+import {
+  buildWeekPlanForProfile,
+  getTodayWorkout,
+  loadTrainingCalendarState,
+} from "../utils/trainingCalendar";
+import TodayPersonalTasksBlock from "./today/TodayPersonalTasksBlock";
+import TodayHabitControlBlock from "./today/TodayHabitControlBlock";
 import Stagger from "../animations/Stagger";
 import AnimatedProgressFill from "../animations/AnimatedProgressFill";
 import PlayerProfileCard from "./rpg/PlayerProfileCard";
@@ -52,7 +60,9 @@ type Props = {
   assessmentComplete: boolean;
   onStartAssessment: () => void;
   onStartTraining: () => void;
-  onOpenToday: () => void;
+  onCompleteDeepWork: () => void;
+  onCompleteProtein: () => void;
+  onCompleteSleep: () => void;
   onViewBoss: () => void;
   assessmentInput?: AssessmentInput | null;
   showReassessmentPrompt?: boolean;
@@ -112,7 +122,9 @@ export default function HeroScreen({
   assessmentComplete,
   onStartAssessment,
   onStartTraining,
-  onOpenToday,
+  onCompleteDeepWork,
+  onCompleteProtein,
+  onCompleteSleep,
   onViewBoss,
   assessmentInput = null,
   showReassessmentPrompt = false,
@@ -120,7 +132,8 @@ export default function HeroScreen({
   onRetakeAssessment,
   onDismissReassessment,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const lang = locale === "ru" ? "ru" : "en";
   const pathMode = getPathModeFromProfile(profile);
   const pathModeLabel = pathMode ? t(`pathMode.${pathMode}.title`) : "";
   const titleLabel = translateBossRewardTitleById(equippedTitle, t);
@@ -132,14 +145,56 @@ export default function HeroScreen({
     ? translateBossProgressLabel(currentBoss, bossProgressContext, t)
     : "";
 
+  const isCompleted = (id: DailyMission["id"]) =>
+    missions.find((mission) => mission.id === id)?.completed ?? false;
+
+  const tryComplete = (id: DailyMission["id"], action: () => void) => {
+    if (isCompleted(id)) return;
+    action();
+  };
+
+  const deepWorkDone = isCompleted("deepwork");
+  const proteinDone = isCompleted("protein");
+  const sleepDone = isCompleted("sleep");
+  const workoutDone = isCompleted("workout");
+
+  const calendarState = useMemo(
+    () => loadTrainingCalendarState(week),
+    [week]
+  );
+
+  const weekPlan = useMemo(
+    () => buildWeekPlanForProfile(profile),
+    [profile]
+  );
+
+  const todayWorkout = useMemo(
+    () => getTodayWorkout(profile, weekPlan, calendarState.activeDayIndex),
+    [profile, weekPlan, calendarState.activeDayIndex]
+  );
+
+  const todayDayType = weekPlan.days[calendarState.activeDayIndex]?.dayType;
+  const dayTypeLabel = todayDayType
+    ? translateDayType(todayDayType, t)
+    : todayWorkout.title[lang];
+
   const workoutXp = useMemo(
     () => sideMissionXp("workout", profile.classId, level, program.phase),
     [profile.classId, level, program.phase]
   );
 
-  const mainCta = workoutMissionCompleted
-    ? { label: t("hero.ctaOpenDay"), action: onOpenToday }
-    : { label: t("hero.ctaStartWorkout"), action: onStartTraining };
+  const deepWorkXp = useMemo(
+    () => applyClassXpBonus(MISSION_XP.deepWork, profile.classId, "deepWork", level),
+    [profile.classId, level]
+  );
+  const proteinXp = useMemo(
+    () => applyClassXpBonus(MISSION_XP.protein, profile.classId, "mission", level),
+    [profile.classId, level]
+  );
+  const sleepXp = useMemo(
+    () => applyClassXpBonus(MISSION_XP.sleep, profile.classId, "mission", level),
+    [profile.classId, level]
+  );
 
   const showStreakWarning = assessmentComplete && !workoutMissionCompleted;
 
@@ -152,6 +207,125 @@ export default function HeroScreen({
       streak={streak}
       titleLabel={titleLabel}
       pathModeLabel={pathModeLabel || undefined}
+    />
+  );
+
+  const workoutMeta = (
+    <div className="space-y-1.5 text-xs sm:text-sm">
+      <div className="flex justify-between gap-3 border-b border-iron-border pb-1.5">
+        <span className="text-iron-muted">{t("today.dayTypeLabel")}</span>
+        <span className="text-iron-text font-semibold text-right">{dayTypeLabel}</span>
+      </div>
+      <div className="flex justify-between gap-3 border-b border-iron-border pb-1.5">
+        <span className="text-iron-muted">{t("today.durationLabel")}</span>
+        <span className="text-iron-text font-semibold">
+          {t("training.estimatedMinutes", {
+            minutes: todayWorkout.estimatedMinutes,
+          })}
+        </span>
+      </div>
+      <div className="flex justify-between gap-3">
+        <span className="text-iron-muted">{t("today.statusLabel")}</span>
+        <span
+          className={
+            workoutDone
+              ? "text-iron-accent font-semibold"
+              : "text-iron-text font-semibold"
+          }
+        >
+          {workoutDone ? t("today.statusDone") : t("today.statusNotDone")}
+        </span>
+      </div>
+    </div>
+  );
+
+  const todayDaySection = assessmentComplete ? (
+    <>
+      <div className="text-center text-sm text-iron-muted">
+        <p className="font-semibold text-iron-accent">{phaseLabel}</p>
+        <p>{t("today.week", { week })}</p>
+      </div>
+
+      <QuestCard
+        variant="main"
+        icon={MISSION_ICONS.workout}
+        title={t("today.todayWorkoutTitle")}
+        meta={workoutMeta}
+        reward={
+          <RewardChip
+            amount={workoutXp}
+            variant={workoutDone ? "muted" : "gold"}
+          />
+        }
+        status={workoutDone ? "completed" : "available"}
+        actionLabel={workoutDone ? undefined : t("today.goToTraining")}
+        onAction={workoutDone ? undefined : onStartTraining}
+        questStart={!workoutDone}
+      />
+
+      <p className="iron-label text-center">{t("today.habitsTitle")}</p>
+
+      <div className="space-y-2">
+        <QuestCard
+          icon={MISSION_ICONS.deepwork}
+          title={deepWorkDone ? t("today.deepWorkDone") : t("today.deepWork")}
+          reward={
+            <RewardChip
+              amount={deepWorkXp}
+              variant={deepWorkDone ? "muted" : "gold"}
+            />
+          }
+          status={deepWorkDone ? "completed" : "available"}
+          onAction={() => tryComplete("deepwork", onCompleteDeepWork)}
+          disabled={deepWorkDone}
+        />
+
+        <QuestCard
+          icon={MISSION_ICONS.protein}
+          title={proteinDone ? t("today.proteinDone") : t("today.protein")}
+          reward={
+            <RewardChip
+              amount={proteinXp}
+              variant={proteinDone ? "muted" : "gold"}
+            />
+          }
+          status={proteinDone ? "completed" : "available"}
+          onAction={() => tryComplete("protein", onCompleteProtein)}
+          disabled={proteinDone}
+        />
+
+        <QuestCard
+          icon={MISSION_ICONS.sleep}
+          title={sleepDone ? t("today.sleepDone") : t("today.sleep")}
+          reward={
+            <RewardChip
+              amount={sleepXp}
+              variant={sleepDone ? "muted" : "gold"}
+            />
+          }
+          status={sleepDone ? "completed" : "available"}
+          onAction={() => tryComplete("sleep", onCompleteSleep)}
+          disabled={sleepDone}
+        />
+      </div>
+
+      {pathMode === "self_development" && (
+        <div className="space-y-4">
+          <TodayPersonalTasksBlock />
+          <TodayHabitControlBlock />
+        </div>
+      )}
+
+      {pathMode === "balance" && <TodayPersonalTasksBlock compact />}
+    </>
+  ) : (
+    <QuestCard
+      variant="main"
+      icon="🗺️"
+      title={t("hero.pathNotFormedTitle")}
+      subtitle={t("today.assessmentRequired")}
+      actionLabel={t("hero.startAssessment")}
+      onAction={onStartAssessment}
     />
   );
 
@@ -189,8 +363,8 @@ export default function HeroScreen({
             </p>
           }
           reward={<RewardChip amount={workoutXp} />}
-          actionLabel={mainCta.label}
-          onAction={mainCta.action}
+          actionLabel={t("hero.ctaStartWorkout")}
+          onAction={onStartTraining}
           questStart
         />
 
@@ -201,11 +375,11 @@ export default function HeroScreen({
             emphasis={pathMode === "sport" ? "physical" : "balanced"}
           />
         )}
+
+        <section className="space-y-3 pt-1">{todayDaySection}</section>
       </div>
     );
   }
-
-  const sideMissions = missions.filter((mission) => mission.id !== "workout");
 
   return (
     <Stagger className="mt-3 sm:mt-5 iron-shell-card p-3.5 mb-5 space-y-2.5">
@@ -213,14 +387,14 @@ export default function HeroScreen({
 
       {showStreakWarning && (
         <StreakWarningCard
-          onAction={mainCta.action}
-          actionLabel={mainCta.label}
+          onAction={onStartTraining}
+          actionLabel={t("hero.ctaStartWorkout")}
         />
       )}
 
       <section className="space-y-3">
         <div className="flex justify-between items-baseline gap-2 px-0.5">
-          <h3 className="iron-heading text-sm">{t("hero.todayTitle")}</h3>
+          <h3 className="iron-heading text-sm">{t("today.title")}</h3>
           <span className="text-xs text-iron-muted">
             {completedCount} / {totalCount}
           </span>
@@ -230,52 +404,7 @@ export default function HeroScreen({
           <AnimatedProgressFill percent={progress} />
         </div>
 
-        <QuestCard
-          variant="main"
-          icon={MISSION_ICONS.workout}
-          title={t("mission.workout")}
-          subtitle={t("hero.streakWeek", { streak, week })}
-          reward={
-            <RewardChip
-              amount={workoutXp}
-              variant={workoutMissionCompleted ? "muted" : "gold"}
-            />
-          }
-          status={workoutMissionCompleted ? "neutral" : "available"}
-          meta={
-            workoutMissionCompleted ? (
-              <span className="text-iron-accent font-semibold">
-                {t("today.statusDone")}
-              </span>
-            ) : undefined
-          }
-          progress={progress}
-          actionLabel={mainCta.label}
-          onAction={mainCta.action}
-          questStart
-        />
-
-        <div className="space-y-2">
-          {sideMissions.map((mission) => (
-            <QuestCard
-              key={mission.id}
-              icon={MISSION_ICONS[mission.id]}
-              title={t(`mission.${mission.id}`)}
-              reward={
-                <RewardChip
-                  amount={sideMissionXp(
-                    mission.id,
-                    profile.classId,
-                    level,
-                    program.phase
-                  )}
-                  variant={mission.completed ? "muted" : "gold"}
-                />
-              }
-              status={mission.completed ? "completed" : "available"}
-            />
-          ))}
-        </div>
+        {todayDaySection}
       </section>
 
       {assessmentInput && (

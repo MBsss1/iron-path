@@ -43,8 +43,6 @@ export function useAppNavigation(appReady: boolean) {
 
   const handleStartTraining = useCallback(() => setScreen("training"), []);
 
-  const handleOpenToday = useCallback(() => setScreen("today"), []);
-
   const handleViewBoss = useCallback(() => setScreen("bosses"), []);
 
   const handleAssessmentCancel = useCallback(() => setScreen("hero"), []);
@@ -60,7 +58,6 @@ export function useAppNavigation(appReady: boolean) {
     goBackToMore,
     handleStartAssessment,
     handleStartTraining,
-    handleOpenToday,
     handleViewBoss,
     handleAssessmentCancel,
     navigateToDebrief,

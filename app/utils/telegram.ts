@@ -53,7 +53,7 @@ declare global {
   }
 }
 
-const MAIN_TAB_SCREENS = ["hero", "today", "training", "nutrition", "more"] as const;
+const MAIN_TAB_SCREENS = ["hero", "training", "nutrition", "more"] as const;
 
 export function getTelegramWebApp(): TelegramWebApp | null {
   if (typeof window === "undefined") return null;

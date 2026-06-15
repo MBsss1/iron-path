@@ -55,7 +55,7 @@ const ru = {
     today: "Сегодня",
     train: "Тренинг",
     food: "Питание",
-    more: "Ещё",
+    more: "Полезное",
   },
   common: {
     back: "Назад",

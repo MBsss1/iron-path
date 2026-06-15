@@ -7,7 +7,6 @@ import { generateProgram } from "./data/programGenerator";
 import { usePlayer } from "./hooks/usePlayer";
 import { getRank } from "./data/ranks";
 import BottomNav from "./components/BottomNav";
-import TodayScreen from "./components/TodayScreen";
 import TrainingScreen from "./components/TrainingScreen";
 import NutritionScreen from "./components/NutritionScreen";
 import ProgressScreen from "./components/ProgressScreen";
@@ -235,7 +234,6 @@ function HomeContent() {
     goBackToMore,
     handleStartAssessment,
     handleStartTraining,
-    handleOpenToday,
     handleViewBoss,
     handleAssessmentCancel,
     navigateToDebrief,
@@ -436,11 +434,6 @@ function HomeContent() {
     withQuestStart(handleStartTraining);
   }, [withQuestStart, handleStartTraining]);
 
-  const onOpenTodayQuest = useCallback(
-    () => withQuestStart(handleOpenToday),
-    [withQuestStart, handleOpenToday]
-  );
-
   const allQuestsCompleteRef = useRef(
     completedCount === totalCount && totalCount > 0
   );
@@ -528,13 +521,11 @@ function HomeContent() {
             <div className="w-full max-w-md mx-auto">
               <ScreenLoadingSkeleton
                 variant={
-                  screen === "today"
-                    ? "today"
-                    : screen === "training"
-                      ? "training"
-                      : screen === "progress"
-                        ? "progress"
-                        : "hero"
+                  screen === "training"
+                    ? "training"
+                    : screen === "progress"
+                      ? "progress"
+                      : "hero"
                 }
               />
             </div>
@@ -658,36 +649,15 @@ function HomeContent() {
                 bossProgressContext={bossProgressContext}
                 allBossesDefeated={allBossesDefeated}
                 onStartTraining={onStartTrainingQuest}
-                onOpenToday={onOpenTodayQuest}
+                onCompleteDeepWork={completeDeepWork}
+                onCompleteProtein={completeProtein}
+                onCompleteSleep={completeSleep}
                 onViewBoss={handleViewBoss}
                 assessmentInput={assessmentInput}
                 showReassessmentPrompt={showReassessmentPrompt}
                 showAdaptationHint={showAdaptationHint}
                 onRetakeAssessment={handleStartAssessment}
                 onDismissReassessment={handleDismissReassessment}
-              />
-            )}
-
-            {storageReady &&
-              assessmentLoaded &&
-              profile &&
-              hasPathModeSelected(profile) &&
-              screen === "today" && (
-              <TodayScreen
-                program={program}
-                classId={classId}
-                level={level}
-                xp={xp}
-                maxXp={MAX_XP_PER_LEVEL}
-                streak={loginStreak}
-                rank={rank}
-                missions={missions}
-                assessmentComplete={assessmentComplete}
-                onStartAssessment={handleStartAssessment}
-                onCompleteDeepWork={completeDeepWork}
-                onCompleteProtein={completeProtein}
-                onCompleteSleep={completeSleep}
-                onGoToTraining={onStartTrainingQuest}
               />
             )}
 

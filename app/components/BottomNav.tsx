@@ -13,7 +13,6 @@ type Props = {
 
 const NAV_ITEMS = [
   { id: "hero", labelKey: "nav.home", icon: "★" },
-  { id: "today", labelKey: "nav.today", icon: "✓" },
   { id: "training", labelKey: "nav.train", icon: "◆" },
   { id: "nutrition", labelKey: "nav.food", icon: "◇" },
   { id: "more", labelKey: "nav.more", icon: "☰" },
